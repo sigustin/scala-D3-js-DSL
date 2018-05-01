@@ -1,16 +1,24 @@
-package example
+package lib
 
 import org.singlespaced.d3js.Ops._
 import org.singlespaced.d3js.d3
 
+import scala.annotation.meta.field
 import scala.scalajs.js
-import lib.D3Lib
+import scala.scalajs.js.annotation._
 
-object ScalaJSExample extends js.JSApp {
-  def main(): Unit = {
-    D3Lib.fun()
-  }
-  /*def main(): Unit = {
+/*@JSExport("H")
+@JSExportAll
+class D3lib(var o: Int) { // it is a class not an object because we do not want a singleton here
+  @JSExport
+  def this() = this(450)
+  def p = o
+  def p_= (value:Int):Unit = o = value
+}*/
+
+object D3Lib { // it is a class not an object because we do not want a singleton here
+
+  def fun(): Unit = {
     /**
       * Adapted from http://thecodingtutorials.blogspot.ch/2012/07/introduction-to-d3.html
       */
@@ -50,6 +58,6 @@ object ScalaJSExample extends js.JSApp {
       .style("fill", rectColorFun)
 
 
-  }*/
+  }
 
 }
