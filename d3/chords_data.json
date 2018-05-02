@@ -1,0 +1,7 @@
+[
+  {"name":"A","size":2000,"imports":["A","B","C","D"]},
+  {"name":"B","size":2000,"imports":["C","D"]},
+  {"name":"C","size":2000,"imports":["D"]},
+  {"name":"D","size":2000,"imports":["A", "C"]},
+  {"name":"D","size":1000,"imports":["A"]}
+]
