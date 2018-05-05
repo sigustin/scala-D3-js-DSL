@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Example Scala.js d3 facade application</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <style>
+
+    body {
+      font: 10px sans-serif;
+    }
+
+    .group-tick line {
+      stroke: #000;
+    }
+
+    .ribbons {
+      fill-opacity: 0.67;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<h1>Example Scala.js d3 facade application - development version</h1>
+
+<p>After having compiled and packaged properly the code for the application
+  (using `sbt fastOptJS::webpack`), you should see some bars here below.
+  See README.md for detailed explanations.</p>
+
+<div id="playground">
+  <svg width="960" height="960"></svg>
+</div>
+
+<script type="text/javascript" src="./target/scala-2.12/scalajs-bundler/main/example-fastopt-bundle.js"></script>
+
+
+</body>
+</html>
