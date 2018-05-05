@@ -3,6 +3,9 @@ package example
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
+import lib.ImplicitConv._
+
+import scala.scalajs.js
 
 object ScalaJSExample {
 
@@ -11,7 +14,23 @@ object ScalaJSExample {
 
     @JSExport
     def main(args: Array[String]): Unit = {
+        val data = List(
+            List(11975,  5871, 8916, 2868),
+            List(1951, 10048, 2060, 6171),
+            List(8010, 16145, 8090, 8045),
+            List(1013,   990,  940, 6907)
+        )
+
+        val dataJs = js.Array[js.Array[Double]](
+            js.Array(11975,  5871, 8916, 2868),
+            js.Array(1951, 10048, 2060, 6171),
+            js.Array(8010, 16145, 8090, 8045),
+            js.Array(1013,   990,  940, 6907)
+        )
+
+
         val g = new ChordGraphe()
+        g.setData(data)
         g.setTarget("#playground2 svg")
         g.setDimention(480, 480)
         g.draw()

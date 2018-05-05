@@ -1,6 +1,7 @@
 package lib;
 
 import d3v4._
+import lib.Graphe
 
 import scala.scalajs.js
 
@@ -12,17 +13,15 @@ class ChordGraphe extends Graphe {
     }
 
     def draw(): Unit = {
-        val matrix = js.Array[js.Array[Double]](
-                js.Array(11975,  5871, 8916, 2868),
-                js.Array(1951, 10048, 2060, 6171),
-                js.Array(8010, 16145, 8090, 8045),
-                js.Array(1013,   990,  940, 6907)
-        )
+
+        var matrix:js.Array[js.Array[Double]] = js.Array()
+        data match {
+            case Some(d) => matrix = d
+            case None => return // TODO test if it work
+        }
 
         import d3v4.d3
-//        val svg = d3.select("svg")
-//        val width = svg.attr("width").toDouble
-//        val height = svg.attr("height").toDouble
+
         val outerRadius = Math.min(width, height) * 0.5 - 40
         val innerRadius = outerRadius - 30
 
