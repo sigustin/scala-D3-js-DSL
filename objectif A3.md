@@ -24,3 +24,5 @@ Tutorial to explain chords plots: (https://www.visualcinnamon.com/2014/12/using-
 
 ##TODO
 Utiliser un classe parent pour contenir ce qui concerne la figure en générale (size, id à laquelle elle sera mise via d3.select()).
+
+Monads used to have a default value for the size of the graphe.

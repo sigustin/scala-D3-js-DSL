@@ -1,43 +1,28 @@
-package example
+package lib;
 
+import d3v4._
 
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import lib._
+import scala.scalajs.js
 
-object ScalaJSExample {
+class ChordGraphe extends Graphe {
 
-    @JSExportTopLevel("myproject")
-    protected def getInstance(): this.type = this
-
-    @JSExport
-    def main(args: Array[String]): Unit = {
-        val g = new ChordGraphe()
-        g.setTarget("#playground2 svg")
-        g.setDimention(480, 480)
-        g.draw()
-    }
-
-    /*@JSExportTopLevel("myproject")
-    protected def getInstance(): this.type = this
-
-    def groupTicks(d: ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
+    def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
         d3.range(0, d.value, step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
     }
 
-    @JSExport
-    def main(args: Array[String]): Unit = {
+    def draw(): Unit = {
         val matrix = js.Array[js.Array[Double]](
-            js.Array(11975,  5871, 8916, 2868),
-            js.Array(1951, 10048, 2060, 6171),
-            js.Array(8010, 16145, 8090, 8045),
-            js.Array(1013,   990,  940, 6907)
+                js.Array(11975,  5871, 8916, 2868),
+                js.Array(1951, 10048, 2060, 6171),
+                js.Array(8010, 16145, 8090, 8045),
+                js.Array(1013,   990,  940, 6907)
         )
 
         import d3v4.d3
-        val svg = d3.select("svg")
-        val width = svg.attr("width").toDouble
-        val height = svg.attr("height").toDouble
+//        val svg = d3.select("svg")
+//        val width = svg.attr("width").toDouble
+//        val height = svg.attr("height").toDouble
         val outerRadius = Math.min(width, height) * 0.5 - 40
         val innerRadius = outerRadius - 30
 
@@ -54,8 +39,8 @@ object ScalaJSExample {
         val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
 
         val group = g.append("g").attr("class", "groups")
-            .selectAll("g")
-            .data((c: ChordArray) => c.groups)
+                .selectAll("g")
+                .data((c: ChordArray) => c.groups)
             .enter().append("g")
 
         group.append("path").style("fill", (d: ChordGroup) => color(d.index))
@@ -64,14 +49,14 @@ object ScalaJSExample {
 
         var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
             .enter().append("g").attr("class", "group-tick")
-            .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
+                .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
         groupTick.append("line").attr("x2", 6)
 
         groupTick.filter((d: js.Dictionary[Double]) => d("value") % 5e3 == 0).append("text")
-            .attr("x", 8)
-            .attr("dy", ".35em")
-            .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
+                .attr("x", 8)
+                .attr("dy", ".35em")
+                .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
             .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
 
@@ -80,5 +65,5 @@ object ScalaJSExample {
             .attr("d", (d: Chord) => ribbon(d))
             .style("fill", (d: Chord) => color(d.target.index))
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
-    }*/
+    }
 }
