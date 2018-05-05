@@ -21,3 +21,6 @@ Tutorial to explain chords plots: (https://www.visualcinnamon.com/2014/12/using-
 **Currying** : allow for example to have function of this style: fct()()
 **Monads** : ? (in what this property could be usefull ?)
 **Closures** : function whose return value depends on the value of one or more variables declared outside this function.
+
+##TODO
+Utiliser un classe parent pour contenir ce qui concerne la figure en générale (size, id à laquelle elle sera mise via d3.select()).
