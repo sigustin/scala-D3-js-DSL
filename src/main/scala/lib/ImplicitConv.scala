@@ -4,6 +4,11 @@ import scala.scalajs.js
 
 object ImplicitConv {
     implicit def intListToDoubleList(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
+    implicit def ListToArray[T](d:List[T]): js.Array[T] = {
+        val newT:js.Array[T]= js.Array()
+        d.foreach(newT.append(_))
+        newT
+    }
 
     // syntactic sugar for power of a value
     implicit class PowerInt(val i:Double) extends AnyVal {

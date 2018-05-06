@@ -25,22 +25,23 @@ Tutorial to explain chords plots: (https://www.visualcinnamon.com/2014/12/using-
 ## Preprety used
 - Monads used to have a default value for the size of the graphe.
 - add multiplication by a constant to the type `js.Array[js.Array[Double]]`
+- add implicit convertion between `List[T]` and `js.Array[T]`
 
 ##TODO
 - GRAPHE:
     - DONE: set dimension
     - DONE: set data (as 2D matrix)
     - DONE: set a target to attache the graphe
-    
+
 - CHORD
+    - DONE: set color
     - TODO: add percentage scale mode
     - TODO: adaptative scall for the numeric mode
     - TODO: set text label
-    - set color
-    - TODO: add interaction when the mouse is over somthing
+    - TODO: add interaction when the mouse is over something
 
 - MIGRATION
     - TODO: find a example for the migration graphe
     - TODO: translate it into a scala file
     - TODO: handle zoom
-    - TODO: add interaction when the mouse is over somthing
+    - TODO: add interaction when the mouse is over something

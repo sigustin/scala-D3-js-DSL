@@ -1,13 +1,28 @@
 package lib;
 
 import d3v4._
-import lib.{Graphe => GrapheBase} // to avoid to hide an other class also called Graphe
+import lib.{Graph => GraphBase} // to avoid to hide an other class also called Graphe
 
 import scala.scalajs.js
 import js.Dynamic.{ global => gJS }
 import lib.ImplicitConv._
 
-class ChordGraphe extends GrapheBase {
+class ChordGraph extends GraphBase {
+
+    var colorPaletteLocal: Option[js.Array[String]] = None
+
+    def setColorPalette(cp:js.Array[String])={
+        colorPaletteLocal = Some(cp)
+    }
+
+    // use a color palette in function of the size of the data if none is defined
+    def colorPalette:js.Array[String] = {
+        (data, colorPaletteLocal) match {
+            case (_, Some(p)) => p
+            case (Some(d), None) => if (d.length < 10) d3.schemeCategory10 else d3.schemeCategory20
+            case _ => return js.Array("") // never used because cannot draw a graph without data
+        }
+    }
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
@@ -36,14 +51,12 @@ class ChordGraphe extends GrapheBase {
 
         val ribbon = d3.ribbon().radius(innerRadius)
 
-        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
-        gJS.console.log("hello 2")
-        val gtmp = svg.append("g")
-            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPalette)
 
-        gJS.console.log("hello 2'")
-        val g: Selection[ChordArray] = gtmp.datum(chord(matrix))
-        gJS.console.log("hello 2''")
+        val g = svg.append("g")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+            .datum(chord(matrix))
+
         val group = g.append("g").attr("class", "groups")
                 .selectAll("g")
                 .data((c: ChordArray) => c.groups)
@@ -65,7 +78,7 @@ class ChordGraphe extends GrapheBase {
                 .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
             .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
-        gJS.console.log("hello 3")
+
         g.append("g").attr("class", "ribbons").selectAll("path").data((c: ChordArray) => c)
             .enter().append("path")
             .attr("d", (d: Chord) => ribbon(d))

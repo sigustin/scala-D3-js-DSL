@@ -41,10 +41,11 @@ object ScalaJSExample {
 //            js.Array(1, 1,  1, 7)
 //        )
 
-        val g = new ChordGraphe()
-        g.setData(dataJs)
+        val g = new ChordGraph()
+        g.setData(data)
         g.setTarget("#playground2 svg")
         g.setDimention(480, 480)
+        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
         g.draw()
     }
 

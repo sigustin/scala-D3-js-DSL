@@ -37,7 +37,7 @@ trait SimpleJson extends js.Object {
 }
 
 
-class Chords extends Graphe {
+class Chords extends Graph {
 
     //var data = js.Array(js.Array(1.0))
 

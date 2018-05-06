@@ -5,7 +5,7 @@ import scala.scalajs.js
 import js.Dynamic.{ global => gJS }
 import lib.ImplicitConv._
 
-trait Graphe {
+trait Graph {
     var scale = 0               // power of ten multiplier of the representation of the data hold in data
     var heightLocal:Option[Double] = None;
     var widthLocal:Option[Double] = None;
@@ -50,9 +50,9 @@ trait Graphe {
     def setData(d: List[List[Double]]) ={
         val tmpD:js.Array[js.Array[Double]] = js.Array()
         d.foreach(e => {
-            val tmpSubD: js.Array[Double] = js.Array()
-            e.foreach(tmpSubD.append(_))
-            tmpD.append(tmpSubD)
+//            val tmpSubD: js.Array[Double] = js.Array()
+//            e.foreach(tmpSubD.append(_))
+            tmpD.append(e)
         })
         data = Some(trasformeData(tmpD))
     }
