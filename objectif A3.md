@@ -17,12 +17,30 @@ Tutorial to explain chords plots: (https://www.visualcinnamon.com/2014/12/using-
 **Static typing** : the type of a variable is known at compile time
 **Type inference** : by default in Scala (-> more readable code)
 **By-name parameters** : allow either to pass value laziyly or to pass function only evaluated when needed, and create custome structure
-**Implicits** : value set by default
+**Implicits** : value set by default or add function to an existing type
 **Currying** : allow for example to have function of this style: fct()()
 **Monads** : ? (in what this property could be usefull ?)
 **Closures** : function whose return value depends on the value of one or more variables declared outside this function.
 
-##TODO
-Utiliser un classe parent pour contenir ce qui concerne la figure en générale (size, id à laquelle elle sera mise via d3.select()).
+## Preprety used
+- Monads used to have a default value for the size of the graphe.
+- add multiplication by a constant to the type `js.Array[js.Array[Double]]`
 
-Monads used to have a default value for the size of the graphe.
+##TODO
+- GRAPHE:
+    - DONE: set dimension
+    - DONE: set data (as 2D matrix)
+    - DONE: set a target to attache the graphe
+    
+- CHORD
+    - TODO: add percentage scale mode
+    - TODO: adaptative scall for the numeric mode
+    - TODO: set text label
+    - set color
+    - TODO: add interaction when the mouse is over somthing
+
+- MIGRATION
+    - TODO: find a example for the migration graphe
+    - TODO: translate it into a scala file
+    - TODO: handle zoom
+    - TODO: add interaction when the mouse is over somthing
