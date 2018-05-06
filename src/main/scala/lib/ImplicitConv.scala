@@ -4,6 +4,9 @@ import scala.scalajs.js
 
 object ImplicitConv {
     implicit def intListToDoubleList(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
+
+    implicit def GraphToChordGraph(g: Graph) = g.asInstanceOf[ChordGraph]
+
     implicit def ListToArray[T](d:List[T]): js.Array[T] = {
         val newT:js.Array[T]= js.Array()
         d.foreach(newT.append(_))

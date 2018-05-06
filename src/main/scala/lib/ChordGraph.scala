@@ -10,7 +10,7 @@ import lib.ImplicitConv._
 class ChordGraph extends GraphBase {
 
     var colorPaletteLocal: Option[js.Array[String]] = None
-    def setColorPalette(cp:js.Array[String])= colorPaletteLocal = Some(cp)
+    def setColorPalette(cp:js.Array[String])=  {colorPaletteLocal = Some(cp); this}
 
     // use a color palette in function of the size of the data if none is defined
     def colorPalette:js.Array[String] = {
@@ -22,7 +22,7 @@ class ChordGraph extends GraphBase {
     }
 
     var labelLocal: Option[js.Array[String]] = None
-    def setLabel(l:js.Array[String]) = labelLocal = Some(l)
+    def setLabel(l:js.Array[String]) = { labelLocal = Some(l); this }
 
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {

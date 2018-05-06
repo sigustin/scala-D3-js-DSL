@@ -41,13 +41,21 @@ object ScalaJSExample {
 //            js.Array(1, 1,  1, 7)
 //        )
 
+//        val g = new ChordGraph()
+//        g.setData(data)
+//        g.setTarget("#playground2 svg")
+//        g.setDimention(480, 480)
+//        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//        g.setLabel(List("A", "B", "C", "D"))
+//        g.draw()
+
         val g = new ChordGraph()
-        g.setData(data)
-        g.setTarget("#playground2 svg")
-        g.setDimention(480, 480)
-        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-        g.setLabel(List("A", "B", "C", "D"))
-        g.draw()
+            .setData(data)
+            .setTarget("#playground2 svg")
+            .setDimention(480, 480)
+            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+            .setLabel(List("A", "B", "C", "D"))
+            .draw()
     }
 
     /*@JSExportTopLevel("myproject")

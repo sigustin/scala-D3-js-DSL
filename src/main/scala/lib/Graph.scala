@@ -19,14 +19,16 @@ trait Graph {
 
 
 
-    def setDimention(h: Int, w:Int): Unit ={
+    def setDimention(h: Int, w:Int) ={
         heightLocal = Some(h)
         widthLocal = Some(w)
+        this
     }
 
-    def setTarget(t: String): Unit ={
+    def setTarget(t: String) ={
         target = t
         svg = d3.select(target)
+        this
     }
 
     def height: Double = {
@@ -45,18 +47,15 @@ trait Graph {
 
     def setData(d: js.Array[js.Array[Double]]) ={
         data = Some(trasformeData(d))
+        this
     }
 
     def setData(d: List[List[Double]]) ={
         val tmpD:js.Array[js.Array[Double]] = js.Array()
-        d.foreach(e => {
-//            val tmpSubD: js.Array[Double] = js.Array()
-//            e.foreach(tmpSubD.append(_))
-            tmpD.append(e)
-        })
+        d.foreach(tmpD.append(_))
         data = Some(trasformeData(tmpD))
+        this
     }
-
 
 
     private def trasformeData(d: js.Array[js.Array[Double]]): js.Array[js.Array[Double]]={
