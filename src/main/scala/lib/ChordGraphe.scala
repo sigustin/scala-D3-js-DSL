@@ -1,15 +1,17 @@
 package lib;
 
 import d3v4._
-import lib.Graphe
+import lib.{Graphe => GrapheBase} // to avoid to hide an other class also called Graphe
 
 import scala.scalajs.js
+import js.Dynamic.{ global => gJS }
+import lib.ImplicitConv._
 
-class ChordGraphe extends Graphe {
+class ChordGraphe extends GrapheBase {
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
-        d3.range(0, d.value, step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
+        d3.range(0, d.value/(10**scale), step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
     }
 
     def draw(): Unit = {
@@ -17,8 +19,9 @@ class ChordGraphe extends Graphe {
         var matrix:js.Array[js.Array[Double]] = js.Array()
         data match {
             case Some(d) => matrix = d
-            case None => return // TODO test if it work
+            case None => return
         }
+
 
         import d3v4.d3
 
@@ -34,9 +37,13 @@ class ChordGraphe extends Graphe {
         val ribbon = d3.ribbon().radius(innerRadius)
 
         val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
+        gJS.console.log("hello 2")
+        val gtmp = svg.append("g")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
 
-        val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
-
+        gJS.console.log("hello 2'")
+        val g: Selection[ChordArray] = gtmp.datum(chord(matrix))
+        gJS.console.log("hello 2''")
         val group = g.append("g").attr("class", "groups")
                 .selectAll("g")
                 .data((c: ChordArray) => c.groups)
@@ -58,7 +65,7 @@ class ChordGraphe extends Graphe {
                 .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
             .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
-
+        gJS.console.log("hello 3")
         g.append("g").attr("class", "ribbons").selectAll("path").data((c: ChordArray) => c)
             .enter().append("path")
             .attr("d", (d: Chord) => ribbon(d))

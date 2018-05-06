@@ -58,6 +58,10 @@
             }
             d.imports.forEach(function(d) { row[indexByName.get(d)]++; });
         });
+	/*matrix=[[0.5, 2, 0, 0],
+		[1, 1, 0, 0],
+		[0, 0, 1, 0],
+		[0, 0, 0, 1]];*/
         console.log(matrix)
         chord.matrix(matrix);
 

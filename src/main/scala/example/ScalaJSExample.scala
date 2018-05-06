@@ -21,16 +21,28 @@ object ScalaJSExample {
             List(1013,   990,  940, 6907)
         )
 
+//        val dataJs = js.Array[js.Array[Double]](
+//            js.Array(11975,  5871, 8916, 2868),
+//            js.Array(1951, 10048, 2060, 6171),
+//            js.Array(8010, 16145, 8090, 8045),
+//            js.Array(1013,   990,  940, 6907)
+//        )
         val dataJs = js.Array[js.Array[Double]](
-            js.Array(11975,  5871, 8916, 2868),
-            js.Array(1951, 10048, 2060, 6171),
-            js.Array(8010, 16145, 8090, 8045),
-            js.Array(1013,   990,  940, 6907)
+            js.Array(11.975,  5.871, 8.916, 2.868),
+            js.Array(1.951, 10.048, 2.060, 6.171),
+            js.Array(8.010, 16.145, 8.090, 8.045),
+            js.Array(1.013,   0.990,  0.940, 6.907)
         )
 
+//        val dataJs = js.Array[js.Array[Double]](
+//            js.Array(12, 6, 9, 3),
+//            js.Array(2, 10, 2, 6),
+//            js.Array(8, 16, 8, 8),
+//            js.Array(1, 1,  1, 7)
+//        )
 
         val g = new ChordGraphe()
-        g.setData(data)
+        g.setData(dataJs)
         g.setTarget("#playground2 svg")
         g.setDimention(480, 480)
         g.draw()

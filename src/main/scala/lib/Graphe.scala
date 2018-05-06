@@ -2,12 +2,15 @@ package lib
 
 import d3v4._
 import scala.scalajs.js
-
-
+import js.Dynamic.{ global => gJS }
+import lib.ImplicitConv._
 
 trait Graphe {
+    var scale = 0               // power of ten multiplier of the representation of the data hold in data
     var heightLocal:Option[Double] = None;
     var widthLocal:Option[Double] = None;
+
+
 
     var target = "svg" // is a html selector used as destination for the graphe
     var svg = d3.select(target)
@@ -41,7 +44,7 @@ trait Graphe {
     }
 
     def setData(d: js.Array[js.Array[Double]]) ={
-        data = Some(d)
+        data = Some(trasformeData(d))
     }
 
     def setData(d: List[List[Double]]) ={
@@ -51,13 +54,14 @@ trait Graphe {
             e.foreach(tmpSubD.append(_))
             tmpD.append(tmpSubD)
         })
-        data = Some(tmpD)
+        data = Some(trasformeData(tmpD))
     }
 
-    /*def setData(d: List[List[Int]]) ={
-        setData(d.map(_.map(_.toDouble)))
-    }*/
-//    def intToDouble[T: Int](x: T) = implicitly[Int[T]].toDouble(x)
-//    def intToDouble[T](x: T)(implicit n: Numeric[T]) = n.toDouble(x)
-//    implicit def intListToDoubleList(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
+
+
+    private def trasformeData(d: js.Array[js.Array[Double]]): js.Array[js.Array[Double]]={
+        var maxFigureBehideCommaVal = d.maxNbFigureBehindComma
+        scale=maxFigureBehideCommaVal
+        (d * (10**maxFigureBehideCommaVal)).round
+    }
 }
