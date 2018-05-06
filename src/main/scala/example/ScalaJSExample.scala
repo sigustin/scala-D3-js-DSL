@@ -46,6 +46,7 @@ object ScalaJSExample {
         g.setTarget("#playground2 svg")
         g.setDimention(480, 480)
         g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+        g.setLabel(List("A", "B", "C", "D"))
         g.draw()
     }
 
