@@ -1,16 +1,30 @@
 package lib;
 
 import d3v4._
-import lib.{Graph => GraphBase} // to avoid to hide an other class also called Graphe
+import lib.{Graph => GraphBase}
 
 import scala.scalajs.js
-import js.Dynamic.{ global => gJS }
+import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
+
+import scala.collection.mutable.ArrayBuffer
 
 class ChordGraph extends GraphBase {
 
-    var colorPaletteLocal: Option[js.Array[String]] = None
+    private var colorPaletteLocal: Option[js.Array[String]] = None
     def setColorPalette(cp:js.Array[String])=  {colorPaletteLocal = Some(cp); this}
+
+    def this(data: Map[String, List[Int]]) = {
+        this()
+        val labels: ArrayBuffer[String] = ArrayBuffer.empty[String]
+        var matrix: ArrayBuffer[List[Int]] = ArrayBuffer.empty[List[Int]]
+        data.foreach((label, currentData) => {
+              labels += label
+              matrix += currentData
+            }
+        )
+        val temp = 5
+    }
 
     // use a color palette in function of the size of the data if none is defined
     def colorPalette:js.Array[String] = {

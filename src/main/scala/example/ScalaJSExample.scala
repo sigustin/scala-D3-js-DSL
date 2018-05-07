@@ -31,7 +31,7 @@ object ScalaJSExample {
             js.Array(0/*11.975*/,  5.871, 8.916, 2.868),
             js.Array(1.951, 10.048, 2.060, 6.171),
             js.Array(8.010, 16.145, 8.090, 8.045),
-            js.Array(1.013,   0.990,  0.940, 6.907)
+            js.Array(1.013, 0.990,  0.940, 6.907)
         )
 
 //        val dataJs = js.Array[js.Array[Double]](
@@ -44,7 +44,7 @@ object ScalaJSExample {
 //        val g = new ChordGraph()
 //        g.setData(data)
 //        g.setTarget("#playground2 svg")
-//        g.setDimention(480, 480)
+//        g.setDimension(480, 480)
 //        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
 //        g.setLabel(List("A", "B", "C", "D"))
 //        g.draw()
@@ -63,6 +63,24 @@ object ScalaJSExample {
             .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
             .setLabel(List("A", "B", "C", "D"))
             .draw()
+
+        /* MOCKUP
+        val notImplementedGraph = ChordGraph(List((1,2,3), (4,5,6), (7,8,9)))
+        notImplementedGraph.target = "svg"
+        notImplementedGraph.dimension(480)(480)
+        notImplementedGraph.colorPalette("#000")("#FD8")("#974")("#F62")
+        notImplementedGraph.label("A")("B")("C")("D")
+        notImplementedGraph draw
+
+        val graph = ChordGraph(
+            Map(
+                "A" -> (1,2,3),
+                "B" -> (4,5,6),
+                "C" -> (7,8,9)
+            )
+        )
+        graph.dimension(480, 480)
+        */
     }
 
     /*@JSExportTopLevel("myproject")
