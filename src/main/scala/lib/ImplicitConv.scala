@@ -5,7 +5,7 @@ import scala.scalajs.js
 object ImplicitConv {
     implicit def intListToDoubleList(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
 
-    implicit def GraphToChordGraph(g: Graph) = g.asInstanceOf[ChordGraph]
+    implicit def GraphToChordGraph(g: Graph): ChordGraph = g.asInstanceOf[ChordGraph]
 
     implicit def ListToArray[T](d:List[T]): js.Array[T] = {
         val newT:js.Array[T]= js.Array()
@@ -49,7 +49,7 @@ object ImplicitConv {
         /**
           * @return the maximum number of figure behind the comma of the value inside d
           */
-        def maxNbFigureBehindComma = {
+        def maxNbFigureBehindComma: Int = {
             val maxPossible = 20 // TODO see if it have a sense to have a max value and if this value is ok
             var maxFigureBehideComma = 0
             for(r <- 0 until t.length; e <- 0 until t(r).length){
