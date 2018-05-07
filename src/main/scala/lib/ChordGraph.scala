@@ -18,12 +18,13 @@ class ChordGraph extends GraphBase {
         this()
         val labels: ArrayBuffer[String] = ArrayBuffer.empty[String]
         var matrix: ArrayBuffer[List[Int]] = ArrayBuffer.empty[List[Int]]
-        data.foreach((label, currentData) => {
-              labels += label
-              matrix += currentData
+        data.foreach(elem => {
+              labels += elem._1
+              matrix += elem._2
             }
         )
-        val temp = 5
+        setLabel(labels.toList)
+        setData(matrix.toList)
     }
 
     // use a color palette in function of the size of the data if none is defined

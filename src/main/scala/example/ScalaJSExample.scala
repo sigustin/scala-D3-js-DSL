@@ -57,30 +57,31 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
-        val g = ChordGraph(data)
-            .setTarget("#playground2 svg")
-            .setDimension(480, 480)
-            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-            .setLabel(List("A", "B", "C", "D"))
-            .draw()
+//        val g = ChordGraph(data)
+//            .setTarget("#playground2 svg")
+//            .setDimension(480, 480)
+//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//            .setLabel(List("A", "B", "C", "D"))
+//            .draw()
 
-        /* MOCKUP
-        val notImplementedGraph = ChordGraph(List((1,2,3), (4,5,6), (7,8,9)))
-        notImplementedGraph.target = "svg"
-        notImplementedGraph.dimension(480)(480)
-        notImplementedGraph.colorPalette("#000")("#FD8")("#974")("#F62")
-        notImplementedGraph.label("A")("B")("C")("D")
-        notImplementedGraph draw
+//        MOCKUP
+//        val notImplementedGraph = ChordGraph(List((1,2,3), (4,5,6), (7,8,9)))
+//        notImplementedGraph.target = "svg"
+//        notImplementedGraph.dimension(480)(480)
+//        notImplementedGraph.colorPalette("#000")("#FD8")("#974")("#F62")
+//        notImplementedGraph.label("A")("B")("C")("D")
+//        notImplementedGraph draw
 
-        val graph = ChordGraph(
+        val graph = new ChordGraph(
             Map(
-                "A" -> (1,2,3),
-                "B" -> (4,5,6),
-                "C" -> (7,8,9)
+                "LabelA" -> List(1,2,3),
+                "LabelB" -> List(4,5,4),
+                "LabelC" -> List(3,2,1)
             )
-        )
-        graph.dimension(480, 480)
-        */
+        ).setTarget("#playground2 svg")
+          .draw()
+
+//        graph.dimension(480, 480)
     }
 
     /*@JSExportTopLevel("myproject")
