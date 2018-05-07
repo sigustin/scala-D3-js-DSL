@@ -63,13 +63,13 @@ object ImplicitConv {
           */
         def maxNbFigureBehindComma: Int = {
             val maxPossible = 20 // TODO see if it have a sense to have a max value and if this value is ok
-            var maxFigureBehideComma = 0
+            var maxFigureBehindComma = 0
             for(r <- 0 until t.length; e <- 0 until t(r).length){
                 val nbFigureBehideCommaVal = nbFigureBehindComma(t(r)(e))
-                if (nbFigureBehideCommaVal > maxFigureBehideComma)
-                    maxFigureBehideComma = nbFigureBehideCommaVal
+                if (nbFigureBehideCommaVal > maxFigureBehindComma)
+                    maxFigureBehindComma = nbFigureBehideCommaVal
             }
-            if (maxFigureBehideComma > maxPossible) maxPossible else maxFigureBehideComma
+            if (maxFigureBehindComma > maxPossible) maxPossible else maxFigureBehindComma
         }
     }
 

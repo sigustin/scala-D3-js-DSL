@@ -9,8 +9,8 @@ import org.scalajs.dom
 
 trait Graph {
     var scale = 0               // power of ten multiplier of the representation of the data hold in data
-    var heightLocal:Option[Double] = None
-    var widthLocal:Option[Double] = None
+    private var heightLocal:Option[Double] = None
+    private var widthLocal:Option[Double] = None
 
 
 
@@ -31,6 +31,10 @@ trait Graph {
         target = t
         svg = d3.select(target)
         this
+    }
+    def target_(t: String): Unit = {
+        target = t
+        svg = d3.select(target)
     }
 
     def height: Double = {
@@ -61,8 +65,8 @@ trait Graph {
 
 
     private def transformData(d: js.Array[js.Array[Double]]): js.Array[js.Array[Double]] = {
-        var maxFigureBehideCommaVal = d.maxNbFigureBehindComma
-        scale=maxFigureBehideCommaVal
-        (d * (10**maxFigureBehideCommaVal)).round
+        var maxFigureBehindCommaVal = d.maxNbFigureBehindComma
+        scale=maxFigureBehindCommaVal
+        (d * (10**maxFigureBehindCommaVal)).round
     }
 }
