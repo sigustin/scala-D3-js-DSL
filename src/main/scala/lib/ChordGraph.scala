@@ -14,17 +14,21 @@ class ChordGraph extends GraphBase {
     private var colorPaletteLocal: Option[js.Array[String]] = None
     def setColorPalette(cp:js.Array[String])=  {colorPaletteLocal = Some(cp); this}
 
-    def this(data: Map[String, List[Int]]) = {
+    def this(data: Map[String, Product with Serializable]) = {
         this()
         val labels: ArrayBuffer[String] = ArrayBuffer.empty[String]
-        var matrix: ArrayBuffer[List[Int]] = ArrayBuffer.empty[List[Int]]
+        var matrix: ArrayBuffer[Product with Serializable] = ArrayBuffer.empty[Product with Serializable]
         data.foreach(elem => {
-              labels += elem._1
-              matrix += elem._2
-            }
-        )
+            labels += elem._1
+            matrix += elem._2
+        })
+        var arrayOfList: ArrayBuffer[List[Int]] = ArrayBuffer.empty[List[Int]]
+        matrix.foreach(tuple => {
+            arrayOfList += tuple.productIterator.toList.asInstanceOf[List[Int]]
+        })
+
         setLabel(labels.toList)
-        setData(matrix.toList)
+        setData(arrayOfList.toList)
     }
 
     // use a color palette in function of the size of the data if none is defined
@@ -136,4 +140,5 @@ class ChordGraph extends GraphBase {
 object ChordGraph {
 //    def apply(d:List[List[Double]]): ChordGraph =  new ChordGraph().setData(d)
     def apply(d:js.Array[js.Array[Double]]): ChordGraph =  new ChordGraph().setData(d)
+    def apply(d: Map[String, Product with Serializable]): ChordGraph = new ChordGraph(d)
 }

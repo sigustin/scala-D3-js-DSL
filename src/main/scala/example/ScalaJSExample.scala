@@ -72,11 +72,11 @@ object ScalaJSExample {
 //        notImplementedGraph.label("A")("B")("C")("D")
 //        notImplementedGraph draw
 
-        val graph = new ChordGraph(
+        val graph = ChordGraph(
             Map(
-                "LabelA" -> List(1,2,3),
-                "LabelB" -> List(4,5,4),
-                "LabelC" -> List(3,2,1)
+                "LabelA" -> (1,2,3),
+                "LabelB" -> (4,5,4),
+                "LabelC" -> (3,2,1)
             )
         ).setTarget("#playground2 svg")
           .draw()
