@@ -3,7 +3,7 @@ package lib
 import scala.scalajs.js
 
 object ImplicitConv {
-    //implicit def intMatrixToDoubleMatrix(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
+    implicit def intMatrixToDoubleMatrix(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
 
     implicit def GraphToChordGraph(g: Graph): ChordGraph = g.asInstanceOf[ChordGraph]
 
@@ -19,11 +19,9 @@ object ImplicitConv {
         newT
     }
 
-//    implicit def DoubleMatrixToIntMatrixJs(d:List[List[Int]]): js.Array[js.Array[Double]] = {
-//        val newT:js.Array[js.Array[Double]]= js.Array()
-//        d.foreach(newT.append(_))
-//        newT
-//    }
+    implicit def IntMatrixToDoubleMatrixJs(d:List[List[Int]]): js.Array[js.Array[Double]] = {
+        intMatrixToDoubleMatrix(d)
+    }
 
 
 

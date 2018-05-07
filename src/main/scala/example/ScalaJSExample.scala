@@ -57,7 +57,7 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
-        val g = ChordGraph(dataJs)
+        val g = ChordGraph(data)
             .setTarget("#playground2 svg")
             .setDimension(480, 480)
             .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
