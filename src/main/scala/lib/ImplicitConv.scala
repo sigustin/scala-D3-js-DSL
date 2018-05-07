@@ -3,7 +3,7 @@ package lib
 import scala.scalajs.js
 
 object ImplicitConv {
-    implicit def intListToDoubleList(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
+    //implicit def intMatrixToDoubleMatrix(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
 
     implicit def GraphToChordGraph(g: Graph) = g.asInstanceOf[ChordGraph]
 
@@ -12,6 +12,20 @@ object ImplicitConv {
         d.foreach(newT.append(_))
         newT
     }
+
+    implicit def DoubleMatrixToDoubleMatrixJs(d:List[List[Double]]): js.Array[js.Array[Double]] = {
+        val newT:js.Array[js.Array[Double]]= js.Array()
+        d.foreach(newT.append(_))
+        newT
+    }
+
+//    implicit def DoubleMatrixToIntMatrixJs(d:List[List[Int]]): js.Array[js.Array[Double]] = {
+//        val newT:js.Array[js.Array[Double]]= js.Array()
+//        d.foreach(newT.append(_))
+//        newT
+//    }
+
+
 
     // syntactic sugar for power of a value
     implicit class PowerInt(val i:Double) extends AnyVal {

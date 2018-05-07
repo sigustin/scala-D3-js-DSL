@@ -116,5 +116,9 @@ class ChordGraph extends GraphBase {
             .attr("d", (d: Chord) => ribbon(d))
             .style("fill", (d: Chord) => color(d.target.index))
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
+    }
 }
+object ChordGraph {
+//    def apply(d:List[List[Double]]): ChordGraph =  new ChordGraph().setData(d)
+    def apply(d:js.Array[js.Array[Double]]): ChordGraph =  new ChordGraph().setData(d)
 }

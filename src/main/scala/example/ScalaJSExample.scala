@@ -49,8 +49,15 @@ object ScalaJSExample {
 //        g.setLabel(List("A", "B", "C", "D"))
 //        g.draw()
 
-        val g = new ChordGraph()
-            .setData(data)
+//        val g = new ChordGraph()
+//            .setData(data)
+//            .setTarget("#playground2 svg")
+//            .setDimention(480, 480)
+//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//            .setLabel(List("A", "B", "C", "D"))
+//            .draw()
+
+        val g = ChordGraph(dataJs)
             .setTarget("#playground2 svg")
             .setDimention(480, 480)
             .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
