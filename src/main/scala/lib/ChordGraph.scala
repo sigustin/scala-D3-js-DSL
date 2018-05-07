@@ -114,8 +114,10 @@ class ChordGraph extends GraphBase {
                 .attr("x", 8)
                 .attr("dy", ".35em")
                 //            .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + ((d("angle") * 180 / Math.PI - 90) + ")" + "translate(" + (innerRadius + 26) + ")" +  (if (d("angle") > Math.PI ) "rotate(180)" else "")))
-                .attr("transform", (d: js.Dictionary[Double]) => (if (d("angle") > Math.PI ) "rotate(180) translate(-16)" else null))
-                .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
+//                .attr("transform", (d: js.Dictionary[Double]) => (if (d("angle") > Math.PI ) "rotate(180) translate(-16)" else null))
+                .attr("transform", (d: js.Dictionary[Double]) => "translate(8) rotate(90)")
+//                .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
+                .attr("text-anchor", "middle")
                 .text((d: js.Dictionary[Double]) => label(d("index").toInt) )
 
             //        groupTick.append("text")
