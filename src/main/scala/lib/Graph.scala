@@ -7,8 +7,8 @@ import lib.ImplicitConv._
 
 trait Graph {
     var scale = 0               // power of ten multiplier of the representation of the data hold in data
-    var heightLocal:Option[Double] = None;
-    var widthLocal:Option[Double] = None;
+    var heightLocal:Option[Double] = None
+    var widthLocal:Option[Double] = None
 
 
 
@@ -19,13 +19,13 @@ trait Graph {
 
 
 
-    def setDimention(h: Int, w:Int) ={
+    def setDimension(h: Int, w:Int) = {
         heightLocal = Some(h)
         widthLocal = Some(w)
         this
     }
 
-    def setTarget(t: String) ={
+    def setTarget(t: String) = {
         target = t
         svg = d3.select(target)
         this
@@ -45,12 +45,12 @@ trait Graph {
         }
     }
 
-    def setData(d: js.Array[js.Array[Double]]) ={
+    def setData(d: js.Array[js.Array[Double]]) = {
         data = Some(trasformeData(d))
         this
     }
 
-    def setData(d: List[List[Double]]) ={
+    def setData(d: List[List[Double]]) = {
         val tmpD:js.Array[js.Array[Double]] = js.Array()
         d.foreach(tmpD.append(_))
         data = Some(trasformeData(tmpD))
@@ -58,7 +58,7 @@ trait Graph {
     }
 
 
-    private def trasformeData(d: js.Array[js.Array[Double]]): js.Array[js.Array[Double]]={
+    private def trasformeData(d: js.Array[js.Array[Double]]): js.Array[js.Array[Double]] = {
         var maxFigureBehideCommaVal = d.maxNbFigureBehindComma
         scale=maxFigureBehideCommaVal
         (d * (10**maxFigureBehideCommaVal)).round
