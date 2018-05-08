@@ -6,8 +6,10 @@ import lib.{Graph => GraphBase}
 import scala.scalajs.js
 import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
+import org.scalajs.dom.XMLHttpRequest
 
 import scala.collection.mutable.ArrayBuffer
+import scala.scalajs.js.JSON
 
 @js.native
 trait ChordGroupJson extends js.Object {
@@ -30,6 +32,12 @@ trait MySubChordJson extends js.Object {
     val startAngle: Double = js.native
     val endAngle: Double= js.native
     val value:Int = js.native
+}
+
+@js.native
+trait DataFromJsonUrl extends js.Object {
+    val label:String= js.native
+    val data: js.Array[Double] = js.native
 }
 
 class ChordGraph extends GraphBase {
@@ -65,6 +73,42 @@ class ChordGraph extends GraphBase {
 
     private var labelLocal: Option[js.Array[String]] = None
     def setLabel(l:js.Array[String]) = { labelLocal = Some(l); this }
+
+
+    def setDataFromUrl(url: String): Graph = {
+        var xobj = new XMLHttpRequest();
+        xobj.open("GET", url, false)
+        xobj.send(null);
+
+        if (xobj.readyState == 4 && xobj.status == 200) {
+            val r = xobj.responseText
+            val d = JSON.parse(r)
+
+            try{
+                val tmpData: js.Array[js.Array[Double]] = js.Array()
+                val tmpLabel: js.Array[String] = js.Array()
+                for (e <- d.asInstanceOf[js.Array[DataFromJsonUrl]]){
+                    val row = e.asInstanceOf[DataFromJsonUrl]
+                    tmpData.append(row.data)
+                    tmpLabel.append(row.label)
+                }
+
+                data = Some(tmpData)
+                labelLocal = Some(tmpLabel)
+
+            }catch {
+                case default:Throwable => {
+                    gJS.console.log("error in the json format")
+                }
+            }
+
+
+        }else {
+            gJS.console.log("error while getting the json")
+        }
+
+        this
+    }
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
