@@ -43,7 +43,7 @@ var formatValue = d3.formatPrefix(",.0", 1e3);
 
 var chord = d3.chord()
     .padAngle(0.05)
-    .sortSubgroups(d3.descending);
+    .sortSubgroups(d3.descending)
 
 var arc = d3.arc()
     .innerRadius(innerRadius)
@@ -70,6 +70,27 @@ group.append("path")
     .style("fill", function(d) { return color(d.index); })
     .style("stroke", function(d) { return d3.rgb(color(d.index)).darker(); })
     .attr("d", arc);
+
+
+/*Returns an event handler for fading a given chord group*/
+function fade(opacity) {
+      return function(d, i) {
+        svg.selectAll("path")
+            .filter(function(d) {
+                console.log(d, i);
+                if (d.source){
+                    return d.source.index != i && d.target.index != i
+                }else{
+                    return d.index != i;
+                }})
+            .transition()
+            .style("stroke-opacity", opacity)
+            .style("fill-opacity", opacity);
+      };
+};/*fade*/
+
+group.on("mouseover", fade(0.2))
+    .on("mouseout", fade(.80))
 
 var groupTick = group.selectAll(".group-tick")
   .data(function(d) { return groupTicks(d, 1e3); })
