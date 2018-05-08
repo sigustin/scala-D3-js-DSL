@@ -1,6 +1,8 @@
 package example
 
 
+import d3v4.{Projection, TransformType, d3geo}
+
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
 import lib.ImplicitConv._
@@ -14,18 +16,12 @@ object ScalaJSExample {
 
     @JSExport
     def main(args: Array[String]): Unit = {
-        val data = List(
-            List(0/*11975*/,  5871, 8916, 2868),
-            List(1951, 10048, 2060, 6171),
-            List(8010, 16145, 8090, 8045),
-            List(1013,   990,  940, 6907)
-        )
-
-//        val dataJs = js.Array[js.Array[Double]](
-//            js.Array(11975,  5871, 8916, 2868),
-//            js.Array(1951, 10048, 2060, 6171),
-//            js.Array(8010, 16145, 8090, 8045),
-//            js.Array(1013,   990,  940, 6907)
+//        //========= Chord Graph =====================
+//        val graph = ChordGraph(
+//            "LabelA" -> (11975, 5871, 8916, 2868),
+//            "LabelB" -> (1951, 10048, 2060, 6171),
+//            "LabelC" -> (8010, 16145, 8090, 8045),
+//            "LabelD" -> (1013, 990, 940, 6907)
 //        )
         val dataJs = js.Array[js.Array[Double]](
             js.Array(11.975,  5.871, 8.916, 2.868),
@@ -51,32 +47,24 @@ object ScalaJSExample {
 //        val g = new ChordGraph()
 //            .setData(data)
 //            .setTarget("#playground2 svg")
-//            .setDimention(480, 480)
-//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-//            .setLabel(List("A", "B", "C", "D"))
-//            .draw()
-
-//        val g = ChordGraph(dataJs)
-//            .setTarget("#playground2 svg")
-//            .setDimension(480, 480)
-//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-//            .setLabel(List("A", "B", "C", "D"))
-//            .draw()
-
-
-//        val graph = ChordGraph(
-//            "LabelA" -> (11975, 5871, 8916, 2868),
-//            "LabelB" -> (1951, 10048, 2060, 6171),
-//            "LabelC" -> (8010, 16145, 8090, 8045),
-//            "LabelD" -> (1013, 990, 940, 6907)
-//        )
-//
-//        graph
-//            .setTarget("#playground2 svg")
 //            .setDimension(600, 600)
 //            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
+        //========== Flow map =====================
+        import d3v4.d3
+        val width = 900
+        val height = 800
+
+        val projection = d3geo.mercator().translate((1000.0/2, 700.0/2)).scale(300)
+
+        val svg = d3.select("svg").append("svg")
+            .attr("width", 900)
+            .attr("height", 600)
+//        var path: Projection = d3geo.path().projection(projection.asInstanceOf[Projection])
+
+        var countries = svg.append("g")
     }
 
     /*

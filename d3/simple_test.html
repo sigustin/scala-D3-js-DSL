@@ -1,103 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>title</title>
-</head>
-<body>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>D3 World Map</title>
+        <style>
+          path {
+            stroke: white;
+            stroke-width: 0.5px;
+            fill: black;
+          }
+        </style>
+        <script src="http://d3js.org/d3.v4.min.js"></script>
+        <!--<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>-->
+        <script src="http://d3js.org/topojson.v1.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            let width = 900;
+            let height = 800;
 
+            let center = [0, 75];
+            let scale = 0.6*height;
 
-<script src="d3.v3.min.js"></script>
+            <!--let projection = d3.geo.mercator().scale(scale).translate([width / 2, 0]).center(center);-->
+            let projection = d3.geoMercator().translate([screen.width/2, screen.height/2]).center([0,0]).scale(300);
+            let path = d3.geoPath().projection(projection);
 
-<script>
+            let svg = d3.select("body").append("svg")
+                        .attr("height", height)
+                        .attr("width", width);
 
-    var outerRadius = 960 / 2,
-        innerRadius = outerRadius - 130;
-
-    var fill = d3.scale.category20c();
-
-    var chord = d3.layout.chord()
-        .padding(.04)
-        .sortSubgroups(d3.descending)
-        .sortChords(d3.descending);
-
-    var arc = d3.svg.arc()
-        .innerRadius(innerRadius)
-        .outerRadius(innerRadius + 20);
-
-    var svg = d3.select("body").append("svg")
-        .attr("width", outerRadius * 2)
-        .attr("height", outerRadius * 2)
-        .append("g")
-        .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
-
-    d3.json("chords_data2.json", function(error, imports) {
-        console.log(imports);
-        if (error) throw error;
-
-        var indexByName = d3.map(),
-            nameByIndex = d3.map(),
-            matrix = [],
-            n = 0;
-
-        // Compute a unique index for each package name.
-        imports.forEach(function(d) {
-            if (!indexByName.has(d = d.name)) {
-                nameByIndex.set(n, d);
-                indexByName.set(d, n++);
-            }
-        });
-
-        // Construct a square matrix counting package imports.
-        imports.forEach(function(d) {
-            var source = indexByName.get(d.name),
-                row = matrix[source];
-            if (!row) {
-                row = matrix[source] = [];
-                for (var i = -1; ++i < n;) row[i] = 0;
-            }
-            d.imports.forEach(function(d) { row[indexByName.get(d)]++; });
-        });
-	/*matrix=[[0.5, 2, 0, 0],
-		[1, 1, 0, 0],
-		[0, 0, 1, 0],
-		[0, 0, 0, 1]];*/
-        console.log(matrix)
-        chord.matrix(matrix);
-
-        var g = svg.selectAll(".group")
-            .data(chord.groups)
-            .enter().append("g")
-            .attr("class", "group");
-
-        g.append("path")
-            .style("fill", function(d) { return fill(d.index); })
-            .style("stroke", function(d) { return fill(d.index); })
-            .attr("d", arc);
-
-        g.append("text")
-            .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
-            .attr("dy", ".35em")
-            .attr("transform", function(d) {
-                return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-                    + "translate(" + (innerRadius + 26) + ")"
-                    + (d.angle > Math.PI ? "rotate(180)" : "");
-            })
-            .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
-            .text(function(d) { return nameByIndex.get(d.index); });
-
-        svg.selectAll(".chord")
-            .data(chord.chords)
-            .enter().append("path")
-            .attr("class", "chord")
-            .style("stroke", function(d) { return d3.rgb(fill(d.source.index)).darker(); })
-            .style("fill", function(d) { return fill(d.source.index); })
-            .attr("d", d3.svg.chord().radius(innerRadius));
-
-    });
-    console.log(self.frameElement);
-    //d3.select(self.frameElement).style("height", outerRadius * 2 + "px");
-
-</script>
-</body>
+            let countries = svg.append("g");
+            <!--d3.json("eu.topojson", function(data) {-->
+            d3.json("states_census_2015.json", function(data) {
+                countries.selectAll('.country')
+                    <!--.data(topojson.feature(data, data.objects.europe).features)-->
+                    .data(topojson.feature(data, data.objects.states).features)
+                    .enter()
+                    .append('path')
+                    .attr('class', 'country')
+                    .attr('d', path);
+                return;
+            });
+        </script>
+    </body>
 </html>
