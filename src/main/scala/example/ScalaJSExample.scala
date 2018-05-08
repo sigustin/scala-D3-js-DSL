@@ -73,13 +73,14 @@ object ScalaJSExample {
 //        notImplementedGraph draw
 
         val graph = ChordGraph(
-            Map(
-                "LabelA" -> (1,2,3),
-                "LabelB" -> (4,5,4),
-                "LabelC" -> (3,2,1)
-            )
-        ).setTarget("#playground2 svg")
-            .setDimension(480, 480)
+            "LabelA" -> (100,200,300),
+            "LabelB" -> (400,500,400),
+            "LabelC" -> (300,200,100)
+        )
+
+        graph
+            .setTarget("#playground2 svg")
+            .setDimension(600, 600)
             .draw()
 
 
