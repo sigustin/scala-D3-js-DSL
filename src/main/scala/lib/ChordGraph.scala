@@ -31,6 +31,18 @@ class ChordGraph extends GraphBase {
         setData(arrayOfList.toList)
     }
 
+    override def setData(d: js.Array[js.Array[Double]]): GraphBase = {
+        super.setData(d)
+        sumData = Some(computeSumDataOverCircle())
+        this
+    }
+
+    override def setData(d: List[List[Double]]): GraphBase = {
+        super.setData(d)
+        sumData = Some(computeSumDataOverCircle())
+        this
+    }
+
     // use a color palette in function of the size of the data if none is defined
     def colorPalette:js.Array[String] = {
         (data, colorPaletteLocal) match {
@@ -45,19 +57,17 @@ class ChordGraph extends GraphBase {
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
-        gJS.console.log(d.value)
-        gJS.console.log(d.index)
-        gJS.console.log(k)
         d3.range(0, d.value/(10**scale), step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
     }
 
-    def sumDataOverCircle(): Double = {
+    private var sumData: Option[Double] = None
+    /** Returns the sum of the data around the whold chord plot */
+    private def computeSumDataOverCircle(): Double = {
         data match {
             case None => 0.0
             case Some(matrix) => {
                 var sum = 0.0
                 matrix.foreach(sum += _.sum)
-                gJS.console.log("sum data "+sum)
                 sum
             }
         }
@@ -69,18 +79,30 @@ class ChordGraph extends GraphBase {
         val diameter = width min height
         val circumference = math.Pi * diameter
         // One tick every 10 pixels
-        gJS.console.log("nb ticks "+(circumference / minStepPx).round.toInt)
         (circumference / minStepPx).round.toInt
     }
 
-    /** Computes the step of the ticks so that there are at most $computeMaxNbTicks ticks and at least one per data point */
-    def computeTickStep(): Double = {
-        val sumData = sumDataOverCircle()
-        val minTicksStep = closestRoundNb(sumData / computeMaxNbTicks())
-        gJS.console.log("minTicksStep "+minTicksStep+" "+(minTicksStep == 0.0))
+    private var tickStep: Option[Double] = None
+    private def getTickStep: Double = {
+        if (tickStep isDefined)
+            return tickStep.get
+        else {
+            computeTickStep()
+            return tickStep.get
+        }
+    }
+    /**
+      * Computes the step of the ticks so that
+      * there are at most $computeMaxNbTicks ticks and at least one per data point
+      * (not in pixels)
+      * and puts it in $tickStep
+      */
+    private def computeTickStep(): Unit = {
+        val sumDataValue: Double = sumData.getOrElse(0)
+        val minTicksStep = closestRoundNb(sumDataValue / computeMaxNbTicks())
         if (minTicksStep == 0.0)
-            return 1
-        return minTicksStep
+            tickStep = Some(1)
+        tickStep = Some(minTicksStep)
     }
 
     /** Computes the order of $nb */
@@ -103,11 +125,32 @@ class ChordGraph extends GraphBase {
         if (nb == math.pow(10, order))
             return math.pow(10, order).toLong
 
+        val differenceTo1X = (nb - math.pow(10, order)).abs
+        val differenceTo2dot5X = (nb - 2.5*math.pow(10, order)).abs
         val differenceTo5X = (nb - 5*math.pow(10, order)).abs
         val differenceTo10X = (nb - math.pow(10, order+1)).abs
+        if (differenceTo1X < differenceTo2dot5X)
+            return math.pow(10, order).toLong
+        if (differenceTo2dot5X < differenceTo5X)
+            return (2.5*math.pow(10, order)).toLong
         if (differenceTo5X < differenceTo10X)
             return 5*math.pow(10, order).toLong
         math.pow(10, order+1).toLong
+    }
+
+    /** Computes the number of ticks between each big tick (included) */
+    private def nbTicksBetweenBigTicks(): Int = {
+        val preferredBigTickStep = 4
+        val minNbBigTicks = 8
+        val maxNbBigTicks = 16
+        if (sumData.getOrElse(0) != 0) {
+            val totalNbTicks = sumData.get / getTickStep
+            val nbBigTicks: Int = (totalNbTicks / preferredBigTickStep).round.toInt
+            if (nbBigTicks >= minNbBigTicks && nbBigTicks < maxNbBigTicks)
+                return (totalNbTicks / nbBigTicks).round.toInt
+            (totalNbTicks / minNbBigTicks).round.toInt
+        }
+        else 0
     }
 
     def groupLabelData(d:ChordGroup): js.Array[js.Dictionary[Double]] = {
@@ -145,16 +188,14 @@ class ChordGraph extends GraphBase {
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
             .attr("d", (x: ChordGroup) => arc(x))
 
-        val tickStep = computeTickStep()
-        gJS.console.log("step ticks "+tickStep)
-        var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, tickStep))
+        var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, getTickStep))
             .enter().append("g").attr("class", "group-tick")
             .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
         groupTick.append("line").attr("x2", 6)
 
-        val formatValue = d3.formatPrefix(",.0", tickStep)
-        val bigTickStep = 5*tickStep
+        val formatValue = d3.formatPrefix(",.0", getTickStep)
+        val bigTickStep = closestRoundNb(nbTicksBetweenBigTicks() * getTickStep)
         groupTick.filter((d: js.Dictionary[Double]) => d("value") % bigTickStep == 0).append("text")
                 .attr("x", 8)
                 .attr("dy", ".35em")
