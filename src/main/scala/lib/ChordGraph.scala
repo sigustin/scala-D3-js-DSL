@@ -263,6 +263,36 @@ class ChordGraph extends GraphBase {
             if (false) return
         }
 
+        def fade(opacity:Double):js.Any => Selection[js.Any] = {
+            (d:js.Any)=> {
+                val i = d.asInstanceOf[ChordGroupJson].index
+//                val opacity = 0.8
+
+                svg.selectAll("path")
+                    .filter((d:js.Any) => {
+                        val dJs = d.asInstanceOf[js.Any]
+                        try {
+                            val e = dJs.asInstanceOf[ChordGroupJson]
+                            i != e.index
+                        }catch{
+                            case default:Throwable => {
+                                try {
+                                    val e = dJs.asInstanceOf[ChordJson]
+                                    e.source.index != i && e.target.index != i
+                                }catch{
+                                    case default:Throwable => {
+                                        true
+                                    }
+                                }
+                            }
+
+                        }})
+                    .style("stroke-opacity", opacity.toString)
+                    .style("fill-opacity", opacity.toString);
+//                if (false) return
+            }
+        }
+
 //        val testHandler = (d:js.Any)=> {
 //            gJS.console.log("hello !")
 //            if (false) return
@@ -271,6 +301,7 @@ class ChordGraph extends GraphBase {
         group
             .on("mouseover", mouseOverHandler)
             .on("mouseout", mouseOutHandler)
+//            .on("mouseout", fade(0.5))
 
 
         val tickStep = computeTickStep()
