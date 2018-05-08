@@ -1,4 +1,4 @@
-package lib;
+package lib
 
 import d3v4._
 import lib.{Graph => GraphBase}
@@ -14,7 +14,7 @@ class ChordGraph extends GraphBase {
     private var colorPaletteLocal: Option[js.Array[String]] = None
     def setColorPalette(cp:js.Array[String])=  {colorPaletteLocal = Some(cp); this}
 
-    def this(data: Map[String, Product with Serializable]) = {
+    def this(data: Seq[(String, Product with Serializable)]) = {
         this()
         val labels: ArrayBuffer[String] = ArrayBuffer.empty[String]
         var matrix: ArrayBuffer[Product with Serializable] = ArrayBuffer.empty[Product with Serializable]
@@ -40,9 +40,8 @@ class ChordGraph extends GraphBase {
         }
     }
 
-    var labelLocal: Option[js.Array[String]] = None
+    private var labelLocal: Option[js.Array[String]] = None
     def setLabel(l:js.Array[String]) = { labelLocal = Some(l); this }
-
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
@@ -52,13 +51,44 @@ class ChordGraph extends GraphBase {
         d3.range(0, d.value/(10**scale), step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
     }
 
+    def sumDataOverCircle(): Double = {
+        data match {
+            case None => 0.0
+            case Some(matrix) => {
+                var sum = 0.0
+                matrix.foreach(sum += _.sum)
+                gJS.console.log("sum data "+sum)
+                sum
+            }
+        }
+    }
+
+    private val minStepPx = 30 // minimal number of pixels between 2 ticks
+    /** Computes the number of ticks so that there are not too many nor too few */
+    def computeMaxNbTicks(): Int = {
+        val diameter = width min height
+        val circumference = math.Pi * diameter
+        // One tick every 10 pixels
+        gJS.console.log("nb ticks "+(circumference / minStepPx).round.toInt)
+        (circumference / minStepPx).round.toInt
+    }
+
+    /** Computes the step of the ticks so that there are at most $computeMaxNbTicks ticks and at least one per data point */
+    def computeTickStep(): Double = {
+        val sumData = sumDataOverCircle()
+        val maxTicksStep = (sumData / computeMaxNbTicks()).round
+        gJS.console.log("maxTicksStep "+maxTicksStep+" "+(maxTicksStep == 0.0))
+        if (maxTicksStep == 0.0)
+            return 1
+        return maxTicksStep
+    }
+
     def groupLabelData(d:ChordGroup): js.Array[js.Dictionary[Double]] = {
         val angleMean = (d.endAngle - d.startAngle) / 2
         js.Array(js.Dictionary("index" -> d.index.toDouble, "angle" -> (d.startAngle + angleMean)))
     }
 
     def draw(): Unit = {
-
         var matrix:js.Array[js.Array[Double]] = js.Array()
         data match {
             case Some(d) => matrix = d
@@ -94,7 +124,10 @@ class ChordGraph extends GraphBase {
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
             .attr("d", (x: ChordGroup) => arc(x))
 
-        var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
+        val tickStep = computeTickStep()
+        gJS.console.log("step ticks "+tickStep)
+
+        var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, tickStep))
             .enter().append("g").attr("class", "group-tick")
             .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
@@ -142,5 +175,5 @@ class ChordGraph extends GraphBase {
 object ChordGraph {
 //    def apply(d:List[List[Double]]): ChordGraph =  new ChordGraph().setData(d)
     def apply(d:js.Array[js.Array[Double]]): ChordGraph =  new ChordGraph().setData(d)
-    def apply(d: Map[String, Product with Serializable]): ChordGraph = new ChordGraph(d)
+    def apply(d: (String, Product with Serializable)*): ChordGraph = new ChordGraph(d)
 }

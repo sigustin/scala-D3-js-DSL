@@ -6,6 +6,7 @@ import scala.scalajs.js
 import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
 import org.scalajs.dom
+import dom.document
 
 trait Graph {
     var scale = 0               // power of ten multiplier of the representation of the data hold in data
@@ -19,11 +20,12 @@ trait Graph {
 
     var data: Option[js.Array[js.Array[Double]]] = None
 
-
-
-    def setDimension(h: Int, w:Int): Graph = {
+    def setDimension(w: Int, h:Int): Graph = {
         heightLocal = Some(h)
         widthLocal = Some(w)
+        d3.select(target)
+            .attr("width", w)
+            .attr("height", h)
         this
     }
 
