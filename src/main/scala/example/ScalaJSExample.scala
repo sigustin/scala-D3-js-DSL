@@ -79,7 +79,8 @@ object ScalaJSExample {
                 "LabelC" -> (3,2,1)
             )
         ).setTarget("#playground2 svg")
-          .draw()
+            .setDimension(480, 480)
+            .draw()
 
 
 //        graph.dimension(480, 480)

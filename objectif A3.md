@@ -39,7 +39,7 @@ Tutorial to explain chords plots: (https://www.visualcinnamon.com/2014/12/using-
     - TODO: set text label for bigger text (pb detect that the text is too big)
     - TODO: add percentage scale mode
     - TODO: adaptative scall for the numeric mode
-    - TODO: add interaction when the mouse is over something
+    - DONE: add interaction when the mouse is over something
     - TODO: add support to get data from an URL
 
 - MIGRATION
