@@ -6,8 +6,10 @@ import lib.{Graph => GraphBase}
 import scala.scalajs.js
 import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
+import org.scalajs.dom.XMLHttpRequest
 
 import scala.collection.mutable.ArrayBuffer
+import scala.scalajs.js.JSON
 
 @js.native
 trait ChordGroupJson extends js.Object {
@@ -30,6 +32,12 @@ trait MySubChordJson extends js.Object {
     val startAngle: Double = js.native
     val endAngle: Double= js.native
     val value:Int = js.native
+}
+
+@js.native
+trait DataFromJsonUrl extends js.Object {
+    val label:String= js.native
+    val data: js.Array[Double] = js.native
 }
 
 class ChordGraph extends GraphBase {
@@ -77,6 +85,42 @@ class ChordGraph extends GraphBase {
 
     private var labelLocal: Option[js.Array[String]] = None
     def setLabel(l:js.Array[String]) = { labelLocal = Some(l); this }
+
+
+    def setDataFromUrl(url: String): Graph = {
+        var xobj = new XMLHttpRequest();
+        xobj.open("GET", url, false)
+        xobj.send(null);
+
+        if (xobj.readyState == 4 && xobj.status == 200) {
+            val r = xobj.responseText
+            val d = JSON.parse(r)
+
+            try{
+                val tmpData: js.Array[js.Array[Double]] = js.Array()
+                val tmpLabel: js.Array[String] = js.Array()
+                for (e <- d.asInstanceOf[js.Array[DataFromJsonUrl]]){
+                    val row = e.asInstanceOf[DataFromJsonUrl]
+                    tmpData.append(row.data)
+                    tmpLabel.append(row.label)
+                }
+
+                data = Some(tmpData)
+                labelLocal = Some(tmpLabel)
+
+            }catch {
+                case default:Throwable => {
+                    gJS.console.log("error in the json format")
+                }
+            }
+
+
+        }else {
+            gJS.console.log("error while getting the json")
+        }
+
+        this
+    }
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
@@ -210,106 +254,11 @@ class ChordGraph extends GraphBase {
         group.append("path").style("fill", (d: ChordGroup) => color(d.index))
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
             .attr("d", (x: ChordGroup) => arc(x))
-//
-//        val fade = (opacyty: Double)=>{
-//            (d:js.Datum, i:Int) => {
-//                gJS.console.log(d)
-//            }
-//        }
-//        group
-//            .on("mouseover", fade(0.2))
-//            .on("mouseout", fade(.80))
-//            .on("mouseover", () => gJS.console.log("hi"))
-//            .on("mouseover", (x: ChordGroup) => gJS.console.log(x))
 
-  /*      val mouseHandler = (d:js.Any)=> {
 
-        }
-        group.on("mouseover", ((d:Int,i:Int)=>{
-            () => {
-                gJS.console.log(d, i)
-            }
-        }).asInstanceOf[group.ListenerFunction2])
-*/
-
-//        /*Returns an event handler for fading a given chord group*/
-//        function fade(opacity) {
-//            return function(d, i) {
-//                svg.selectAll("path")
-//                    .filter(function(d) {
-//                        console.log(d, i);
-//                        if (d.source){
-//                            return d.source.index != i && d.target.index != i
-//                        }else{
-//                            return d.index != i;
-//                        }})
-//                    .transition()
-//                    .style("stroke-opacity", opacity)
-//                    .style("fill-opacity", opacity);
-//            };
-//        };/*fade*/
-
-        val mouseOverHandler = (d:js.Any)=> {
-            gJS.console.log("hello !")
-            val i = d.asInstanceOf[ChordGroupJson].index
-            val opacity = 0.2
-
-            svg.selectAll("path")
-                .filter((d:js.Any) => {
-                    val dJs = d.asInstanceOf[js.Any]
-                    try {
-                        val e = dJs.asInstanceOf[ChordGroupJson]
-                        i != e.index
-                    }catch{
-                        case default:Throwable => {
-                            try {
-                                val e = dJs.asInstanceOf[ChordJson]
-                                e.source.index != i && e.target.index != i
-                            }catch{
-                                case default:Throwable => {
-                                    true
-                                }
-                            }
-                        }
-
-                    }})
-                .style("stroke-opacity", opacity.toString)
-                .style("fill-opacity", opacity.toString);
-            if (false) return
-        }
-
-        val mouseOutHandler = (d:js.Any)=> {
-            val i = d.asInstanceOf[ChordGroupJson].index
-            val opacity = 0.8
-
-            svg.selectAll("path")
-                .filter((d:js.Any) => {
-                    val dJs = d.asInstanceOf[js.Any]
-                    try {
-                        val e = dJs.asInstanceOf[ChordGroupJson]
-                        i != e.index
-                    }catch{
-                        case default:Throwable => {
-                            try {
-                                val e = dJs.asInstanceOf[ChordJson]
-                                e.source.index != i && e.target.index != i
-                            }catch{
-                                case default:Throwable => {
-                                    true
-                                }
-                            }
-                        }
-
-                    }})
-                .style("stroke-opacity", opacity.toString)
-                .style("fill-opacity", opacity.toString);
-            if (false) return
-        }
-
-        def fade(opacity:Double):js.Any => Selection[js.Any] = {
-            (d:js.Any)=> {
+        def fade(opacity:Double): js.Any => Unit = {
+            d => {
                 val i = d.asInstanceOf[ChordGroupJson].index
-//                val opacity = 0.8
 
                 svg.selectAll("path")
                     .filter((d:js.Any) => {
@@ -332,19 +281,13 @@ class ChordGraph extends GraphBase {
                         }})
                     .style("stroke-opacity", opacity.toString)
                     .style("fill-opacity", opacity.toString);
-//                if (false) return
             }
         }
 
-//        val testHandler = (d:js.Any)=> {
-//            gJS.console.log("hello !")
-//            if (false) return
-//        }
 
         group
-            .on("mouseover", mouseOverHandler)
-            .on("mouseout", mouseOutHandler)
-//            .on("mouseout", fade(0.5))
+            .on("mouseover", fade(0.2))
+            .on("mouseout", fade(0.8))
 
 
         var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, getTickStep))

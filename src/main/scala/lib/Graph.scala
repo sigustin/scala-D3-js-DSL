@@ -6,7 +6,6 @@ import scala.scalajs.js
 import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
 import org.scalajs.dom
-import dom.document
 
 trait Graph {
     var scale = 0               // power of ten multiplier of the representation of the data hold in data

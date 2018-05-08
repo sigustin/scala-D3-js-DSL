@@ -41,13 +41,12 @@ object ScalaJSExample {
 //            js.Array(1, 1,  1, 7)
 //        )
 
-//        val g = new ChordGraph()
-//        g.setData(data)
-//        g.setTarget("#playground2 svg")
-//        g.setDimension(480, 480)
-//        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-//        g.setLabel(List("A", "B", "C", "D"))
-//        g.draw()
+        val g = new ChordGraph()
+        g.setDataFromUrl("data.json")
+        g.setTarget("#playground2 svg")
+        g.setDimension(480, 480)
+        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+        g.draw()
 
 //        val g = new ChordGraph()
 //            .setData(data)
@@ -64,18 +63,20 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
-        val graph = ChordGraph(
-            "LabelA" -> (11975, 5871, 8916, 2868),
-            "LabelB" -> (1951, 10048, 2060, 6171),
-            "LabelC" -> (8010, 16145, 8090, 8045),
-            "LabelD" -> (1013, 990, 940, 6907)
-        )
 
-        graph
-            .setTarget("#playground2 svg")
-            .setDimension(600, 600)
-            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-            .draw()
+//        val graph = ChordGraph(
+//            "LabelA" -> (11975, 5871, 8916, 2868),
+//            "LabelB" -> (1951, 10048, 2060, 6171),
+//            "LabelC" -> (8010, 16145, 8090, 8045),
+//            "LabelD" -> (1013, 990, 940, 6907)
+//        )
+//
+//        graph
+//            .setTarget("#playground2 svg")
+//            .setDimension(600, 600)
+//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//            .draw()
+
     }
 
     /*
