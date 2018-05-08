@@ -56,7 +56,6 @@ trait Graph {
         data = Some(transformData(d))
         this
     }
-
     def setData(d: List[List[Double]]): Graph = {
         val tmpD:js.Array[js.Array[Double]] = js.Array()
         d.foreach(tmpD.append(_))

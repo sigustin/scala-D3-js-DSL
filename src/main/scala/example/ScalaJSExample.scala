@@ -42,12 +42,10 @@ object ScalaJSExample {
 //        )
 
         val g = new ChordGraph()
-//        g.setData(data)
         g.setDataFromUrl("data.json")
         g.setTarget("#playground2 svg")
         g.setDimension(480, 480)
         g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-//        g.setLabel(List("A", "B", "C", "D"))
         g.draw()
 
 //        val g = new ChordGraph()
@@ -65,30 +63,24 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
-//        MOCKUP
-//        val notImplementedGraph = ChordGraph(List((1,2,3), (4,5,6), (7,8,9)))
-//        notImplementedGraph.target = "svg"
-//        notImplementedGraph.dimension(480)(480)
-//        notImplementedGraph.colorPalette("#000")("#FD8")("#974")("#F62")
-//        notImplementedGraph.label("A")("B")("C")("D")
-//        notImplementedGraph draw
 
 //        val graph = ChordGraph(
-//            "LabelA" -> (100,200,300),
-//            "LabelB" -> (400,500,400),
-//            "LabelC" -> (300,200,100)
+//            "LabelA" -> (11975, 5871, 8916, 2868),
+//            "LabelB" -> (1951, 10048, 2060, 6171),
+//            "LabelC" -> (8010, 16145, 8090, 8045),
+//            "LabelD" -> (1013, 990, 940, 6907)
 //        )
 //
 //        graph
 //            .setTarget("#playground2 svg")
 //            .setDimension(600, 600)
+//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
 //            .draw()
 
-
-//        graph.dimension(480, 480)
     }
 
-    /*@JSExportTopLevel("myproject")
+    /*
+    @JSExportTopLevel("myproject")
     protected def getInstance(): this.type = this
 
     def groupTicks(d: ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {

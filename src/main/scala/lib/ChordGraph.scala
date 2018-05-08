@@ -62,6 +62,18 @@ class ChordGraph extends GraphBase {
         setData(arrayOfList.toList)
     }
 
+    override def setData(d: js.Array[js.Array[Double]]): GraphBase = {
+        super.setData(d)
+        sumData = Some(computeSumDataOverCircle())
+        this
+    }
+
+    override def setData(d: List[List[Double]]): GraphBase = {
+        super.setData(d)
+        sumData = Some(computeSumDataOverCircle())
+        this
+    }
+
     // use a color palette in function of the size of the data if none is defined
     def colorPalette:js.Array[String] = {
         (data, colorPaletteLocal) match {
@@ -112,19 +124,17 @@ class ChordGraph extends GraphBase {
 
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
-        gJS.console.log(d.value)
-        gJS.console.log(d.index)
-        gJS.console.log(k)
         d3.range(0, d.value/(10**scale), step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
     }
 
-    def sumDataOverCircle(): Double = {
+    private var sumData: Option[Double] = None
+    /** Returns the sum of the data around the whold chord plot */
+    private def computeSumDataOverCircle(): Double = {
         data match {
             case None => 0.0
             case Some(matrix) => {
                 var sum = 0.0
                 matrix.foreach(sum += _.sum)
-                gJS.console.log("sum data "+sum)
                 sum
             }
         }
@@ -136,18 +146,30 @@ class ChordGraph extends GraphBase {
         val diameter = width min height
         val circumference = math.Pi * diameter
         // One tick every 10 pixels
-        gJS.console.log("nb ticks "+(circumference / minStepPx).round.toInt)
         (circumference / minStepPx).round.toInt
     }
 
-    /** Computes the step of the ticks so that there are at most $computeMaxNbTicks ticks and at least one per data point */
-    def computeTickStep(): Double = {
-        val sumData = sumDataOverCircle()
-        val minTicksStep = closestRoundNb(sumData / computeMaxNbTicks())
-        gJS.console.log("minTicksStep "+minTicksStep+" "+(minTicksStep == 0.0))
+    private var tickStep: Option[Double] = None
+    private def getTickStep: Double = {
+        if (tickStep isDefined)
+            return tickStep.get
+        else {
+            computeTickStep()
+            return tickStep.get
+        }
+    }
+    /**
+      * Computes the step of the ticks so that
+      * there are at most $computeMaxNbTicks ticks and at least one per data point
+      * (not in pixels)
+      * and puts it in $tickStep
+      */
+    private def computeTickStep(): Unit = {
+        val sumDataValue: Double = sumData.getOrElse(0)
+        val minTicksStep = closestRoundNb(sumDataValue / computeMaxNbTicks())
         if (minTicksStep == 0.0)
-            return 1
-        return minTicksStep
+            tickStep = Some(1)
+        tickStep = Some(minTicksStep)
     }
 
     /** Computes the order of $nb */
@@ -170,11 +192,32 @@ class ChordGraph extends GraphBase {
         if (nb == math.pow(10, order))
             return math.pow(10, order).toLong
 
+        val differenceTo1X = (nb - math.pow(10, order)).abs
+        val differenceTo2dot5X = (nb - 2.5*math.pow(10, order)).abs
         val differenceTo5X = (nb - 5*math.pow(10, order)).abs
         val differenceTo10X = (nb - math.pow(10, order+1)).abs
+        if (differenceTo1X < differenceTo2dot5X)
+            return math.pow(10, order).toLong
+        if (differenceTo2dot5X < differenceTo5X)
+            return (2.5*math.pow(10, order)).toLong
         if (differenceTo5X < differenceTo10X)
             return 5*math.pow(10, order).toLong
         math.pow(10, order+1).toLong
+    }
+
+    /** Computes the number of ticks between each big tick (included) */
+    private def nbTicksBetweenBigTicks(): Int = {
+        val preferredBigTickStep = 4
+        val minNbBigTicks = 8
+        val maxNbBigTicks = 16
+        if (sumData.getOrElse(0) != 0) {
+            val totalNbTicks = sumData.get / getTickStep
+            val nbBigTicks: Int = (totalNbTicks / preferredBigTickStep).round.toInt
+            if (nbBigTicks >= minNbBigTicks && nbBigTicks < maxNbBigTicks)
+                return (totalNbTicks / nbBigTicks).round.toInt
+            (totalNbTicks / minNbBigTicks).round.toInt
+        }
+        else 0
     }
 
     def groupLabelData(d:ChordGroup): js.Array[js.Dictionary[Double]] = {
@@ -211,106 +254,11 @@ class ChordGraph extends GraphBase {
         group.append("path").style("fill", (d: ChordGroup) => color(d.index))
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
             .attr("d", (x: ChordGroup) => arc(x))
-//
-//        val fade = (opacyty: Double)=>{
-//            (d:js.Datum, i:Int) => {
-//                gJS.console.log(d)
-//            }
-//        }
-//        group
-//            .on("mouseover", fade(0.2))
-//            .on("mouseout", fade(.80))
-//            .on("mouseover", () => gJS.console.log("hi"))
-//            .on("mouseover", (x: ChordGroup) => gJS.console.log(x))
 
-  /*      val mouseHandler = (d:js.Any)=> {
 
-        }
-        group.on("mouseover", ((d:Int,i:Int)=>{
-            () => {
-                gJS.console.log(d, i)
-            }
-        }).asInstanceOf[group.ListenerFunction2])
-*/
-
-//        /*Returns an event handler for fading a given chord group*/
-//        function fade(opacity) {
-//            return function(d, i) {
-//                svg.selectAll("path")
-//                    .filter(function(d) {
-//                        console.log(d, i);
-//                        if (d.source){
-//                            return d.source.index != i && d.target.index != i
-//                        }else{
-//                            return d.index != i;
-//                        }})
-//                    .transition()
-//                    .style("stroke-opacity", opacity)
-//                    .style("fill-opacity", opacity);
-//            };
-//        };/*fade*/
-
-        val mouseOverHandler = (d:js.Any)=> {
-            gJS.console.log("hello !")
-            val i = d.asInstanceOf[ChordGroupJson].index
-            val opacity = 0.2
-
-            svg.selectAll("path")
-                .filter((d:js.Any) => {
-                    val dJs = d.asInstanceOf[js.Any]
-                    try {
-                        val e = dJs.asInstanceOf[ChordGroupJson]
-                        i != e.index
-                    }catch{
-                        case default:Throwable => {
-                            try {
-                                val e = dJs.asInstanceOf[ChordJson]
-                                e.source.index != i && e.target.index != i
-                            }catch{
-                                case default:Throwable => {
-                                    true
-                                }
-                            }
-                        }
-
-                    }})
-                .style("stroke-opacity", opacity.toString)
-                .style("fill-opacity", opacity.toString);
-            if (false) return
-        }
-
-        val mouseOutHandler = (d:js.Any)=> {
-            val i = d.asInstanceOf[ChordGroupJson].index
-            val opacity = 0.8
-
-            svg.selectAll("path")
-                .filter((d:js.Any) => {
-                    val dJs = d.asInstanceOf[js.Any]
-                    try {
-                        val e = dJs.asInstanceOf[ChordGroupJson]
-                        i != e.index
-                    }catch{
-                        case default:Throwable => {
-                            try {
-                                val e = dJs.asInstanceOf[ChordJson]
-                                e.source.index != i && e.target.index != i
-                            }catch{
-                                case default:Throwable => {
-                                    true
-                                }
-                            }
-                        }
-
-                    }})
-                .style("stroke-opacity", opacity.toString)
-                .style("fill-opacity", opacity.toString);
-            if (false) return
-        }
-
-        def fade(opacity:Double):js.Any => Selection[js.Any] = {
-            (d:js.Any)=> {
+        def fade(opacity:Double): js.Any => Unit = {
+            d => {
                 val i = d.asInstanceOf[ChordGroupJson].index
-//                val opacity = 0.8
 
                 svg.selectAll("path")
                     .filter((d:js.Any) => {
@@ -333,31 +281,23 @@ class ChordGraph extends GraphBase {
                         }})
                     .style("stroke-opacity", opacity.toString)
                     .style("fill-opacity", opacity.toString);
-//                if (false) return
             }
         }
 
-//        val testHandler = (d:js.Any)=> {
-//            gJS.console.log("hello !")
-//            if (false) return
-//        }
 
         group
-            .on("mouseover", mouseOverHandler)
-            .on("mouseout", mouseOutHandler)
-//            .on("mouseout", fade(0.5))
+            .on("mouseover", fade(0.2))
+            .on("mouseout", fade(0.8))
 
 
-        val tickStep = computeTickStep()
-        gJS.console.log("step ticks "+tickStep)
-        var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, tickStep))
+        var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, getTickStep))
             .enter().append("g").attr("class", "group-tick")
             .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
         groupTick.append("line").attr("x2", 6)
 
-        val formatValue = d3.formatPrefix(",.0", tickStep)
-        val bigTickStep = 5*tickStep
+        val formatValue = d3.formatPrefix(",.0", getTickStep)
+        val bigTickStep = closestRoundNb(nbTicksBetweenBigTicks() * getTickStep)
         groupTick.filter((d: js.Dictionary[Double]) => d("value") % bigTickStep == 0).append("text")
                 .attr("x", 8)
                 .attr("dy", ".35em")
