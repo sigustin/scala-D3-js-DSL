@@ -63,7 +63,7 @@ class ChordGraph extends GraphBase {
         }
     }
 
-    private val minStepPx = 30 // minimal number of pixels between 2 ticks
+    private val minStepPx = 40 // minimal number of pixels between 2 ticks (not a hard bound)
     /** Computes the number of ticks so that there are not too many nor too few */
     def computeMaxNbTicks(): Int = {
         val diameter = width min height
@@ -76,11 +76,38 @@ class ChordGraph extends GraphBase {
     /** Computes the step of the ticks so that there are at most $computeMaxNbTicks ticks and at least one per data point */
     def computeTickStep(): Double = {
         val sumData = sumDataOverCircle()
-        val maxTicksStep = (sumData / computeMaxNbTicks()).round
-        gJS.console.log("maxTicksStep "+maxTicksStep+" "+(maxTicksStep == 0.0))
-        if (maxTicksStep == 0.0)
+        val minTicksStep = closestRoundNb(sumData / computeMaxNbTicks())
+        gJS.console.log("minTicksStep "+minTicksStep+" "+(minTicksStep == 0.0))
+        if (minTicksStep == 0.0)
             return 1
-        return maxTicksStep
+        return minTicksStep
+    }
+
+    /** Computes the order of $nb */
+    private def getOrder(nb: Double): Int = {
+        var stop = false
+        var pow = 0
+        while (!stop) {
+            if (nb >= math.pow(10, pow))
+                pow += 1
+            else
+                stop = true
+        }
+        pow-1
+    }
+    /** Computes the closest "round" number to $nb */
+    private def closestRoundNb(nb: Double): Long = {
+        val order = getOrder(nb)
+        if (order == 0)
+            return 0
+        if (nb == math.pow(10, order))
+            return math.pow(10, order).toLong
+
+        val differenceTo5X = (nb - 5*math.pow(10, order)).abs
+        val differenceTo10X = (nb - math.pow(10, order+1)).abs
+        if (differenceTo5X < differenceTo10X)
+            return 5*math.pow(10, order).toLong
+        math.pow(10, order+1).toLong
     }
 
     def groupLabelData(d:ChordGroup): js.Array[js.Dictionary[Double]] = {
@@ -94,7 +121,6 @@ class ChordGraph extends GraphBase {
             case Some(d) => matrix = d
             case None => return
         }
-
 
         import d3v4.d3
 
