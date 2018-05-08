@@ -127,14 +127,9 @@ class ChordGraph extends GraphBase {
         val outerRadius = Math.min(width, height) * 0.5 - 40
         val innerRadius = outerRadius - 30
 
-        val formatValue = d3.formatPrefix(",.0", 1e3)
-
         val chord = d3.chord().padAngle(0.05).sortSubgroups(d3.descending)
-
         val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
-
         val ribbon = d3.ribbon().radius(innerRadius)
-
         val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPalette)
 
         val g = svg.append("g")
@@ -152,14 +147,15 @@ class ChordGraph extends GraphBase {
 
         val tickStep = computeTickStep()
         gJS.console.log("step ticks "+tickStep)
-
         var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, tickStep))
             .enter().append("g").attr("class", "group-tick")
             .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
         groupTick.append("line").attr("x2", 6)
 
-        groupTick.filter((d: js.Dictionary[Double]) => d("value") % 5e3 == 0).append("text")
+        val formatValue = d3.formatPrefix(",.0", tickStep)
+        val bigTickStep = 5*tickStep
+        groupTick.filter((d: js.Dictionary[Double]) => d("value") % bigTickStep == 0).append("text")
                 .attr("x", 8)
                 .attr("dy", ".35em")
                 .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
