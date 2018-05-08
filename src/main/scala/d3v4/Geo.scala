@@ -25,6 +25,7 @@ import js.`|`
 @js.native
 object d3geo extends js.Object {
     def path(): Path = js.native
+    def geoPath(): Path = js.native
 
     def graticule(): Graticule = js.native
 
@@ -75,6 +76,7 @@ object d3geo extends js.Object {
     def gnomonic(): InvertibleProjection = js.native
 
     def mercator(): InvertibleProjection = js.native
+    def geoMercator(): InvertibleProjection = js.native
 
     def orthographic(): InvertibleProjection = js.native
 

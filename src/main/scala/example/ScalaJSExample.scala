@@ -58,17 +58,21 @@ object ScalaJSExample {
         val width = 900
         val height = 800
 
-        val projection: Projection = d3geo.mercator().translate((1000.0/2, 700.0/2)).scale(300)
+        val projection: Projection = d3.geoMercator()
+            projection.translate((1000.0/2, 700.0/2)).scale(300)
+        gJS.console.log(projection)
 
         val svg = d3.select("svg").append("svg")
             .attr("width", 900)
             .attr("height", 600)
-        var path: Path = d3geo.path().projection(projection.asInstanceOf[TransformType])
+        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType])
 
         var countries = svg.append("g")
 
         val callback: (js.Any, js.Any) => Unit = (e:js.Any, d:js.Any) => {gJS.console.log("test")}
+        gJS.console.log("this is a test")
         d3.json("states_census_2015.json", callback)
+        gJS.console.log("this is a test")
     }
 
     /*
