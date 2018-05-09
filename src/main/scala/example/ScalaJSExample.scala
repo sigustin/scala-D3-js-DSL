@@ -6,9 +6,11 @@ import d3v4.{Path, Projection, TransformType, d3geo}
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
 import lib.ImplicitConv._
+import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
 import js.Dynamic.{global => gJS}
+import scala.scalajs.js.JSON
 
 object ScalaJSExample {
 
@@ -24,12 +26,12 @@ object ScalaJSExample {
 //            "LabelC" -> (8010, 16145, 8090, 8045),
 //            "LabelD" -> (1013, 990, 940, 6907)
 //        )
-        val dataJs = js.Array[js.Array[Double]](
-            js.Array(11.975,  5.871, 8.916, 2.868),
-            js.Array(1.951, 10.048, 2.060, 6.171),
-            js.Array(8.010, 16.145, 8.090, 8.045),
-            js.Array(1.013, 0.990,  0.940, 6.907)
-        )
+//        val dataJs = js.Array[js.Array[Double]](
+//            js.Array(11.975,  5.871, 8.916, 2.868),
+//            js.Array(1.951, 10.048, 2.060, 6.171),
+//            js.Array(8.010, 16.145, 8.090, 8.045),
+//            js.Array(1.013, 0.990,  0.940, 6.907)
+//        )
 
 //        val dataJs = js.Array[js.Array[Double]](
 //            js.Array(12, 6, 9, 3),
@@ -38,12 +40,12 @@ object ScalaJSExample {
 //            js.Array(1, 1,  1, 7)
 //        )
 
-        val g = new ChordGraph()
-        g.setDataFromUrl("data.json")
-        g.setTarget("#playground2 svg")
-        g.setDimension(480, 480)
-        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-        g.draw()
+//        val g = new ChordGraph()
+//        g.setDataFromUrl("data.json")
+//        g.setTarget("#playground2 svg")
+//        g.setDimension(480, 480)
+//        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//        g.draw()
 
 //        val g = new ChordGraph()
 //            .setData(data)
@@ -60,7 +62,6 @@ object ScalaJSExample {
 
         val projection: Projection = d3.geoMercator()
             projection.translate((1000.0/2, 700.0/2)).scale(300)
-        gJS.console.log(projection)
 
         val svg = d3.select("svg").append("svg")
             .attr("width", 900)
@@ -69,10 +70,37 @@ object ScalaJSExample {
 
         var countries = svg.append("g")
 
-        val callback: (js.Any, js.Any) => Unit = (e:js.Any, d:js.Any) => {gJS.console.log("test")}
+        val callback: (js.Any) => Unit = (d:js.Any) => {}
         gJS.console.log("this is a test")
-        d3.json("states_census_2015.json", callback)
+        d3.json("d3/states_census_2015.json", callback)
         gJS.console.log("this is a test")
+
+//        var xobj = new XMLHttpRequest()
+//        xobj.open("GET", "d3/states_census_2015.json", false)
+//        xobj.send(null)
+//
+//        if (xobj.readyState == 4 & xobj.status == 200) {
+//            println("OK")
+//            val r = xobj.responseText
+//            val d = JSON.parse(r)
+//
+//            println(d)
+//            try {
+//                for (e <- d.asInstanceOf[js.Array[DataFromJsonUrl]]) {
+//                    println("data " + e)
+//                }
+//            } catch {
+//                case default: Throwable => println("error in the json format: "+default.getMessage)
+//            }
+//        }
+//        else
+//            println("error while loading the json file")
+
+        //========== Test matrices =================
+//        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
+//        println(testMatrix(1))
+//        println(testMatrix(1)(2))
+//        println(testMatrix(1,2))
     }
 
     /*

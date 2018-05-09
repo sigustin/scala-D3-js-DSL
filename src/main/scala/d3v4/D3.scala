@@ -64,6 +64,8 @@ package object d3v4 {
   implicit def d3toD3Zoom(d3t: d3.type): d3zoom.type = d3zoom
   implicit def d3toD3Format(d3t: d3.type): d3format.type = d3format
   implicit def d3toD3Chord(d3t: d3.type): d3chord.type = d3chord
+  //TODO is this right?
+  implicit def d3toD3Fetch(d3t: d3.type): d3fetch.type = d3fetch
 
   implicit class SelectionExtensions[Datum](val s: Selection[Datum]) extends AnyVal {
     def nodeAs[T <: dom.EventTarget] = s.node().asInstanceOf[T]
