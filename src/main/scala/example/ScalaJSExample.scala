@@ -70,7 +70,7 @@ object ScalaJSExample {
 
         var countries = svg.append("g")
 
-        val callback: (js.Any) => Unit = (d:js.Any) => {}
+        val callback: (js.Any) => Unit = (d:js.Any) => {println("got:"+d)}
         gJS.console.log("this is a test")
         d3.json("d3/states_census_2015.json", callback)
         gJS.console.log("this is a test")
