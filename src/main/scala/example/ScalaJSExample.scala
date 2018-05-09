@@ -1,7 +1,6 @@
 package example
 
-
-import d3v4.{Path, Projection, TransformType, d3geo}
+import d3v4.{Path, Primitive, Projection, TransformType, d3geo, d3selection}
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
@@ -11,6 +10,20 @@ import org.scalajs.dom.raw.XMLHttpRequest
 import scala.scalajs.js
 import js.Dynamic.{global => gJS}
 import scala.scalajs.js.JSON
+
+@js.native
+trait MyRootJson extends js.Object {
+    val features:js.Array[MyRootJson]= js.native
+}
+
+@js.native
+trait MyFeatureJson extends js.Object {
+    val properties:MyCountryJson= js.native
+}
+@js.native
+trait MyCountryJson extends js.Object {
+    val name: String = js.native
+}
 
 object ScalaJSExample {
 
@@ -55,25 +68,47 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
+//        val graph = ChordGraph(
+//            "LabelA" -> (1,2,3),
+//            "LabelB" -> (4,5,4),
+//            "LabelC" -> (3,2,1)
+//        )
+//
+//        graph
+//            .setTarget("#playground2 svg")
+//            .setDimension(600, 600)
+//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//            .draw()
+
         //========== Flow map =====================
         import d3v4.d3
         val width = 900
         val height = 800
 
-        val projection: Projection = d3.geoMercator()
-            projection.translate((1000.0/2, 700.0/2)).scale(300)
+        val projection: Projection = d3.geoMercator()//.translate((400.0, 0.0))
+//            projection.translate((0.0,0.0)).scale(300)
 
-        val svg = d3.select("svg").append("svg")
-            .attr("width", 900)
-            .attr("height", 600)
-        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType])
+        var path: Path = d3.geoPath(projection)
+//        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
 
-        var countries = svg.append("g")
 
-        val callback: (js.Any) => Unit = (d:js.Any) => {println("got:"+d)}
-        gJS.console.log("this is a test")
-        d3.json("d3/states_census_2015.json", callback)
-        gJS.console.log("this is a test")
+        val callback: js.Any => Unit = (d:js.Any) => {
+            val geoData = d.asInstanceOf[MyRootJson].features
+            println("got:"+d+" => "+geoData)
+
+            val ret = d3.select("body")
+                .append("svg")
+                .attr("width", 1500)
+                .attr("height", 1000)
+                .append("g")
+                .attr("id", "map")
+                .selectAll("path")
+                .data(geoData)
+                .enter().append("path")
+                .attr("d", path.asInstanceOf[Primitive])
+                .attr("fill", "green")
+        }
+        d3.json("d3/europe.geo.json", callback)
 
 //        var xobj = new XMLHttpRequest()
 //        xobj.open("GET", "d3/states_census_2015.json", false)
