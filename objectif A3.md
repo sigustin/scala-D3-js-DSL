@@ -43,6 +43,7 @@ Tutorial to explain chords plots: (https://www.visualcinnamon.com/2014/12/using-
     - TODO: add support to get data from an URL
     - DONE: automatically compute the steps for the ticks and the big ticks
     - TODO: transform JSON into data for constructor (with ->)
+    - TODO: fix ticks not showing :/
 
 - MIGRATION
     - TODO: find a example for the migration graphe
