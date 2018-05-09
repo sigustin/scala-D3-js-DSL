@@ -88,9 +88,9 @@ class ChordGraph extends GraphBase {
 
 
     def setDataFromUrl(url: String): Graph = {
-        var xobj = new XMLHttpRequest();
+        var xobj = new XMLHttpRequest()
         xobj.open("GET", url, false)
-        xobj.send(null);
+        xobj.send(null)
 
         if (xobj.readyState == 4 && xobj.status == 200) {
             val r = xobj.responseText
@@ -249,7 +249,7 @@ class ChordGraph extends GraphBase {
         val group = g.append("g").attr("class", "groups")
                 .selectAll("g")
                 .data((c: ChordArray) => c.groups)
-            .enter().append("g")
+                .enter().append("g")
 
         group.append("path").style("fill", (d: ChordGroup) => color(d.index))
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
