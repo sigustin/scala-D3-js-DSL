@@ -84,13 +84,12 @@ object ScalaJSExample {
         import d3v4.d3
         val width = 900
         val height = 800
+        val scale = 200 // for this file, this is approximately 0.5*size of America
 
-        val projection: Projection = d3.geoMercator()//.translate((400.0, 0.0))
-//            projection.translate((0.0,0.0)).scale(300)
+        val projection: Projection = d3.geoMercator().translate((width/2.0+2*scale, height/2.0+2*scale)).scale(scale)
 
         var path: Path = d3.geoPath(projection)
 //        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
-
 
         val callback: js.Any => Unit = (d:js.Any) => {
             val geoData = d.asInstanceOf[MyRootJson].features
@@ -98,8 +97,8 @@ object ScalaJSExample {
 
             val ret = d3.select("body")
                 .append("svg")
-                .attr("width", 1500)
-                .attr("height", 1000)
+                .attr("width", width)
+                .attr("height", height)
                 .append("g")
                 .attr("id", "map")
                 .selectAll("path")
@@ -109,27 +108,6 @@ object ScalaJSExample {
                 .attr("fill", "green")
         }
         d3.json("d3/europe.geo.json", callback)
-
-//        var xobj = new XMLHttpRequest()
-//        xobj.open("GET", "d3/states_census_2015.json", false)
-//        xobj.send(null)
-//
-//        if (xobj.readyState == 4 & xobj.status == 200) {
-//            println("OK")
-//            val r = xobj.responseText
-//            val d = JSON.parse(r)
-//
-//            println(d)
-//            try {
-//                for (e <- d.asInstanceOf[js.Array[DataFromJsonUrl]]) {
-//                    println("data " + e)
-//                }
-//            } catch {
-//                case default: Throwable => println("error in the json format: "+default.getMessage)
-//            }
-//        }
-//        else
-//            println("error while loading the json file")
 
         //========== Test matrices =================
 //        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
