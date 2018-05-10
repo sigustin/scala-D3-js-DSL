@@ -81,39 +81,44 @@ object ScalaJSExample {
 //            .draw()
 
         //========== Flow map =====================
-        import d3v4.d3
-        val width = 900
-        val height = 800
-        val scale = 200 // for this file, this is approximately 0.5*size of America
-
-        val projection: Projection = d3.geoMercator().translate((width/2.0+2*scale, height/2.0+2*scale)).scale(scale)
-
-        var path: Path = d3.geoPath(projection)
-//        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
-
-        val callback: js.Any => Unit = (d:js.Any) => {
-            val geoData = d.asInstanceOf[MyRootJson].features
-            println("got:"+d+" => "+geoData)
-
-            val ret = d3.select("body")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .append("g")
-                .attr("id", "map")
-                .selectAll("path")
-                .data(geoData)
-                .enter().append("path")
-                .attr("d", path.asInstanceOf[Primitive])
-                .attr("fill", "green")
-        }
-        d3.json("d3/europe.geo.json", callback)
+//        import d3v4.d3
+//        val width = 900
+//        val height = 800
+//        val scale = 200 // for this file, this is approximately 0.5*size of America
+//
+//        val projection: Projection = d3.geoMercator().translate((width/2.0+2*scale, height/2.0+2*scale)).scale(scale)
+//
+//        var path: Path = d3.geoPath(projection)
+////        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
+//
+//        val callback: js.Any => Unit = (d:js.Any) => {
+//            val geoData = d.asInstanceOf[MyRootJson].features
+//            println("got:"+d+" => "+geoData)
+//
+//            val ret = d3.select("body")
+//                .append("svg")
+//                .attr("width", width)
+//                .attr("height", height)
+//                .append("g")
+//                .attr("id", "map")
+//                .selectAll("path")
+//                .data(geoData)
+//                .enter().append("path")
+//                .attr("d", path.asInstanceOf[Primitive])
+//                .attr("fill", "green")
+//        }
+//        d3.json("d3/europe.geo.json", callback)
 
         //========== Test matrices =================
-//        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
-//        println(testMatrix(1))
-//        println(testMatrix(1)(2))
-//        println(testMatrix(1,2))
+        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
+        println(testMatrix(0)(*)) // Actually no error
+        println(testMatrix(*)(2))
+        println(testMatrix(0)(2)) // Id.
+//        println(testMatrix(-1)(-1)) // exception as intended
+
+        println(testMatrix)
+        testMatrix.merge(1 -> 2)
+        println(testMatrix)
     }
 
     /*

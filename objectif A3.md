@@ -28,6 +28,8 @@ Tutorial to explain chords plots: (https://www.visualcinnamon.com/2014/12/using-
 - add implicit convertion between `List[T]` and `js.Array[T]`
 
 ##TODO
+TODO: error messages everywhere
+
 - GRAPHE:
     - DONE: set dimension
     - DONE: set data (as 2D matrix)
