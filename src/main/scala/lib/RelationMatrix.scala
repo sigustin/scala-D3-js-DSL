@@ -17,11 +17,11 @@ class RelationMatrix {
 
     /** Pads $data with 0 to make it square */
     private def makeSquare(data: List[List[Double]]): List[List[Double]] = {
-        // TODO print warning if 0 need to be added
         var maxWidth = Int.MinValue
         data.foreach(a => maxWidth = maxWidth max a.length)
         size = maxWidth max data.length
 
+        var invalidEntry = false
         val buffer = new ListBuffer[List[Double]]
         for (i <- 0 until size) {
             val rowBuffer = new ListBuffer[Double]
@@ -29,7 +29,13 @@ class RelationMatrix {
                 try {
                     rowBuffer += data(i)(j)
                 } catch {
-                    case e: IndexOutOfBoundsException => rowBuffer += 0
+                    case e: IndexOutOfBoundsException => {
+                        rowBuffer += 0
+                        if (!invalidEntry) {
+                            println("[WARNING] the created matrix missed elements => replaced by zeros")
+                            invalidEntry = true
+                        }
+                    }
                 }
             }
             buffer += rowBuffer.toList
