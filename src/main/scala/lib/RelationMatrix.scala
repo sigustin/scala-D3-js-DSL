@@ -6,8 +6,11 @@ import scala.collection.mutable.ListBuffer
 class RelationMatrix {
     //============== Constructors and related ===================
     private var data: List[List[Double]] = _
+    def getData = data
     private var size: Int = _
     private var zeroDiagonal = false
+
+    // TODO add labels in here?
 
     def this(rawData: List[List[Double]]) = {
         this()
