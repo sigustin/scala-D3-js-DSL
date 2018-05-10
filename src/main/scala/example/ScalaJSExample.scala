@@ -5,6 +5,7 @@ import d3v4.{Path, Primitive, Projection, TransformType, d3geo, d3selection}
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
 import lib.ImplicitConv._
+import lib.matrix.{*, FlowsMatrix, LabelizedFlowsMatrix, LabelizedRelationMatrix}
 import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
@@ -119,6 +120,11 @@ object ScalaJSExample {
         println(testMatrix)
         testMatrix.merge(1 -> 2)
         println(testMatrix)
+
+        val mat = LabelizedFlowsMatrix(
+            List("LabelA", "LabelB"), List(List(2,5), List(3,4))
+        )
+        println(mat)
     }
 
     /*
