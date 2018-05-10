@@ -6,6 +6,7 @@ import lib.{Graph => GraphBasis}
 import scala.scalajs.js
 import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
+import lib.matrix.RelationMatrix
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.collection.mutable.ArrayBuffer

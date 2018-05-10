@@ -1,25 +1,22 @@
-package lib
+package lib.matrix
 
 import scala.collection.mutable.ListBuffer
 
-/** Square matrix used to store relations between groups for chord plots and migration maps */
+/** Square matrix used to store relations between sections for chord plots and migration maps */
 class RelationMatrix {
     //============== Constructors and related ===================
-    private var data: List[List[Double]] = _
+    protected var data: List[List[Double]] = _
     def getData = data
-    private var size: Int = _
-    private var zeroDiagonal = false
-
-    // TODO add labels in here?
+    protected var size: Int = _
+    protected var zeroDiagonal = false
 
     def this(rawData: List[List[Double]]) = {
         this()
         data = makeSquare(rawData)
-        println("data in matrix "+data)
     }
 
-    /** Pads $data with 0 to make it square */
-    private def makeSquare(data: List[List[Double]]): List[List[Double]] = {
+    /** Pads $data with 0 to make it square and returns it */
+    protected def makeSquare(data: List[List[Double]]): List[List[Double]] = {
         var maxWidth = Int.MinValue
         data.foreach(a => maxWidth = maxWidth max a.length)
         size = maxWidth max data.length
@@ -35,7 +32,7 @@ class RelationMatrix {
                     case e: IndexOutOfBoundsException => {
                         rowBuffer += 0
                         if (!invalidEntry) {
-                            println("[WARNING] the created matrix missed elements => replaced by zeros")
+                            println("[WARNING] The created matrix missed elements => replaced by zeros")
                             invalidEntry = true
                         }
                     }
