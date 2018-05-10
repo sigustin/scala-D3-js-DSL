@@ -121,8 +121,10 @@ object ScalaJSExample {
         testMatrix.merge(1 -> 2)
         println(testMatrix)
 
+        //MOCKUP
         val mat = LabelizedFlowsMatrix(
-            List("LabelA", "LabelB"), List(List(2,5), List(3,4))
+            "LabelA" -> (2,5),
+            "LabelB" -> (3,4)
         )
         println(mat)
     }

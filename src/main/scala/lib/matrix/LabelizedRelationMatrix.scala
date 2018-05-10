@@ -41,12 +41,24 @@ class LabelizedRelationMatrix extends RelationMatrix {
 object LabelizedRelationMatrix {
     def apply(labels: List[String], data: List[List[Double]]): LabelizedRelationMatrix =
         new LabelizedRelationMatrix(labels, data)
+    def apply(dataAndLabels: Tuple2[String, Product with Serializable]*): LabelizedRelationMatrix = {
+        val labels = dataAndLabels.flatMap(t => List(t._1)).toList
+        val data = dataAndLabels.flatMap(t => List(t._2.productIterator.toList.asInstanceOf[List[Double]])).toList
+        LabelizedRelationMatrix(labels, data)
+    }
 }
 
 /** Constructors of matrix representing migration flows */
 object LabelizedFlowsMatrix {
     def apply(labels: List[String], data: List[List[Double]]): LabelizedRelationMatrix = {
         val answer = new LabelizedRelationMatrix(labels, data)
+        answer.ensureZeroDiagonal()
+        answer
+    }
+    def apply(dataAndLabels: Tuple2[String, Product with Serializable]*): LabelizedRelationMatrix = {
+        val labels = dataAndLabels.flatMap(t => List(t._1)).toList
+        val data = dataAndLabels.flatMap(t => List(t._2.productIterator.toList.asInstanceOf[List[Double]])).toList
+        val answer = LabelizedRelationMatrix(labels, data)
         answer.ensureZeroDiagonal()
         answer
     }
