@@ -80,10 +80,19 @@ class RelationMatrix {
             case _ => throw new IllegalArgumentException("Matrix indices must be Int or *")
         }
     }
+    /** Allows for syntax matrix(x -> y) for indexing relations */
+    def apply(indices: (Any, Any)): Any = {
+        indices match {
+            case (indexRow: Int, indexCol: Int) => this.apply(indexRow)(indexCol)
+            case (indexRow: Int, _: *.type) => this.apply(indexRow)(*)
+            case (_: *.type, indexCol: Int) => this.apply(*)(indexCol)
+            case _ => throw new IllegalArgumentException("Matrix indices must be Int or *")
+        }
+    }
 
     //================== Utility functions =====================
     /** Merge group $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index $indexToIndex._1 */
-    def merge(indexToIndex: Tuple2[Int, Int]): Unit = {
+    def merge(indexToIndex: (Int, Int)): Unit = {
         // TODO this method might be better off using a ListBuffer
         val index1 = indexToIndex._1
         val index2 = indexToIndex._2

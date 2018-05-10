@@ -113,8 +113,11 @@ object ScalaJSExample {
         //========== Test matrices =================
         val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
         println(testMatrix(0)(*)) // Actually no error
+        println(testMatrix(0 -> *))
         println(testMatrix(*)(2))
+        println(testMatrix(* -> 2))
         println(testMatrix(0)(2)) // Id.
+        println(testMatrix(0 -> 2))
 //        println(testMatrix(-1)(-1)) // exception as intended
 
         println(testMatrix)
@@ -129,11 +132,17 @@ object ScalaJSExample {
         )
         println(mat)
         println(mat(1)(1))
+        println(mat(1->1))
         println(mat(0)(*))
+        println(mat(0 -> *))
         println(mat("LabelA")("LabelB"))
+        println(mat("LabelA" -> "LabelB"))
         println(mat("LabelA")(*))
+        println(mat("LabelA" -> *))
         println(mat(1)("LabelB"))
+        println(mat(1 -> "LabelB"))
         println(mat(*)("LabelC"))
+        println(mat(* -> "LabelC"))
     }
 
     /*
