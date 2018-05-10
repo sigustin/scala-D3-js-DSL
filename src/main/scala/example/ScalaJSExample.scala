@@ -123,10 +123,17 @@ object ScalaJSExample {
 
         //MOCKUP
         val mat = LabelizedFlowsMatrix(
-            "LabelA" -> (2,5),
-            "LabelB" -> (3,4)
+            "LabelA" -> (1,2,5),
+            "LabelB" -> (3,4,5),
+            "LabelC" -> (7,8,9)
         )
         println(mat)
+        println(mat(1)(1))
+        println(mat(0)(*))
+        println(mat("LabelA")("LabelB"))
+        println(mat("LabelA")(*))
+        println(mat(1)("LabelB"))
+        println(mat(*)("LabelC"))
     }
 
     /*

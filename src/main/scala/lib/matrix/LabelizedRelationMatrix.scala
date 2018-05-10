@@ -31,10 +31,58 @@ class LabelizedRelationMatrix extends RelationMatrix {
         labelsIndices = labelsIndicesBuilder.toMap
     }
 
+    //=================== Indexing ================================
+    /**
+      * Returns the element at indices labelled (indexRow, indexCol)
+      * or the whole row if $indexCol == * or the whole column if $indexRow == *
+      */
+    override def apply(indexRow: Any)(indexCol: Any): Any = {
+        (indexRow, indexCol) match {
+            case (_: Int, _: Int) | (_: Int, _: *.type) | (_: *.type, _: Int) => super.apply(indexRow)(indexCol)
+            case (labelRow: String, labelCol: String) =>
+                super.apply(
+                    labelsIndices.getOrElse(labelRow, throw new IllegalArgumentException("Invalid label: "+labelRow))
+                )(
+                    labelsIndices.getOrElse(labelCol, throw new IllegalArgumentException("Invalid label: "+labelCol))
+                )
+            case (labelRow: String, _: Int) =>
+                super.apply(
+                    labelsIndices.getOrElse(labelRow, throw new IllegalArgumentException("Invalid label: "+labelRow))
+                )(indexCol)
+            case (_: Int, labelCol: String) =>
+                super.apply(indexRow)(
+                    labelsIndices.getOrElse(labelCol, throw new IllegalArgumentException("Invalid label: "+labelCol))
+                )
+            case (labelRow: String, _: *.type) =>
+                super.apply(
+                    labelsIndices.getOrElse(labelRow, throw new IllegalArgumentException("Invalid label: "+labelRow))
+                )(indexCol)
+            case (_: *.type, labelCol: String) =>
+                super.apply(indexRow)(
+                    labelsIndices.getOrElse(labelCol, throw new IllegalArgumentException("Invalid label: "+labelCol))
+                )
+            case _ => throw new IllegalArgumentException("Matrix indices must be Int, * or a label")
+        }
+    }
+
     //====================== Utility functions ===========================
     override def toString: String = {
-        // TODO this could be better
-        labels.toString +"\n"+ super.toString
+        val answer = new StringBuilder()
+        answer.append("Matrix(\n")
+        data.zipWithIndex.foreach{
+            case (row, i) => {
+                answer.append("\t")
+                answer.append(labels(i))
+                answer.append(":\t")
+                row.foreach(elem => {
+                    answer.append(elem)
+                    answer.append("\t")
+                })
+                answer.append("\n")
+            }
+        }
+        answer.append(")")
+        answer.toString()
     }
 }
 
