@@ -91,7 +91,7 @@ class RelationMatrix {
     }
 
     //================== Utility functions =====================
-    /** Merge group $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index $indexToIndex._1 */
+    /** Merge section $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index $indexToIndex._2 */
     def merge(indexToIndex: (Int, Int)): Unit = {
         // TODO this method might be better off using a ListBuffer
         val index1 = indexToIndex._1
@@ -107,7 +107,7 @@ class RelationMatrix {
         data = data.map(row => {
             val (head, val1::tail) = row.splitAt(indexSmall)
             val (mid, val2::end) = tail.splitAt(indexLarge-indexSmall-1)
-            if (index1 < index2)
+            if (index1 > index2)
                 head ++ List(val1+val2) ++ mid ++ end
             else
                 head ++ mid ++ List(val1+val2) ++ end
@@ -119,7 +119,7 @@ class RelationMatrix {
         var mergedRow = (row1 zip row2).map(t => t._1+t._2)
         if (zeroDiagonal)
             mergedRow = mergedRow.updated(index1, 0).asInstanceOf[List[Double]]
-        if (index1 < index2)
+        if (index1 > index2)
             data = head ++ List(mergedRow) ++ mid ++ end
         else
             data = head ++ mid ++ List(mergedRow) ++ end

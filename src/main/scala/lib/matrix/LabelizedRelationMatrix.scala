@@ -32,6 +32,10 @@ class LabelizedRelationMatrix extends RelationMatrix {
     }
 
     //=================== Indexing ================================
+    /** Returns the index of $label or throws an exception if the label didn't exist */
+    private def getIndex(label: String): Int =
+        labelsIndices.getOrElse(label, throw new IllegalArgumentException("Invalid label: "+label))
+
     /**
       * Returns the element at indices labelled (indexRow, indexCol)
       * or the whole row if $indexCol == * or the whole column if $indexRow == *
@@ -39,28 +43,11 @@ class LabelizedRelationMatrix extends RelationMatrix {
     override def apply(indexRow: Any)(indexCol: Any): Any = {
         (indexRow, indexCol) match {
             case (_: Int, _: Int) | (_: Int, _: *.type) | (_: *.type, _: Int) => super.apply(indexRow)(indexCol)
-            case (labelRow: String, labelCol: String) =>
-                super.apply(
-                    labelsIndices.getOrElse(labelRow, throw new IllegalArgumentException("Invalid label: "+labelRow))
-                )(
-                    labelsIndices.getOrElse(labelCol, throw new IllegalArgumentException("Invalid label: "+labelCol))
-                )
-            case (labelRow: String, _: Int) =>
-                super.apply(
-                    labelsIndices.getOrElse(labelRow, throw new IllegalArgumentException("Invalid label: "+labelRow))
-                )(indexCol)
-            case (_: Int, labelCol: String) =>
-                super.apply(indexRow)(
-                    labelsIndices.getOrElse(labelCol, throw new IllegalArgumentException("Invalid label: "+labelCol))
-                )
-            case (labelRow: String, _: *.type) =>
-                super.apply(
-                    labelsIndices.getOrElse(labelRow, throw new IllegalArgumentException("Invalid label: "+labelRow))
-                )(indexCol)
-            case (_: *.type, labelCol: String) =>
-                super.apply(indexRow)(
-                    labelsIndices.getOrElse(labelCol, throw new IllegalArgumentException("Invalid label: "+labelCol))
-                )
+            case (labelRow: String, labelCol: String) => super.apply(getIndex(labelRow))(getIndex(labelCol))
+            case (labelRow: String, _: Int) => super.apply(getIndex(labelRow))(indexCol)
+            case (_: Int, labelCol: String) => super.apply(indexRow)(getIndex(labelCol))
+            case (labelRow: String, _: *.type) => super.apply(getIndex(labelRow))(indexCol)
+            case (_: *.type, labelCol: String) => super.apply(indexRow)(getIndex(labelCol))
             case _ => throw new IllegalArgumentException("Matrix indices must be Int, * or a label")
         }
     }
@@ -80,6 +67,17 @@ class LabelizedRelationMatrix extends RelationMatrix {
     }
 
     //====================== Utility functions ===========================
+    /** Merge section $labelToLabel._1 and $labelToLabel._2 and puts the resulting elements at index of $labelToLabel._2 */
+    def merge(labelToLabel: (String, String))(implicit d: DummyImplicit): Unit = { // DummyImplicit to avoid "same type after erasure error'
+        super.merge(getIndex(labelToLabel._1) -> getIndex(labelToLabel._2))
+    }
+    def merge(labelToIndex: (String, Int))(implicit d1: DummyImplicit, d2: DummyImplicit): Unit = {
+        super.merge(getIndex(labelToIndex._1) -> labelToIndex._2)
+    }
+    def merge(indexToLabel: (Int, String))(implicit d1: DummyImplicit, d2: DummyImplicit, d3: DummyImplicit): Unit = {
+        super.merge(indexToLabel._1 -> getIndex(indexToLabel._2))
+    }
+
     override def toString: String = {
         val answer = new StringBuilder()
         answer.append("Matrix(\n")
