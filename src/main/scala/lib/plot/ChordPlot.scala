@@ -41,7 +41,7 @@ trait DataFromJsonUrl extends js.Object {
 
 class ChordPlot extends RelationPlot {
     //=================== Constructors and related =============================
-    private var colorPaletteLocal: Option[js.Array[String]] = None
+    private var colorPaletteLocal: Option[List[String]] = None
 
     def this(data: Seq[(String, Product with Serializable)]) = {
         this()
@@ -90,11 +90,11 @@ class ChordPlot extends RelationPlot {
 
     //==================== Getters ===========================
     /** Use a color palette in function of the size of the data if none is defined */
-    def colorPalette:js.Array[String] = {
+    def colorPalette: js.Array[String] = {
         (data, colorPaletteLocal) match {
             case (_, Some(p)) => p
             case (Some(d), None) => if (d.length < 10) d3.schemeCategory10 else d3.schemeCategory20
-            case _ => return js.Array("") // never used because cannot draw a graph without data
+            case _ => js.Array("") // never used because cannot draw a graph without data
         }
     }
 
@@ -117,7 +117,7 @@ class ChordPlot extends RelationPlot {
         this
     }
 
-    def setLabels(l:List[String]): ChordPlot = {
+    def setLabels(l: List[String]): ChordPlot = {
         displayedMatrix match {
             case Some(matrix) => {
                 matrix match {
@@ -141,6 +141,7 @@ class ChordPlot extends RelationPlot {
             case None => throw new IllegalStateException ("Tried to set labels for no matrix")
         }
     }
+    def labels_=(l: List[String]): Unit = setLabels(l)
 
     private def setDataFromUrl(url: String): RelationPlot = {
         var xobj = new XMLHttpRequest()
@@ -176,7 +177,8 @@ class ChordPlot extends RelationPlot {
         this
     }
 
-    def setColorPalette(cp:js.Array[String]): ChordPlot=  {colorPaletteLocal = Some(cp); this}
+    def setColorPalette(cp: List[String]): ChordPlot = {colorPaletteLocal = Some(cp); this}
+    def colorPalette_=(cp: List[String]): Unit = setColorPalette(cp)
 
     //=================== Utility function ==============================
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
