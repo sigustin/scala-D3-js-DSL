@@ -72,8 +72,12 @@ class ChordPlot extends RelationPlot {
     }
 
     private var sumData: Option[Double] = None
-    /** Returns the sum of the data around the whold chord plot */
+    private var tickStep: Option[Double] = None
+    /** Returns the sum of the data around the whole chord plot */
     private def computeSumDataOverCircle(): Double = {
+        // Reset the tick step
+        tickStep = None
+
         data match {
             case None => 0.0
             case Some(d) => {
@@ -189,27 +193,27 @@ class ChordPlot extends RelationPlot {
         (circumference / minStepPx).round.toInt
     }
 
-    private var tickStep: Option[Double] = None
     private def getTickStep: Double = {
-        if (tickStep isDefined)
-            return tickStep.get
+        /**
+          * Computes the step of the ticks so that
+          * there are at most $computeMaxNbTicks ticks and at least one per data point
+          * (not in pixels)
+          * and puts it in $tickStep
+          */
+        def computeTickStep(): Unit = {
+            val sumDataValue: Double = sumData.getOrElse(0)
+            val minTicksStep = closestRoundNb(sumDataValue / computeMaxNbTicks())
+            if (minTicksStep == 0.0)
+                tickStep = Some(1)
+            tickStep = Some(minTicksStep)
+        }
+
+        if (tickStep.isDefined)
+            tickStep.get
         else {
             computeTickStep()
-            return tickStep.get
+            tickStep.get
         }
-    }
-    /**
-      * Computes the step of the ticks so that
-      * there are at most $computeMaxNbTicks ticks and at least one per data point
-      * (not in pixels)
-      * and puts it in $tickStep
-      */
-    private def computeTickStep(): Unit = {
-        val sumDataValue: Double = sumData.getOrElse(0)
-        val minTicksStep = closestRoundNb(sumDataValue / computeMaxNbTicks())
-        if (minTicksStep == 0.0)
-            tickStep = Some(1)
-        tickStep = Some(minTicksStep)
     }
 
     /** Computes the order of $nb */
@@ -266,7 +270,7 @@ class ChordPlot extends RelationPlot {
     }
 
     def draw(): Unit = {
-        var matrix:js.Array[js.Array[Double]] = js.Array()
+        var matrix: js.Array[js.Array[Double]] = js.Array()
         data match {
             case Some(d) => matrix = d
             case None => return
@@ -306,21 +310,19 @@ class ChordPlot extends RelationPlot {
                         try {
                             val e = dJs.asInstanceOf[ChordGroupJson]
                             i != e.index
-                        }catch{
+                        } catch {
                             case default:Throwable => {
                                 try {
                                     val e = dJs.asInstanceOf[ChordJson]
                                     e.source.index != i && e.target.index != i
-                                }catch{
-                                    case default:Throwable => {
-                                        true
-                                    }
+                                } catch {
+                                    case default:Throwable => true
                                 }
                             }
-
-                        }})
+                        }
+                    })
                     .style("stroke-opacity", opacity.toString)
-                    .style("fill-opacity", opacity.toString);
+                    .style("fill-opacity", opacity.toString)
             }
         }
 
@@ -332,7 +334,8 @@ class ChordPlot extends RelationPlot {
 
         var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, getTickStep))
             .enter().append("g").attr("class", "group-tick")
-            .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
+            .attr("transform", (d: js.Dictionary[Double]) =>
+                "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
         groupTick.append("line").attr("x2", 6)
 
@@ -341,7 +344,9 @@ class ChordPlot extends RelationPlot {
         groupTick.filter((d: js.Dictionary[Double]) => d("value") % bigTickStep == 0).append("text")
                 .attr("x", 8)
                 .attr("dy", ".35em")
-                .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
+                .attr("transform", (d: js.Dictionary[Double]) =>
+                    if(d("angle") > Math.PI) "rotate(180) translate(-16)"
+                    else null)
             .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
 
@@ -350,13 +355,14 @@ class ChordPlot extends RelationPlot {
             val label = d3.scaleOrdinal[Int, String]().domain(d3.range(labels.get.size)).range(labels.get)
             val groupLabel = group.selectAll(".group-label").data((d: ChordGroup) => groupLabelData(d))
                 .enter().append("g").attr("class", "group-label")
-                .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+24) + ",0)")
-            //            .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
+                .attr("transform", (d: js.Dictionary[Double]) =>
+                    "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+24) + ",0)")
+//                .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
             groupLabel.append("text")
                 .attr("x", 8)
                 .attr("dy", ".35em")
-                //            .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + ((d("angle") * 180 / Math.PI - 90) + ")" + "translate(" + (innerRadius + 26) + ")" +  (if (d("angle") > Math.PI ) "rotate(180)" else "")))
+//                .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + ((d("angle") * 180 / Math.PI - 90) + ")" + "translate(" + (innerRadius + 26) + ")" +  (if (d("angle") > Math.PI ) "rotate(180)" else "")))
 //                .attr("transform", (d: js.Dictionary[Double]) => (if (d("angle") > Math.PI ) "rotate(180) translate(-16)" else null))
                 .attr("transform", (d: js.Dictionary[Double]) => "translate(8) rotate(90)")
 //                .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
@@ -371,7 +377,8 @@ class ChordPlot extends RelationPlot {
         }
 
 
-        g.append("g").attr("class", "ribbons").selectAll("path").data((c: ChordArray) => c)
+        g.append("g").attr("class", "ribbons")
+            .selectAll("path").data((c: ChordArray) => c)
             .enter().append("path")
             .attr("d", (d: Chord) => ribbon(d))
             .style("fill", (d: Chord) => color(d.target.index))
@@ -379,7 +386,6 @@ class ChordPlot extends RelationPlot {
     }
 }
 object ChordPlot {
-//    def apply(d:List[List[Double]]): ChordGraph =  new ChordGraph().setData(d)
     def apply(d:List[List[Double]]): ChordPlot =  new ChordPlot(d)
     def apply(d: (String, Product with Serializable)*): ChordPlot = new ChordPlot(d)
     def apply(matrix: RelationMatrix): ChordPlot = new ChordPlot(matrix)

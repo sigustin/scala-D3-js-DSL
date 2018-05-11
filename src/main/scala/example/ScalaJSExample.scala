@@ -145,7 +145,7 @@ object ScalaJSExample {
             "LabelB" -> (4,5,4),
             "LabelC" -> (3,2,1)
         )
-//        val plot = ChordPlot("data.json") // Invalid syntax exception?
+//        val plot = ChordPlot("data.json") // TODO Invalid syntax exception?
 
         plot
             .setTarget("#playground2 svg")
