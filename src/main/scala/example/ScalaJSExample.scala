@@ -6,6 +6,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
 import lib.ImplicitConv._
 import lib.matrix.{*, FlowsMatrix, LabelizedFlowsMatrix, LabelizedRelationMatrix}
+import lib.plot.ChordPlot
 import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
@@ -34,7 +35,7 @@ object ScalaJSExample {
     @JSExport
     def main(args: Array[String]): Unit = {
 //        //========= Chord Graph =====================
-//        val graph = ChordGraph(
+//        val plot = ChordGraph(
 //            "LabelA" -> (11975, 5871, 8916, 2868),
 //            "LabelB" -> (1951, 10048, 2060, 6171),
 //            "LabelC" -> (8010, 16145, 8090, 8045),
@@ -69,13 +70,13 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
-//        val graph = ChordGraph(
+//        val plot = ChordGraph(
 //            "LabelA" -> (1,2,3),
 //            "LabelB" -> (4,5,4),
 //            "LabelC" -> (3,2,1)
 //        )
 //
-//        graph
+//        plot
 //            .setTarget("#playground2 svg")
 //            .setDimension(600, 600)
 //            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
@@ -111,33 +112,46 @@ object ScalaJSExample {
 //        d3.json("d3/europe.geo.json", callback)
 
         //========== Test matrices =================
-        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
-        println(testMatrix(0)(*)) // Actually no error
-        println(testMatrix(0 -> *))
-        println(testMatrix(*)(2))
-        println(testMatrix(* -> 2))
-        println(testMatrix(0)(2)) // Id.
-        println(testMatrix(0 -> 2))
-//        println(testMatrix(-1)(-1)) // exception as intended
+//        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
+//        println(testMatrix(0)(*)) // Actually no error
+//        println(testMatrix(0 -> *))
+//        println(testMatrix(*)(2))
+//        println(testMatrix(* -> 2))
+//        println(testMatrix(0)(2)) // Id.
+//        println(testMatrix(0 -> 2))
+////        println(testMatrix(-1)(-1)) // exception as intended
+//
+//        println(testMatrix)
+//        testMatrix.merge(1 -> 2)
+//        println(testMatrix)
+//
+//        //MOCKUP
+//        val mat = LabelizedFlowsMatrix(
+//            "LabelA" -> (1,2,5),
+//            "LabelB" -> (3,4,5),
+//            "LabelC" -> (7,8,9)
+//        )
+//        println(mat(0 -> *))
+//        println(mat("LabelA")("LabelB"))
+//        println(mat("LabelA" -> "LabelB"))
+//        println(mat("LabelA" -> *))
+//        println(mat(1)("LabelB"))
+//        println(mat)
+//        mat.merge("LabelB" -> 2)
+//        println(mat)
 
-        println(testMatrix)
-        testMatrix.merge(1 -> 2)
-        println(testMatrix)
-
-        //MOCKUP
-        val mat = LabelizedFlowsMatrix(
-            "LabelA" -> (1,2,5),
-            "LabelB" -> (3,4,5),
-            "LabelC" -> (7,8,9)
+        val plot = ChordPlot(
+            "LabelA" -> (1,2,3),
+            "LabelB" -> (4,5,4),
+            "LabelC" -> (3,2,1)
         )
-        println(mat(0 -> *))
-        println(mat("LabelA")("LabelB"))
-        println(mat("LabelA" -> "LabelB"))
-        println(mat("LabelA" -> *))
-        println(mat(1)("LabelB"))
-        println(mat)
-        mat.merge("LabelB" -> 2)
-        println(mat)
+//        val plot = ChordPlot("data.json") // Invalid syntax exception?
+
+        plot
+            .setTarget("#playground2 svg")
+            .setDimension(600, 600)
+            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+            .draw()
     }
 
     /*

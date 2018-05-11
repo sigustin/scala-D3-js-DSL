@@ -2,10 +2,10 @@ package lib.plot
 
 import d3v4.{ChordGroup, _}
 import lib.ImplicitConv._
-import lib.matrix.RelationMatrix
+import lib.matrix.{LabelizedRelationMatrix, RelationMatrix}
 import org.scalajs.dom.XMLHttpRequest
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => gJS}
 import scala.scalajs.js.JSON
@@ -20,33 +20,32 @@ trait ChordGroupJson extends js.Object {
 
 @js.native
 trait ChordJson extends js.Object {
-    val source:MySubChordJson = js.native
-    val target:MySubChordJson = js.native
+    val source: MySubChordJson = js.native
+    val target: MySubChordJson = js.native
 }
 
 @js.native
 trait MySubChordJson extends js.Object {
-    val index:Int= js.native
-    val subindex:Int= js.native
+    val index: Int = js.native
+    val subindex: Int = js.native
     val startAngle: Double = js.native
-    val endAngle: Double= js.native
+    val endAngle: Double = js.native
     val value:Int = js.native
 }
 
 @js.native
 trait DataFromJsonUrl extends js.Object {
-    val label:String= js.native
+    val label: String = js.native
     val data: js.Array[Double] = js.native
 }
 
 class ChordPlot extends RelationPlot {
-
+    //=================== Constructors and related =============================
     private var colorPaletteLocal: Option[js.Array[String]] = None
-    def setColorPalette(cp:js.Array[String])=  {colorPaletteLocal = Some(cp); this}
 
     def this(data: Seq[(String, Product with Serializable)]) = {
         this()
-        val labels: ArrayBuffer[String] = ArrayBuffer.empty[String]
+        val labels: ListBuffer[String] = ListBuffer.empty[String]
         var matrix: ArrayBuffer[Product with Serializable] = ArrayBuffer.empty[Product with Serializable]
         data.foreach(elem => {
             labels += elem._1
@@ -57,23 +56,36 @@ class ChordPlot extends RelationPlot {
             arrayOfList += tuple.productIterator.toList.asInstanceOf[List[Int]]
         })
 
-        setLabel(labels.toList)
-        setData(arrayOfList.toList)
+        setMatrix(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
+    }
+    def this(data: List[List[Double]]) = {
+        this()
+        setMatrix(RelationMatrix(data))
+    }
+    def this(matrix: RelationMatrix) = {
+        this()
+        setMatrix(matrix)
+    }
+    def this(url: String) = {
+        this()
+        setDataFromUrl(url)
     }
 
-    override def setData(d: js.Array[js.Array[Double]]): RelationPlot = {
-        super.setData(d)
-        sumData = Some(computeSumDataOverCircle())
-        this
+    private var sumData: Option[Double] = None
+    /** Returns the sum of the data around the whold chord plot */
+    private def computeSumDataOverCircle(): Double = {
+        data match {
+            case None => 0.0
+            case Some(d) => {
+                var sum = 0.0
+                d.foreach(sum += _.sum)
+                sum
+            }
+        }
     }
 
-    override def setData(d: List[List[Double]]): RelationPlot = {
-        super.setData(d)
-        sumData = Some(computeSumDataOverCircle())
-        this
-    }
-
-    // use a color palette in function of the size of the data if none is defined
+    //==================== Getters ===========================
+    /** Use a color palette in function of the size of the data if none is defined */
     def colorPalette:js.Array[String] = {
         (data, colorPaletteLocal) match {
             case (_, Some(p)) => p
@@ -82,11 +94,51 @@ class ChordPlot extends RelationPlot {
         }
     }
 
-    private var labelLocal: Option[js.Array[String]] = None
-    def setLabel(l:js.Array[String]) = { labelLocal = Some(l); this }
+    def getLabels(): Option[List[String]] = {
+        displayedMatrix match {
+            case Some(matrix) => {
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix => Some(labelizedMat.getLabels())
+                    case _ => None
+                }
+            }
+            case _ => None
+        }
+    }
 
+    //================== Setters ===============================
+    override def setMatrix(matrix: RelationMatrix): RelationPlot = {
+        super.setMatrix(matrix)
+        sumData = Some(computeSumDataOverCircle())
+        this
+    }
 
-    def setDataFromUrl(url: String): RelationPlot = {
+    def setLabels(l:List[String]): ChordPlot = {
+        displayedMatrix match {
+            case Some(matrix) => {
+                matrix match {
+                    case m: LabelizedRelationMatrix => {
+                        matrix.asInstanceOf[LabelizedRelationMatrix].setLabels (l)
+                        this
+                    }
+                    case m: RelationMatrix => {
+                        data match {
+                            case Some(d) => {
+                                val labelizedMatrix = LabelizedRelationMatrix (l, d)
+                                displayedMatrix = labelizedMatrix
+                                this
+                            }
+                            case None => throw new IllegalStateException ("Tried to set labels for an empty matrix")
+                        }
+                    }
+                    case _ => throw new IllegalStateException("Matrix is of invalid type")
+                }
+            }
+            case None => throw new IllegalStateException ("Tried to set labels for no matrix")
+        }
+    }
+
+    private def setDataFromUrl(url: String): RelationPlot = {
         var xobj = new XMLHttpRequest()
         xobj.open("GET", url, false)
         xobj.send(null)
@@ -95,48 +147,37 @@ class ChordPlot extends RelationPlot {
             val r = xobj.responseText
             val d = JSON.parse(r)
 
-            try{
-                val tmpData: js.Array[js.Array[Double]] = js.Array()
-                val tmpLabel: js.Array[String] = js.Array()
+            try {
+                val dataBuilder = new ListBuffer[List[Double]]
+                val labelsBuilder = new ListBuffer[String]
                 for (e <- d.asInstanceOf[js.Array[DataFromJsonUrl]]){
                     val row = e.asInstanceOf[DataFromJsonUrl]
-                    tmpData.append(row.data)
-                    tmpLabel.append(row.label)
+                    dataBuilder += row.data.toList
+                    labelsBuilder += row.label
                 }
 
-                data = Some(tmpData)
-                labelLocal = Some(tmpLabel)
+                setMatrix(LabelizedRelationMatrix(labelsBuilder.toList, dataBuilder.toList))
 
-            }catch {
+            } catch {
                 case default:Throwable => {
                     gJS.console.log("error in the json format")
                 }
             }
 
 
-        }else {
+        } else {
             gJS.console.log("error while getting the json")
         }
 
         this
     }
 
+    def setColorPalette(cp:js.Array[String]): ChordPlot=  {colorPaletteLocal = Some(cp); this}
+
+    //=================== Utility function ==============================
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
         d3.range(0, d.value/(10**scale), step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
-    }
-
-    private var sumData: Option[Double] = None
-    /** Returns the sum of the data around the whold chord plot */
-    private def computeSumDataOverCircle(): Double = {
-        data match {
-            case None => 0.0
-            case Some(matrix) => {
-                var sum = 0.0
-                matrix.foreach(sum += _.sum)
-                sum
-            }
-        }
     }
 
     private val minStepPx = 40 // minimal number of pixels between 2 ticks (not a hard bound)
@@ -304,8 +345,9 @@ class ChordPlot extends RelationPlot {
             .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
 
-        if (labelLocal.isDefined){
-            val label = d3.scaleOrdinal[Int, String]().domain(d3.range(labelLocal.get.size)).range(labelLocal.get)
+        val labels = getLabels()
+        if (labels.isDefined){
+            val label = d3.scaleOrdinal[Int, String]().domain(d3.range(labels.get.size)).range(labels.get)
             val groupLabel = group.selectAll(".group-label").data((d: ChordGroup) => groupLabelData(d))
                 .enter().append("g").attr("class", "group-label")
                 .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+24) + ",0)")
@@ -321,11 +363,11 @@ class ChordPlot extends RelationPlot {
                 .attr("text-anchor", "middle")
                 .text((d: js.Dictionary[Double]) => label(d("index").toInt) )
 
-            //        groupTick.append("text")
-            //            .attr("dy", ".35em")
-            //            .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + (d("angle") * 180 / Math.PI - 90) + ")" + "translate(" + (innerRadius + 26) + ")" +  (if (d("angle") > Math.PI ) "rotate(180)" else ""))
-            //            .style("text-anchor", (d: js.Dictionary[Double]) => { if (d("angle") > Math.PI ) "end" else null })
-            //            .text((d: js.Dictionary[Double]) => label(d("value").toInt) )
+//        groupTick.append("text")
+//            .attr("dy", ".35em")
+//            .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + (d("angle") * 180 / Math.PI - 90) + ")" + "translate(" + (innerRadius + 26) + ")" +  (if (d("angle") > Math.PI ) "rotate(180)" else ""))
+//            .style("text-anchor", (d: js.Dictionary[Double]) => { if (d("angle") > Math.PI ) "end" else null })
+//            .text((d: js.Dictionary[Double]) => label(d("value").toInt) )
         }
 
 
@@ -338,7 +380,8 @@ class ChordPlot extends RelationPlot {
 }
 object ChordPlot {
 //    def apply(d:List[List[Double]]): ChordGraph =  new ChordGraph().setData(d)
-    def apply(d:js.Array[js.Array[Double]]): ChordPlot =  new ChordPlot().setData(d)
+    def apply(d:List[List[Double]]): ChordPlot =  new ChordPlot(d)
     def apply(d: (String, Product with Serializable)*): ChordPlot = new ChordPlot(d)
-    def apply(d: RelationMatrix): ChordPlot = new ChordPlot().setData(d.getData)
+    def apply(matrix: RelationMatrix): ChordPlot = new ChordPlot(matrix)
+    def apply(url: String) = new ChordPlot(url)
 }

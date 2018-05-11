@@ -30,6 +30,10 @@ class LabelizedRelationMatrix extends RelationMatrix {
         labels.zipWithIndex.foreach{case (label, i) => labelsIndicesBuilder += (label -> i)}
         labelsIndices = labelsIndicesBuilder.toMap
     }
+    def setLabels(labels: List[String]): Unit = checkAndInitLabels(labels)
+
+    //================== Getters ======================
+    def getLabels(): List[String] = labels
 
     //=================== Indexing ================================
     /** Returns the index of $label or throws an exception if the label didn't exist */
