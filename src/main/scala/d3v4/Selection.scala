@@ -13,7 +13,6 @@ object d3selection extends js.Object {
   def select(node: dom.EventTarget): Selection[dom.EventTarget] = js.native // TODO: Return type correct?
   var event: dom.Event with BaseEvent = js.native
   def mouse(container: dom.EventTarget): js.Array[Double] = js.native
-  def json(url: String, callback: js.Function2[js.Any, js.Any, Unit] = ???): Xhr = js.native
 }
 
 @js.native
@@ -115,39 +114,4 @@ trait Enter[Datum] extends js.Object {
   def append(name: js.Function3[Datum, Double, Double, dom.EventTarget]): Selection[Datum] = js.native
 
   def size():Int = js.native
-}
-
-@js.native
-trait Xhr extends js.Object {
-  def header(name: String): String = js.native
-
-  def header(name: String, value: String): Xhr = js.native
-
-  def mimeType(): String = js.native
-
-  def mimeType(`type`: String): Xhr = js.native
-
-  def responseType(): String = js.native
-
-  def responseType(`type`: String): Xhr = js.native
-
-  def response(): js.Function1[dom.XMLHttpRequest, Any] = js.native
-
-  def response(value: js.Function1[dom.XMLHttpRequest, Any]): Xhr = js.native
-
-  def get(callback: js.Function2[js.Any, js.Any, Unit] = ???): Xhr = js.native
-
-  def post(data: js.Any = ???, callback: js.Function2[js.Any, js.Any, Unit] = ???): Xhr = js.native
-
-  def post(callback: js.Function2[js.Any, js.Any, Unit]): Xhr = js.native
-
-  def send(method: String, data: js.Any = ???, callback: js.Function2[js.Any, js.Any, Unit] = ???): Xhr = js.native
-
-  def send(method: String, callback: js.Function2[js.Any, js.Any, Unit]): Xhr = js.native
-
-  def abort(): Xhr = js.native
-
-  def on(`type`: String): js.Function = js.native
-
-  def on(`type`: String, listener: js.Function): Xhr = js.native
 }

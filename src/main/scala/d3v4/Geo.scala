@@ -26,6 +26,7 @@ import js.`|`
 object d3geo extends js.Object {
     def path(): Path = js.native
     def geoPath(): Path = js.native
+    def geoPath(raw: Projection): Path = js.native
 
     def graticule(): Graticule = js.native
 

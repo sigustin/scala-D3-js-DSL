@@ -1,14 +1,30 @@
 package example
 
-
-import d3v4.{Path, Projection, TransformType, d3geo}
+import d3v4.{Path, Primitive, Projection, TransformType, d3geo, d3selection}
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
 import lib.ImplicitConv._
+import lib.matrix.{*, FlowsMatrix, LabelizedFlowsMatrix, LabelizedRelationMatrix}
+import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
 import js.Dynamic.{global => gJS}
+import scala.scalajs.js.JSON
+
+@js.native
+trait MyRootJson extends js.Object {
+    val features:js.Array[MyRootJson]= js.native
+}
+
+@js.native
+trait MyFeatureJson extends js.Object {
+    val properties:MyCountryJson= js.native
+}
+@js.native
+trait MyCountryJson extends js.Object {
+    val name: String = js.native
+}
 
 object ScalaJSExample {
 
@@ -24,12 +40,12 @@ object ScalaJSExample {
 //            "LabelC" -> (8010, 16145, 8090, 8045),
 //            "LabelD" -> (1013, 990, 940, 6907)
 //        )
-        val dataJs = js.Array[js.Array[Double]](
-            js.Array(11.975,  5.871, 8.916, 2.868),
-            js.Array(1.951, 10.048, 2.060, 6.171),
-            js.Array(8.010, 16.145, 8.090, 8.045),
-            js.Array(1.013, 0.990,  0.940, 6.907)
-        )
+//        val dataJs = js.Array[js.Array[Double]](
+//            js.Array(11.975,  5.871, 8.916, 2.868),
+//            js.Array(1.951, 10.048, 2.060, 6.171),
+//            js.Array(8.010, 16.145, 8.090, 8.045),
+//            js.Array(1.013, 0.990,  0.940, 6.907)
+//        )
 
 //        val dataJs = js.Array[js.Array[Double]](
 //            js.Array(12, 6, 9, 3),
@@ -38,12 +54,12 @@ object ScalaJSExample {
 //            js.Array(1, 1,  1, 7)
 //        )
 
-        val g = new ChordGraph()
-        g.setDataFromUrl("data.json")
-        g.setTarget("#playground2 svg")
-        g.setDimension(480, 480)
-        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-        g.draw()
+//        val g = new ChordGraph()
+//        g.setDataFromUrl("data.json")
+//        g.setTarget("#playground2 svg")
+//        g.setDimension(480, 480)
+//        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//        g.draw()
 
 //        val g = new ChordGraph()
 //            .setData(data)
@@ -53,26 +69,75 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
+//        val graph = ChordGraph(
+//            "LabelA" -> (1,2,3),
+//            "LabelB" -> (4,5,4),
+//            "LabelC" -> (3,2,1)
+//        )
+//
+//        graph
+//            .setTarget("#playground2 svg")
+//            .setDimension(600, 600)
+//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//            .draw()
+
         //========== Flow map =====================
-        import d3v4.d3
-        val width = 900
-        val height = 800
+//        import d3v4.d3
+//        val width = 900
+//        val height = 800
+//        val scale = 200 // for this file, this is approximately 0.5*size of America
+//
+//        val projection: Projection = d3.geoMercator().translate((width/2.0+2*scale, height/2.0+2*scale)).scale(scale)
+//
+//        var path: Path = d3.geoPath(projection)
+////        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
+//
+//        val callback: js.Any => Unit = (d:js.Any) => {
+//            val geoData = d.asInstanceOf[MyRootJson].features
+//            println("got:"+d+" => "+geoData)
+//
+//            val ret = d3.select("body")
+//                .append("svg")
+//                .attr("width", width)
+//                .attr("height", height)
+//                .append("g")
+//                .attr("id", "map")
+//                .selectAll("path")
+//                .data(geoData)
+//                .enter().append("path")
+//                .attr("d", path.asInstanceOf[Primitive])
+//                .attr("fill", "green")
+//        }
+//        d3.json("d3/europe.geo.json", callback)
 
-        val projection: Projection = d3.geoMercator()
-            projection.translate((1000.0/2, 700.0/2)).scale(300)
-        gJS.console.log(projection)
+        //========== Test matrices =================
+        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
+        println(testMatrix(0)(*)) // Actually no error
+        println(testMatrix(0 -> *))
+        println(testMatrix(*)(2))
+        println(testMatrix(* -> 2))
+        println(testMatrix(0)(2)) // Id.
+        println(testMatrix(0 -> 2))
+//        println(testMatrix(-1)(-1)) // exception as intended
 
-        val svg = d3.select("svg").append("svg")
-            .attr("width", 900)
-            .attr("height", 600)
-        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType])
+        println(testMatrix)
+        testMatrix.merge(1 -> 2)
+        println(testMatrix)
 
-        var countries = svg.append("g")
-
-        val callback: (js.Any, js.Any) => Unit = (e:js.Any, d:js.Any) => {gJS.console.log("test")}
-        gJS.console.log("this is a test")
-        d3.json("states_census_2015.json", callback)
-        gJS.console.log("this is a test")
+        //MOCKUP
+        val mat = LabelizedFlowsMatrix(
+            "LabelA" -> (1,2,5),
+            "LabelB" -> (3,4,5),
+            "LabelC" -> (7,8,9)
+        )
+        println(mat(0 -> *))
+        println(mat("LabelA")("LabelB"))
+        println(mat("LabelA" -> "LabelB"))
+        println(mat("LabelA" -> *))
+        println(mat(1)("LabelB"))
+        println(mat)
+        mat.merge("LabelB" -> 2)
+        println(mat)
     }
 
     /*

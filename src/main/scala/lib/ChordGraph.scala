@@ -1,11 +1,12 @@
 package lib
 
 import d3v4._
-import lib.{Graph => GraphBase}
+import lib.{Graph => GraphBasis}
 
 import scala.scalajs.js
 import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
+import lib.matrix.RelationMatrix
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.collection.mutable.ArrayBuffer
@@ -40,7 +41,7 @@ trait DataFromJsonUrl extends js.Object {
     val data: js.Array[Double] = js.native
 }
 
-class ChordGraph extends GraphBase {
+class ChordGraph extends GraphBasis {
 
     private var colorPaletteLocal: Option[js.Array[String]] = None
     def setColorPalette(cp:js.Array[String])=  {colorPaletteLocal = Some(cp); this}
@@ -62,13 +63,13 @@ class ChordGraph extends GraphBase {
         setData(arrayOfList.toList)
     }
 
-    override def setData(d: js.Array[js.Array[Double]]): GraphBase = {
+    override def setData(d: js.Array[js.Array[Double]]): GraphBasis = {
         super.setData(d)
         sumData = Some(computeSumDataOverCircle())
         this
     }
 
-    override def setData(d: List[List[Double]]): GraphBase = {
+    override def setData(d: List[List[Double]]): GraphBasis = {
         super.setData(d)
         sumData = Some(computeSumDataOverCircle())
         this
@@ -88,9 +89,9 @@ class ChordGraph extends GraphBase {
 
 
     def setDataFromUrl(url: String): Graph = {
-        var xobj = new XMLHttpRequest();
+        var xobj = new XMLHttpRequest()
         xobj.open("GET", url, false)
-        xobj.send(null);
+        xobj.send(null)
 
         if (xobj.readyState == 4 && xobj.status == 200) {
             val r = xobj.responseText
@@ -249,7 +250,7 @@ class ChordGraph extends GraphBase {
         val group = g.append("g").attr("class", "groups")
                 .selectAll("g")
                 .data((c: ChordArray) => c.groups)
-            .enter().append("g")
+                .enter().append("g")
 
         group.append("path").style("fill", (d: ChordGroup) => color(d.index))
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
@@ -341,4 +342,5 @@ object ChordGraph {
 //    def apply(d:List[List[Double]]): ChordGraph =  new ChordGraph().setData(d)
     def apply(d:js.Array[js.Array[Double]]): ChordGraph =  new ChordGraph().setData(d)
     def apply(d: (String, Product with Serializable)*): ChordGraph = new ChordGraph(d)
+    def apply(d: RelationMatrix): ChordGraph = new ChordGraph().setData(d.getData) // TODO make a better binding (put a matrix inside this class)
 }
