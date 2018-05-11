@@ -100,12 +100,11 @@ class ChordPlot extends RelationPlot {
 
     def getLabels(): Option[List[String]] = {
         displayedMatrix match {
-            case Some(matrix) => {
+            case Some(matrix) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix => Some(labelizedMat.getLabels())
                     case _ => None
                 }
-            }
             case _ => None
         }
     }
@@ -119,29 +118,39 @@ class ChordPlot extends RelationPlot {
 
     def setLabels(l: List[String]): ChordPlot = {
         displayedMatrix match {
-            case Some(matrix) => {
+            case Some(matrix) =>
                 matrix match {
-                    case m: LabelizedRelationMatrix => {
+                    case m: LabelizedRelationMatrix =>
                         matrix.asInstanceOf[LabelizedRelationMatrix].setLabels (l)
                         this
-                    }
-                    case m: RelationMatrix => {
+                    case m: RelationMatrix =>
                         data match {
-                            case Some(d) => {
-                                val labelizedMatrix = LabelizedRelationMatrix (l, d)
-                                displayedMatrix = labelizedMatrix
+                            case Some(d) =>
+                                val labelizedMatrix = LabelizedRelationMatrix(l, d)
+                                displayedMatrix = Some(labelizedMatrix)
                                 this
-                            }
                             case None => throw new IllegalStateException ("Tried to set labels for an empty matrix")
                         }
-                    }
                     case _ => throw new IllegalStateException("Matrix is of invalid type")
                 }
-            }
             case None => throw new IllegalStateException ("Tried to set labels for no matrix")
         }
     }
     def labels_=(l: List[String]): Unit = setLabels(l)
+
+    def updateLabel(labelToLabel: (String, String)): ChordPlot = {
+        displayedMatrix match {
+            case Some(matrix) => {
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMat.updateLabel(labelToLabel))
+                        this
+                    case _ => throw new IllegalArgumentException("Can't update a label on a plot without labels")
+                }
+            }
+            case None => throw new IllegalArgumentException("Can't update labels on a plot without data")
+        }
+    }
 
     private def setDataFromUrl(url: String): RelationPlot = {
         var xobj = new XMLHttpRequest()

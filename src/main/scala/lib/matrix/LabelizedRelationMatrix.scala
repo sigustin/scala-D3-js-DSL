@@ -32,6 +32,13 @@ class LabelizedRelationMatrix extends RelationMatrix {
     }
     def setLabels(labels: List[String]): Unit = checkAndInitLabels(labels)
 
+    def updateLabel(labelToLabel: (String, String)): LabelizedRelationMatrix = {
+        val oldLabel = labelToLabel._1
+        val newLabel = labelToLabel._2
+        val updatedLabels = labels.map(label => if (label == oldLabel) newLabel else label)
+        new LabelizedRelationMatrix(updatedLabels, data)
+    }
+
     //================== Getters ======================
     def getLabels(): List[String] = labels
 

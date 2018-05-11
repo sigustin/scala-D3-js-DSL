@@ -150,6 +150,7 @@ object ScalaJSExample {
         plot
             .setTarget("#playground2 svg")
             .setDimension(600, 600)
+            .updateLabel("LabelA" -> "LabelOne")
 
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
         plot
