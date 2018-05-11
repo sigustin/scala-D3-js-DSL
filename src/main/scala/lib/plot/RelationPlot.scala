@@ -15,7 +15,6 @@ trait RelationPlot {
     var target = "svg" // is a html selector used as destination for the graphe
     var svg: Selection[dom.EventTarget] = d3.select(target)
 
-    protected var rawData: Option[js.Array[js.Array[Double]]] = None//TODO remove this
     protected var basisMatrix: Option[RelationMatrix] = None
     protected var displayedMatrix: Option[RelationMatrix] = None
 
@@ -39,18 +38,6 @@ trait RelationPlot {
     def target_(t: String): Unit = {
         target = t
         svg = d3.select(target)
-    }
-
-    //TODO remove set data
-    def setData(d: js.Array[js.Array[Double]]): RelationPlot = {
-        rawData = Some(transformData(d))
-        this
-    }
-    def setData(d: List[List[Double]]): RelationPlot = {
-        val tmpD:js.Array[js.Array[Double]] = js.Array()
-        d.foreach(tmpD.append(_))
-        rawData = Some(transformData(tmpD))
-        this
     }
 
     /** Sets the basis matrix of the plot and let it display itself */
