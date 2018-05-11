@@ -1,7 +1,7 @@
 package lib.matrix
 
 /**
-  * Square matrix indexable by labels used to store relations between sections in chord graphs and migration maps
+  * Immutable square matrix indexable by labels used to store relations between sections in chord graphs and migration maps
   */
 class LabelizedRelationMatrix extends RelationMatrix {
     //=================== Constructors and related ==========================

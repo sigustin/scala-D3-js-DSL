@@ -2,7 +2,7 @@ package lib.matrix
 
 import scala.collection.mutable.ListBuffer
 
-/** Square matrix used to store relations between sections for chord plots and migration maps */
+/** Immutable square matrix used to store relations between sections for chord plots and migration maps */
 class RelationMatrix {
     //============== Constructors and related ===================
     protected var data: List[List[Double]] = _
