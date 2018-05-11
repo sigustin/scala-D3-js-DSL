@@ -2,7 +2,7 @@ package lib.plot
 
 import d3v4._
 import lib.ImplicitConv._
-import lib.matrix.RelationMatrix
+import lib.matrix.{LabelizedRelationMatrix, RelationMatrix}
 import org.scalajs.dom
 
 import scala.scalajs.js
@@ -15,7 +15,8 @@ trait RelationPlot {
     var target = "svg" // is a html selector used as destination for the graphe
     var svg: Selection[dom.EventTarget] = d3.select(target)
 
-    protected var basisMatrix: Option[RelationMatrix] = None
+    // Both matrices may contain labels or not
+    protected var basisMatrix: Option[RelationMatrix] = None // When resetting the display, get back to this data
     protected var displayedMatrix: Option[RelationMatrix] = None
 
     //================= Setters ===========================
@@ -58,6 +59,42 @@ trait RelationPlot {
         }
     }
 
+    def setLabels(l: List[String]): ChordPlot = {
+        displayedMatrix match {
+            case Some(matrix) =>
+                matrix match {
+                    case m: LabelizedRelationMatrix =>
+                        matrix.asInstanceOf[LabelizedRelationMatrix].setLabels (l)
+                        this
+                    case m: RelationMatrix =>
+                        data match {
+                            case Some(d) =>
+                                val labelizedMatrix = LabelizedRelationMatrix(l, d)
+                                displayedMatrix = Some(labelizedMatrix)
+                                this
+                            case None => throw new IllegalStateException ("Tried to set labels for an empty matrix")
+                        }
+                    case _ => throw new IllegalStateException("Matrix is of invalid type")
+                }
+            case None => throw new IllegalStateException ("Tried to set labels for no matrix")
+        }
+    }
+    def labels_=(l: List[String]): Unit = setLabels(l)
+
+    def updateLabel(labelToLabel: (String, String)): ChordPlot = {
+        displayedMatrix match {
+            case Some(matrix) => {
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMat.updateLabel(labelToLabel))
+                        this
+                    case _ => throw new IllegalArgumentException("Can't update a label on a plot without labels")
+                }
+            }
+            case None => throw new IllegalArgumentException("Can't update labels on a plot without data")
+        }
+    }
+
     //=================== Getters ===========================
     def height: Double = {
         heightLocal match {
@@ -77,6 +114,17 @@ trait RelationPlot {
         displayedMatrix match {
             case Some(matrix) => Some(matrix.getData)
             case None => None
+        }
+    }
+
+    def getLabels: Option[List[String]] = {
+        displayedMatrix match {
+            case Some(matrix) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix => Some(labelizedMat.getLabels)
+                    case _ => None
+                }
+            case _ => None
         }
     }
 

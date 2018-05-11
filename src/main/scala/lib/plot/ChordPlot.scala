@@ -98,58 +98,11 @@ class ChordPlot extends RelationPlot {
         }
     }
 
-    def getLabels: Option[List[String]] = {
-        displayedMatrix match {
-            case Some(matrix) =>
-                matrix match {
-                    case labelizedMat: LabelizedRelationMatrix => Some(labelizedMat.getLabels)
-                    case _ => None
-                }
-            case _ => None
-        }
-    }
-
     //================== Setters ===============================
     override def setMatrix(matrix: RelationMatrix): RelationPlot = {
         super.setMatrix(matrix)
         sumData = Some(computeSumDataOverCircle())
         this
-    }
-
-    def setLabels(l: List[String]): ChordPlot = {
-        displayedMatrix match {
-            case Some(matrix) =>
-                matrix match {
-                    case m: LabelizedRelationMatrix =>
-                        matrix.asInstanceOf[LabelizedRelationMatrix].setLabels (l)
-                        this
-                    case m: RelationMatrix =>
-                        data match {
-                            case Some(d) =>
-                                val labelizedMatrix = LabelizedRelationMatrix(l, d)
-                                displayedMatrix = Some(labelizedMatrix)
-                                this
-                            case None => throw new IllegalStateException ("Tried to set labels for an empty matrix")
-                        }
-                    case _ => throw new IllegalStateException("Matrix is of invalid type")
-                }
-            case None => throw new IllegalStateException ("Tried to set labels for no matrix")
-        }
-    }
-    def labels_=(l: List[String]): Unit = setLabels(l)
-
-    def updateLabel(labelToLabel: (String, String)): ChordPlot = {
-        displayedMatrix match {
-            case Some(matrix) => {
-                matrix match {
-                    case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMat.updateLabel(labelToLabel))
-                        this
-                    case _ => throw new IllegalArgumentException("Can't update a label on a plot without labels")
-                }
-            }
-            case None => throw new IllegalArgumentException("Can't update labels on a plot without data")
-        }
     }
 
     private def setDataFromUrl(url: String): RelationPlot = {
@@ -361,7 +314,7 @@ class ChordPlot extends RelationPlot {
             .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
 
-        val labels = getLabels()
+        val labels = getLabels
         if (labels.isDefined){
             val label = d3.scaleOrdinal[Int, String]().domain(d3.range(labels.get.size)).range(labels.get)
             val groupLabel = group.selectAll(".group-label").data((d: ChordGroup) => groupLabelData(d))
