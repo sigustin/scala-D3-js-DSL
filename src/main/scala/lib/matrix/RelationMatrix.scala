@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 class RelationMatrix {
     //============== Constructors and related ===================
     protected var data: List[List[Double]] = _
-    def getData = data
+    def getData: List[List[Double]] = data
     protected var size: Int = _
     protected var zeroDiagonal = false
 
@@ -29,13 +29,12 @@ class RelationMatrix {
                 try {
                     rowBuffer += data(i)(j)
                 } catch {
-                    case e: IndexOutOfBoundsException => {
+                    case _: IndexOutOfBoundsException =>
                         rowBuffer += 0
                         if (!invalidEntry) {
                             println("[WARNING] The created matrix missed elements => replaced by zeros")
                             invalidEntry = true
                         }
-                    }
                 }
             }
             buffer += rowBuffer.toList
@@ -60,23 +59,20 @@ class RelationMatrix {
       */
     def apply(indexRow: Any)(indexCol: Any): Any = {
         (indexRow, indexCol) match {
-            case (indexRowInt: Int, indexColInt: Int) => {
+            case (indexRowInt: Int, indexColInt: Int) =>
                 if (indexRowInt < 0 || indexRowInt >= size || indexColInt < 0 || indexColInt >= size)
                     throw new IndexOutOfBoundsException("Tried to fetch data outside of the matrix")
                 data(indexRowInt)(indexColInt)
-            }
-            case (indexRowInt: Int, _: *.type) => {
+            case (indexRowInt: Int, _: *.type) =>
                 if (indexRowInt < 0 || indexRowInt >= size)
                     throw new IndexOutOfBoundsException("Tried to fetch data outside of the matrix")
                 data(indexRowInt)
-            }
-            case (_: *.type, indexColInt: Int) => {
+            case (_: *.type, indexColInt: Int) =>
                 if (indexColInt < 0 || indexColInt >= size)
                     throw new IndexOutOfBoundsException("Tried to fetch data outside of the matrix")
                 val answer = new ListBuffer[Double]
                 data.foreach(answer += _(indexColInt))
                 answer.toList
-            }
             case _ => throw new IllegalArgumentException("Matrix indices must be Int or *")
         }
     }

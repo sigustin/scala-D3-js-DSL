@@ -40,7 +40,7 @@ class LabelizedRelationMatrix extends RelationMatrix {
     }
 
     //================== Getters ======================
-    def getLabels(): List[String] = labels
+    def getLabels: List[String] = labels
 
     //=================== Indexing ================================
     /** Returns the index of $label or throws an exception if the label didn't exist */
@@ -93,7 +93,7 @@ class LabelizedRelationMatrix extends RelationMatrix {
         val answer = new StringBuilder()
         answer.append("Matrix(\n")
         data.zipWithIndex.foreach{
-            case (row, i) => {
+            case (row, i) =>
                 answer.append("\t")
                 answer.append(labels(i))
                 answer.append(":\t")
@@ -102,7 +102,6 @@ class LabelizedRelationMatrix extends RelationMatrix {
                     answer.append("\t")
                 })
                 answer.append("\n")
-            }
         }
         answer.append(")")
         answer.toString()

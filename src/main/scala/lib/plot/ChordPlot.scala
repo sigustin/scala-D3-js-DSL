@@ -98,11 +98,11 @@ class ChordPlot extends RelationPlot {
         }
     }
 
-    def getLabels(): Option[List[String]] = {
+    def getLabels: Option[List[String]] = {
         displayedMatrix match {
             case Some(matrix) =>
                 matrix match {
-                    case labelizedMat: LabelizedRelationMatrix => Some(labelizedMat.getLabels())
+                    case labelizedMat: LabelizedRelationMatrix => Some(labelizedMat.getLabels)
                     case _ => None
                 }
             case _ => None
