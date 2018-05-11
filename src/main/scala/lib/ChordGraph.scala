@@ -306,7 +306,7 @@ class ChordGraph extends GraphBase {
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
 
         if (labelLocal.isDefined){
-            val label = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(labelLocal.get)
+            val label = d3.scaleOrdinal[Int, String]().domain(d3.range(labelLocal.get.size)).range(labelLocal.get)
             val groupLabel = group.selectAll(".group-label").data((d: ChordGroup) => groupLabelData(d))
                 .enter().append("g").attr("class", "group-label")
                 .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+24) + ",0)")
