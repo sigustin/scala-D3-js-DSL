@@ -1,13 +1,12 @@
-package lib
+package lib.plot
 
 import d3v4._
-
-import scala.scalajs.js
-import js.Dynamic.{global => gJS}
 import lib.ImplicitConv._
 import org.scalajs.dom
 
-trait Graph {
+import scala.scalajs.js
+
+trait RelationPlot {
     var scale = 0               // power of ten multiplier of the representation of the data hold in data
     private var heightLocal:Option[Double] = None
     private var widthLocal:Option[Double] = None
@@ -19,7 +18,7 @@ trait Graph {
 
     var data: Option[js.Array[js.Array[Double]]] = None
 
-    def setDimension(w: Int, h:Int): Graph = {
+    def setDimension(w: Int, h:Int): RelationPlot = {
         heightLocal = Some(h)
         widthLocal = Some(w)
         d3.select(target)
@@ -28,7 +27,7 @@ trait Graph {
         this
     }
 
-    def setTarget(t: String): Graph = {
+    def setTarget(t: String): RelationPlot = {
         target = t
         svg = d3.select(target)
         this
@@ -52,11 +51,11 @@ trait Graph {
         }
     }
 
-    def setData(d: js.Array[js.Array[Double]]): Graph = {
+    def setData(d: js.Array[js.Array[Double]]): RelationPlot = {
         data = Some(transformData(d))
         this
     }
-    def setData(d: List[List[Double]]): Graph = {
+    def setData(d: List[List[Double]]): RelationPlot = {
         val tmpD:js.Array[js.Array[Double]] = js.Array()
         d.foreach(tmpD.append(_))
         data = Some(transformData(tmpD))

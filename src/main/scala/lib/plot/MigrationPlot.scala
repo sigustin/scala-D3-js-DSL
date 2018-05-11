@@ -1,6 +1,4 @@
-package lib
-
-import scala.scalajs.js
+package lib.plot
 
 //trait TopoJson extends js.Object {
 //    val `type`: String = js.native
@@ -27,6 +25,6 @@ import scala.scalajs.js
 //    val
 //}
 
-class FlowsMap {
+class MigrationPlot {
     ???
 }

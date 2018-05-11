@@ -1,9 +1,10 @@
 package lib
 
+import lib.plot.RelationPlot
 import org.singlespaced.d3js.d3
 
 import scala.scalajs.js
-import js.Dynamic.{ global => g }
+import js.Dynamic.{global => g}
 // source : https://github.com/spaced/scala-js-d3-example-app/tree/json_example
 
 
@@ -37,7 +38,7 @@ trait SimpleJson extends js.Object {
 }
 
 
-class Chords extends Graph {
+class Chords extends RelationPlot {
 
     //var data = js.Array(js.Array(1.0))
 

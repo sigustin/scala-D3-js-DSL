@@ -1,15 +1,13 @@
-package lib
+package lib.plot
 
-import d3v4._
-import lib.{Graph => GraphBasis}
-
-import scala.scalajs.js
-import js.Dynamic.{global => gJS}
+import d3v4.{ChordGroup, _}
 import lib.ImplicitConv._
 import lib.matrix.RelationMatrix
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.collection.mutable.ArrayBuffer
+import scala.scalajs.js
+import scala.scalajs.js.Dynamic.{global => gJS}
 import scala.scalajs.js.JSON
 
 @js.native
@@ -41,7 +39,7 @@ trait DataFromJsonUrl extends js.Object {
     val data: js.Array[Double] = js.native
 }
 
-class ChordGraph extends GraphBasis {
+class ChordPlot extends RelationPlot {
 
     private var colorPaletteLocal: Option[js.Array[String]] = None
     def setColorPalette(cp:js.Array[String])=  {colorPaletteLocal = Some(cp); this}
@@ -63,13 +61,13 @@ class ChordGraph extends GraphBasis {
         setData(arrayOfList.toList)
     }
 
-    override def setData(d: js.Array[js.Array[Double]]): GraphBasis = {
+    override def setData(d: js.Array[js.Array[Double]]): RelationPlot = {
         super.setData(d)
         sumData = Some(computeSumDataOverCircle())
         this
     }
 
-    override def setData(d: List[List[Double]]): GraphBasis = {
+    override def setData(d: List[List[Double]]): RelationPlot = {
         super.setData(d)
         sumData = Some(computeSumDataOverCircle())
         this
@@ -88,7 +86,7 @@ class ChordGraph extends GraphBasis {
     def setLabel(l:js.Array[String]) = { labelLocal = Some(l); this }
 
 
-    def setDataFromUrl(url: String): Graph = {
+    def setDataFromUrl(url: String): RelationPlot = {
         var xobj = new XMLHttpRequest()
         xobj.open("GET", url, false)
         xobj.send(null)
@@ -338,9 +336,9 @@ class ChordGraph extends GraphBasis {
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
     }
 }
-object ChordGraph {
+object ChordPlot {
 //    def apply(d:List[List[Double]]): ChordGraph =  new ChordGraph().setData(d)
-    def apply(d:js.Array[js.Array[Double]]): ChordGraph =  new ChordGraph().setData(d)
-    def apply(d: (String, Product with Serializable)*): ChordGraph = new ChordGraph(d)
-    def apply(d: RelationMatrix): ChordGraph = new ChordGraph().setData(d.getData) // TODO make a better binding (put a matrix inside this class)
+    def apply(d:js.Array[js.Array[Double]]): ChordPlot =  new ChordPlot().setData(d)
+    def apply(d: (String, Product with Serializable)*): ChordPlot = new ChordPlot(d)
+    def apply(d: RelationMatrix): ChordPlot = new ChordPlot().setData(d.getData)
 }

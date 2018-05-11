@@ -1,11 +1,13 @@
 package lib
 
+import lib.plot.{ChordPlot, RelationPlot}
+
 import scala.scalajs.js
 
 object ImplicitConv {
     implicit def intMatrixToDoubleMatrix(d: List[List[Int]]): List[List[Double]] = d.map(_.map(_.toDouble))
 
-    implicit def GraphToChordGraph(g: Graph): ChordGraph = g.asInstanceOf[ChordGraph]
+    implicit def GraphToChordGraph(g: RelationPlot): ChordPlot = g.asInstanceOf[ChordPlot]
 
     implicit def ListToArray[T](d:List[T]): js.Array[T] = {
         val newT:js.Array[T]= js.Array()

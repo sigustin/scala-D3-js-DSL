@@ -1,5 +1,6 @@
 package lib
 
+import lib.plot.RelationPlot
 import org.singlespaced.d3js.Ops._
 import org.singlespaced.d3js.d3
 
@@ -16,7 +17,7 @@ class D3lib(var o: Int) { // it is a class not an object because we do not want 
   def p_= (value:Int):Unit = o = value
 }*/
 
-object D3Lib extends Graph { // it is a class not an object because we do not want a singleton here
+object D3Lib extends RelationPlot { // it is a class not an object because we do not want a singleton here
     var data = js.Array(1)
 
     def setData(d: js.Array[Int]): Unit ={
