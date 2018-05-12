@@ -41,6 +41,7 @@ trait MigrationData extends js.Object {
 @js.native
 trait CountryData extends js.Object {
     val admin:String= js.native
+    val pop_est:Int = js.native
 }
 
 
@@ -81,9 +82,10 @@ class MigrationPlot extends RelationPlot {
 
                 val div = gJS.document.getElementById(idDivInfo)
                 div.style.display = "block"
-
-                val country = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
-                div.innerHTML = buildDivContent(country)
+                val dataCountry = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
+                val country = dataCountry.admin
+                val pop = dataCountry.pop_est
+                div.innerHTML = buildDivContent(country, pop)
                 gJS.console.log()
                 div.style.left = (x+20)+"px"
                 div.style.top = (y+10)+"px"
@@ -156,10 +158,25 @@ class MigrationPlot extends RelationPlot {
 
     }
 
-    def buildDivContent(name:String):String = {
+    def buildDivContent(name:String, population:Int):String = {
+//        import java.text.DecimalFormat
+//        val myFormatter = new DecimalFormat("# ###")
+//        val pop:String = myFormatter.format(population)
+//        import java.util.Locale
+//
+//        val locale = new java.util.Locale("pl", "PL")
+//        val formatter = java.text.NumberFormat.getIntegerInstance(locale)
+//
+//        val pop:String = formatter.format("%,d", population)
+
+        val f1 = d3.formatPrefix(".3s", population)
+        val pop = f1(population)
+//        val f2 = d3.formatted("$,")
+//        val pop2 = f2(population)
         return s"""
-            <div style="margin:10px; font-size: 20px;">
-              <div> ${name} </div
+            <div style="margin:10px;">
+              <div style="font-size: 20px;"> ${name} </div>
+              <div style="font-size: 15px;"> Population: ${pop} </div>
             </div>
             """
     }
