@@ -78,15 +78,19 @@ class LabelizedRelationMatrix extends RelationMatrix {
     }
 
     //====================== Utility functions ===========================
-    /** Merge section $labelToLabel._1 and $labelToLabel._2 and puts the resulting elements at index of $labelToLabel._2 */
-    def merge(labelToLabel: (String, String))(implicit d: DummyImplicit): Unit = { // DummyImplicit to avoid "same type after erasure error'
-        super.merge(getIndex(labelToLabel._1) -> getIndex(labelToLabel._2))
-    }
-    def merge(labelToIndex: (String, Int))(implicit d1: DummyImplicit, d2: DummyImplicit): Unit = {
-        super.merge(getIndex(labelToIndex._1) -> labelToIndex._2)
-    }
-    def merge(indexToLabel: (Int, String))(implicit d1: DummyImplicit, d2: DummyImplicit, d3: DummyImplicit): Unit = {
-        super.merge(indexToLabel._1 -> getIndex(indexToLabel._2))
+    /** Merge section $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index of $indexToIndex._2 */
+    def merge(indexToIndex: (Any, Any)): LabelizedRelationMatrix = { // DummyImplicit to avoid "same type after erasure error'
+        indexToIndex match {
+            case (index1: Int, index2: Int) =>
+                new LabelizedRelationMatrix(labels, super.mergeData(index1 -> index2))
+            case (index: Int, label: String) =>
+                new LabelizedRelationMatrix(labels, super.mergeData(index -> getIndex(label)))
+            case (label: String, index: Int) =>
+                new LabelizedRelationMatrix(labels, super.mergeData(getIndex(label) -> index))
+            case (label1: String, label2: String) =>
+                new LabelizedRelationMatrix(labels, super.mergeData(getIndex(label1) -> getIndex(label2)))
+            case _ => throw new IllegalArgumentException("Can only index matrices using Int and labels")
+        }
     }
 
     override def toString: String = {

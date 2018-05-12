@@ -145,7 +145,9 @@ class ChordPlot extends RelationPlot {
     //=================== Utility function ==============================
     def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
         val k: Double = (d.endAngle - d.startAngle) / d.value
-        d3.range(0, d.value/(10**scale), step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
+        d3.range(0, d.value/(10**scale), step).map(
+            (v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle))
+        )
     }
 
     private val minStepPx = 40 // minimal number of pixels between 2 ticks (not a hard bound)
@@ -161,8 +163,7 @@ class ChordPlot extends RelationPlot {
         /**
           * Computes the step of the ticks so that
           * there are at most $computeMaxNbTicks ticks and at least one per data point
-          * (not in pixels)
-          * and puts it in $tickStep
+          * (not in pixels) and puts it in $tickStep
           */
         def computeTickStep(): Unit = {
             val sumDataValue: Double = sumData.getOrElse(0)
@@ -228,6 +229,7 @@ class ChordPlot extends RelationPlot {
         else 0
     }
 
+    //====================== Display methods ===========================
     def groupLabelData(d:ChordGroup): js.Array[js.Dictionary[Double]] = {
         val angleMean = (d.endAngle - d.startAngle) / 2
         js.Array(js.Dictionary("index" -> d.index.toDouble, "angle" -> (d.startAngle + angleMean)))
@@ -289,7 +291,6 @@ class ChordPlot extends RelationPlot {
                     .style("fill-opacity", opacity.toString)
             }
         }
-
 
         group
             .on("mouseover", fade(0.2))

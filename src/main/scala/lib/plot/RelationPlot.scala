@@ -8,7 +8,7 @@ import org.scalajs.dom
 import scala.scalajs.js
 
 trait RelationPlot {
-    var scale = 0 // power of ten multiplier of the representation of the data hold in data
+    var scale = 0 // power of ten multiplier of the representation of the data
     private var heightLocal:Option[Double] = None
     private var widthLocal:Option[Double] = None
 
@@ -72,11 +72,11 @@ trait RelationPlot {
                                 val labelizedMatrix = LabelizedRelationMatrix(l, d)
                                 displayedMatrix = Some(labelizedMatrix)
                                 this
-                            case None => throw new IllegalStateException ("Tried to set labels for an empty matrix")
+                            case None => throw new UnsupportedOperationException ("Can't set labels for an empty matrix")
                         }
                     case _ => throw new IllegalStateException("Matrix is of invalid type")
                 }
-            case None => throw new IllegalStateException ("Tried to set labels for no matrix")
+            case None => throw new UnsupportedOperationException ("Can't set labels for no matrix")
         }
     }
     def labels_=(l: List[String]): Unit = setLabels(l)
@@ -88,12 +88,13 @@ trait RelationPlot {
                     case labelizedMat: LabelizedRelationMatrix =>
                         displayedMatrix = Some(labelizedMat.updateLabel(labelToLabel))
                         this
-                    case _ => throw new IllegalArgumentException("Can't update a label on a plot without labels")
+                    case _ => throw new UnsupportedOperationException("Can't update a label on a plot without labels")
                 }
             }
-            case None => throw new IllegalArgumentException("Can't update labels on a plot without data")
+            case None => throw new UnsupportedOperationException("Can't update labels on a plot without data")
         }
     }
+    def updateLabel(oldLabel: String, newLabel: String): ChordPlot = updateLabel(oldLabel -> newLabel)
 
     //=================== Getters ===========================
     def height: Double = {
@@ -128,11 +129,63 @@ trait RelationPlot {
         }
     }
 
-    //=================== Utility method ==========================
+    //=================== Utility methods ==========================
     /** Transform all Double so that they are castable to js.Int (by Javascript) */
     private def transformData(d: js.Array[js.Array[Double]]): js.Array[js.Array[Double]] = {
         var maxFigureBehindCommaVal = d.maxNbFigureBehindComma
         scale=maxFigureBehindCommaVal
         (d * (10**maxFigureBehindCommaVal)).round
     }
+
+    /**
+      * Merges all elements of section $indexToIndex._1 into section $indexToIndex._2
+      * and makes the plot ready to display it
+      */
+    def merge(indexToIndex: (Int, Int)): RelationPlot = {
+        displayedMatrix match {
+            case Some(matrix) => displayedMatrix = Some(matrix.merge(indexToIndex._1 -> indexToIndex._2))
+            case None => throw new UnsupportedOperationException("Can't merge two sections when there is no data in the plot")
+        }
+        this
+    }
+    def merge(index1: Int, index2: Int): RelationPlot = merge(index1 -> index2)
+    def merge(labelToLabel: (String, String))(implicit d: DummyImplicit): RelationPlot = {
+        displayedMatrix match {
+            case Some(matrix) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMat.merge(labelToLabel))
+                        this
+                    case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
+                }
+            case None => throw new UnsupportedOperationException("Can't merge sections when no plot has been initialized")
+        }
+    }
+    def merge(label1: String, label2: String): RelationPlot = merge(label1 -> label2)
+    def merge(labelToIndex: (String, Int))(implicit d1: DummyImplicit, d2: DummyImplicit): RelationPlot = {
+        displayedMatrix match {
+            case Some(matrix) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMat.merge(labelToIndex._1 -> labelToIndex._2)) // Giving $labelToIndex directly restuls in a compiler error
+                        this
+                    case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
+                }
+            case None => throw new UnsupportedOperationException("Can't merge sections when no plot has been initialized")
+        }
+    }
+    def merge(label: String, index: Int): RelationPlot = merge(label -> index)
+    def merge(indexToLabel: (Int, String))(implicit d1: DummyImplicit, d2: DummyImplicit, d3: DummyImplicit): RelationPlot = {
+        displayedMatrix match {
+            case Some(matrix) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMat.merge(indexToLabel))
+                        this
+                    case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
+                }
+            case None => throw new UnsupportedOperationException("Can't merge sections when no plot has been initialized")
+        }
+    }
+    def merge(index: Int, label: String): RelationPlot = merge(index -> label)
 }

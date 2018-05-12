@@ -87,20 +87,20 @@ class RelationMatrix {
     }
 
     //================== Utility functions =====================
-    /** Merge section $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index $indexToIndex._2 */
-    def merge(indexToIndex: (Int, Int)): Unit = {
+    /** Returns the data in which section $indexToIndex._1 is merged into $indexToIndex._2 */
+    protected def mergeData(indexToIndex: (Int, Int)): List[List[Double]] = {
         // TODO this method might be better off using a ListBuffer
         val index1 = indexToIndex._1
         val index2 = indexToIndex._2
         if (index1 < 0 || index1 >= size || index2 < 0 || index2 >= size)
             throw new IndexOutOfBoundsException
         if (index1 == index2)
-            return
+            return data
 
         val indexSmall = index1 min index2
         val indexLarge = index1 max index2
         // Merge columns
-        data = data.map(row => {
+        var updatedData = data.map(row => {
             val (head, val1::tail) = row.splitAt(indexSmall)
             val (mid, val2::end) = tail.splitAt(indexLarge-indexSmall-1)
             if (index1 > index2)
@@ -110,16 +110,19 @@ class RelationMatrix {
         })
 
         // Merge rows
-        val (head, row1::tail) = data.splitAt(indexSmall)
+        val (head, row1::tail) = updatedData.splitAt(indexSmall)
         val (mid, row2::end) = tail.splitAt(indexLarge-indexSmall-1)
         var mergedRow = (row1 zip row2).map(t => t._1+t._2)
         if (zeroDiagonal)
             mergedRow = mergedRow.updated(index1, 0).asInstanceOf[List[Double]]
         if (index1 > index2)
-            data = head ++ List(mergedRow) ++ mid ++ end
+            updatedData = head ++ List(mergedRow) ++ mid ++ end
         else
-            data = head ++ mid ++ List(mergedRow) ++ end
+            updatedData = head ++ mid ++ List(mergedRow) ++ end
+        updatedData
     }
+    /** Returns a new matrix in which section $indexToIndex._1 is merged into $indexToIndex._2 */
+    def merge(indexToIndex: (Int, Int)): RelationMatrix = new RelationMatrix(mergeData(indexToIndex))
 
     override def toString: String = {
         val answer = new StringBuilder()

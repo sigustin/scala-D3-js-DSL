@@ -162,6 +162,8 @@ object ScalaJSExample {
         plot
             .draw()
 
+        plot.merge("LabelB" -> "LabelC")
+        plot.draw()
     }
 
     /*
