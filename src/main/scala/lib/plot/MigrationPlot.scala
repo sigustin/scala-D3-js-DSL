@@ -62,16 +62,28 @@ class MigrationPlot extends RelationPlot {
                 .attr("d", path.asInstanceOf[Primitive])
                 .attr("fill", "green")
 
-            // move the left corner at the right place
+            // move the left corner at the right place and apply the right scale
             val svg_box = gJS.document.querySelector(s"#${id}").getBoundingClientRect()
             val map = gJS.document.querySelector(s"#${id} #map").getBoundingClientRect()
-            val dx = map.x - svg_box.x
-            val dy = svg_box.y - map.y
 
-            ret.attr("transform", s"translate(${dx},${dy})")
+            val scaleX:Double = (svg_box.width/map.width).asInstanceOf[Double]
+            val scaleY:Double = (svg_box.height/map.height).asInstanceOf[Double]
+            val scaleApplied = min(scaleX, scaleY)
+
+            val dx = (svg_box.x - map.x)*scaleApplied.asInstanceOf[js.Dynamic]
+            val dy = (svg_box.y - map.y)*scaleApplied.asInstanceOf[js.Dynamic]
+
+            ret.attr("transform", s"translate(${dx},${dy}) scale(${scaleApplied})")
+
 
         }
         d3.json("d3/europe.geo.json", callback)
 
     }
+
+    def min(a:Double, b:Double): Double ={
+        if (a > b) return b
+        else return a
+    }
+
 }
