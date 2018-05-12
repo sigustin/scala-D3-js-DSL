@@ -134,13 +134,15 @@ object ScalaJSExample {
         plot.draw()
 
         var clickCount = 0
-        plot onClick {
+        plot onClickDown {
             if (clickCount % 2 == 0)
                 plot.merge(("LabelB", "LabelC") -> "Label B and C")
             else
                 plot.revertDisplay()
             plot.draw()
             clickCount += 1
+        } onClickUp {
+            println("clicked :D")
         }
     }
 
