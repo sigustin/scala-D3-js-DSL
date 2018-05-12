@@ -168,9 +168,37 @@ trait RelationPlot {
     def merge(index1: Any, index2: Any): RelationPlot = merge(index1 -> index2)
 
     //===================== Listeners =========================
-    /** Calls the function $function when the plot is clicked on */
-    def onClick(f: => Any): Unit = svg.on("click", () => f)
+    /** Calls the function $f when the plot is clicked on */
+    def onClick(f: => Unit): RelationPlot = {svg.on("click", () => f); this}
     // TODO does not work with 1 or 2 arguments (as in JS) because "same type after erasure"
-//    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction1): Unit = svg.on("click", f)
+    def onClick(f: => js.Any => Unit): Unit = svg.on("click", f)
 //    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction2): Unit = svg.on("click", f)
+    /** Calls the function $f when the plot is double-clicked */
+    def onDoubleClick(f: => Unit): RelationPlot = {svg.on("dblclick", () => f); this}
+    /** Calls the function $f when the plot is clicked on (mouse down) */
+    def onMouseDown(f: => Unit): RelationPlot = onClickDown(f)
+    def onClickDown(f: => Unit): RelationPlot = {svg.on("mousedown", () => f); this}
+    /** Calls the function $f when the plot stops being clicked on (mouse up) */
+    def onMouseUp(f: => Unit): RelationPlot = onClickUp(f)
+    def onClickUp(f: => Unit): RelationPlot = {svg.on("mouseup", () => f); this}
+    /** Calls the function $f when the mouse goes over the plot */
+    def onMouseOver(f: => Unit): RelationPlot = {svg.on("mouseover", () => f); this}
+    /** Calls the function $f when the plot is hovered by the mouse (mouse enter) */
+    def onMouseEnter(f: => Unit): RelationPlot = onHover(f)
+    def onHover(f: => Unit): RelationPlot = {svg.on("mouseenter", () => f); this}
+    /** Calls the function $f when the plot stops being hovered by the mouse (mouse leave) */
+    def onMouseLeave(f: => Unit): RelationPlot = onHoverOff(f)
+    def onHoverOff(f: => Unit): RelationPlot = {svg.on("mouseleave", () => f); this}
+    /** Calls the function $f when the plot is focused */
+    def whenFocused(f: => Unit): RelationPlot = {svg.on("focus", () => f); this} // Not useful as the svg in the html file is not focusable
+    /** Calls the function $f when a key is pressed */
+    def onKeyPressed(f: => Unit): RelationPlot = {svg.on("keydown", () => f); this} // TODO doesn't seem to work
+    /** Calls the function $f when scrolled */
+    def onScroll(f: => Unit): RelationPlot = {svg.on("SCGScroll", () => f); this} // TODO doesn't seem to work
+    /** Calls the function $f when the plot is resized (never happens) */
+    def onResize(f: => Unit): RelationPlot = {svg.on("resize", () => f); this}
+    /** Calls the function $f when the page changes visibility */
+    def onPageVisibilityChange(f: => Unit): RelationPlot = {svg.on("visibilitychange", () => f); this} // TODO doesn't seem to work
+
+    // TODO listeners lists for events on groups?
 }

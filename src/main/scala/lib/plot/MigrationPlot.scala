@@ -5,7 +5,7 @@ import org.scalajs.dom.raw.MouseEvent
 
 import scala.scalajs.js.annotation.{JSExport, JSExportNamed, JSExportTopLevel}
 import scala.scalajs.js
-import js.Dynamic.{global => gJS}
+import scala.scalajs.js.Dynamic.{global => gJS}
 
 //trait TopoJson extends js.Object {
 //    val `type`: String = js.native
@@ -152,7 +152,7 @@ class MigrationPlot extends RelationPlot {
 
             val scaleX:Double = (svg_box.width/map.width).asInstanceOf[Double]
             val scaleY:Double = (svg_box.height/map.height).asInstanceOf[Double]
-            val scaleApplied = min(scaleX, scaleY)
+            val scaleApplied = scaleX min scaleY
 
             val dx = (svg_box.x - map.x)*scaleApplied.asInstanceOf[js.Dynamic]
             val dy = (svg_box.y - map.y)*scaleApplied.asInstanceOf[js.Dynamic]
@@ -173,9 +173,5 @@ class MigrationPlot extends RelationPlot {
 
     }
 
-    def min(a:Double, b:Double): Double ={
-        if (a > b) return b
-        else return a
-    }
-
 }
+

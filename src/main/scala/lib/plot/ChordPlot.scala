@@ -73,7 +73,10 @@ class ChordPlot extends RelationPlot {
 
     private var sumData: Option[Double] = None
     private var tickStep: Option[Double] = None
-    /** Returns the sum of the data around the whole chord plot */
+    /**
+      * Returns the sum of the data around the whole chord plot
+      * @post the result is >= 0.0
+      */
     private def computeSumDataOverCircle(): Double = {
         // Reset the tick step
         tickStep = None
@@ -82,7 +85,7 @@ class ChordPlot extends RelationPlot {
             case None => 0.0
             case Some(d) =>
                 var sum = 0.0
-                d.foreach(sum += _.sum)
+                d.foreach(sum += _.sum.abs)
                 sum
         }
     }
@@ -142,13 +145,6 @@ class ChordPlot extends RelationPlot {
     def colorPalette_=(cp: List[String]): Unit = setColorPalette(cp)
 
     //=================== Utility function ==============================
-    def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
-        val k: Double = (d.endAngle - d.startAngle) / d.value
-        d3.range(0, d.value/(10**scale), step).map(
-            (v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle))
-        )
-    }
-
     private val minStepPx = 40 // minimal number of pixels between 2 ticks (not a hard bound)
     /** Computes the number of ticks so that there are not too many nor too few */
     def computeMaxNbTicks(): Int = {
@@ -167,8 +163,10 @@ class ChordPlot extends RelationPlot {
         def computeTickStep(): Unit = {
             val sumDataValue: Double = sumData.getOrElse(0)
             val minTicksStep = closestRoundNb(sumDataValue / computeMaxNbTicks())
-            if (minTicksStep == 0.0)
+            if (minTicksStep == 0.0) {
                 tickStep = Some(1)
+                return
+            }
             tickStep = Some(minTicksStep)
         }
 
@@ -180,25 +178,27 @@ class ChordPlot extends RelationPlot {
         }
     }
 
-    /** Computes the order of $nb */
-    private def getOrder(nb: Double): Int = {
-        var stop = false
-        var pow = 0
-        while (!stop) {
-            if (nb >= math.pow(10, pow))
-                pow += 1
-            else
-                stop = true
-        }
-        pow-1
-    }
     /** Computes the closest "round" number to $nb */
     private def closestRoundNb(nb: Double): Long = {
+        /** Computes the order of $nb */
+        def getOrder(nb: Double): Int = {
+            if (nb < 0) println(s"[WARNING] Tried to compute the order of $nb => actually computed the order of ${nb.abs}")
+            var fixedNb = nb.abs
+
+            var stop = false
+            var pow = 0
+            while (!stop) {
+                if (fixedNb >= math.pow(10, pow))
+                    pow += 1
+                else
+                    stop = true
+            }
+            pow-1
+        }
+
         val order = getOrder(nb)
-        if (order == 0)
-            return 0
-        if (nb == math.pow(10, order))
-            return math.pow(10, order).toLong
+        if (nb.abs == math.pow(10, order))
+            return nb.toLong
 
         val differenceTo1X = (nb - math.pow(10, order)).abs
         val differenceTo2dot5X = (nb - 2.5*math.pow(10, order)).abs
@@ -222,7 +222,7 @@ class ChordPlot extends RelationPlot {
             val totalNbTicks = sumData.get / getTickStep
             val nbBigTicks: Int = (totalNbTicks / preferredBigTickStep).round.toInt
             if (nbBigTicks >= minNbBigTicks && nbBigTicks < maxNbBigTicks)
-                return (totalNbTicks / nbBigTicks).round.toInt
+                return preferredBigTickStep
             (totalNbTicks / minNbBigTicks).round.toInt
         }
         else 0
@@ -267,11 +267,10 @@ class ChordPlot extends RelationPlot {
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
             .attr("d", (x: ChordGroup) => arc(x))
 
-
+        /** Makes all sections fade but the one hovered */
         def fade(opacity:Double): js.Any => Unit = {
             d => {
                 val i = d.asInstanceOf[ChordGroupJson].index
-
                 svg.selectAll("path")
                     .filter((d:js.Any) => {
                         val dJs = d.asInstanceOf[js.Any]
@@ -292,11 +291,17 @@ class ChordPlot extends RelationPlot {
                     .style("fill-opacity", opacity.toString)
             }
         }
-
         group
             .on("mouseover", fade(0.2))
             .on("mouseout", fade(0.8))
 
+        // Place ticks around the plot
+        def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
+            val k: Double = (d.endAngle - d.startAngle) / d.value
+            d3.range(0, (d.value+1)/(10**scale), step).map(
+                (v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle))
+            )
+        }
 
         var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, getTickStep))
             .enter().append("g").attr("class", "group-tick")
@@ -305,8 +310,9 @@ class ChordPlot extends RelationPlot {
 
         groupTick.append("line").attr("x2", 6)
 
-        val formatValue = d3.formatPrefix(",.0", getTickStep)
-        val bigTickStep = closestRoundNb(nbTicksBetweenBigTicks() * getTickStep)
+        val formatValue = d3.formatPrefix(",.0", getTickStep) // Should print K for thousands, M for millions...
+        val computedBigTickStep = closestRoundNb(nbTicksBetweenBigTicks() * getTickStep)
+        val bigTickStep = if (computedBigTickStep == 0.0) getTickStep else computedBigTickStep
         groupTick.filter((d: js.Dictionary[Double]) => d("value") % bigTickStep == 0).append("text")
                 .attr("x", 8)
                 .attr("dy", ".35em")
