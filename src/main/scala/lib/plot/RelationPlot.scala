@@ -54,7 +54,7 @@ trait RelationPlot {
         displayedMatrix = Some(matrix)
     }
     /** Resets the displayed matrix to the basis one (if there is one) */
-    def resetDisplay(): Unit = {
+    def revertDisplay(): Unit = {
         basisMatrix match {
             case Some(matrix) => displayedMatrix = Some(matrix)
             case None => displayedMatrix = None

@@ -1,5 +1,6 @@
 package example
 
+import d3v4.d3
 import lib.plot.ChordPlot
 
 import scala.scalajs.js
@@ -154,8 +155,15 @@ object ScalaJSExample {
         plot
             .draw()
 
-        plot.merge("LabelB" -> "LabelC")
-        plot.draw()
+        var clickCount = 0
+        d3.select("#playground2").on("click", () => {
+            if (clickCount % 2 == 0)
+                plot.merge("LabelB" -> "LabelC")
+            else
+                plot.revertDisplay()
+            plot.draw()
+            clickCount += 1
+        })
     }
 
     /*
