@@ -1,7 +1,6 @@
 package example
 
 
-import d3v4.d3
 import lib.plot.ChordPlot
 
 import scala.scalajs.js
@@ -132,27 +131,17 @@ object ScalaJSExample {
             .updateLabel("LabelA" -> "LabelOne")
 
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
-        plot
-            .draw()
+        plot.draw()
 
         var clickCount = 0
-        d3.select("#playground2 svg").on("click", () => {
+        plot.onClick{
             if (clickCount % 2 == 0)
-                plot.merge(("LabelB", "LabelC") -> "labelB and C")
+                plot.merge(("LabelB", "LabelC") -> "Label B and C")
             else
                 plot.revertDisplay()
             plot.draw()
             clickCount += 1
-        })
-        //MOCKUP
-//        plot.onClick{
-//            if (clickCount % 2 == 0)
-//                plot.merge("LabelB" -> "LabelC")
-//            else
-//                plot.revertDisplay()
-//            plot.draw()
-//            clickCount += 1
-//        }
+        }
     }
 
     /*

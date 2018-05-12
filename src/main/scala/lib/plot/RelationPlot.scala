@@ -169,7 +169,8 @@ trait RelationPlot {
 
     //===================== Listeners =========================
     /** Calls the function $function when the plot is clicked on */
-//    def onClick(f: => Unit): Unit = { // TODO does not work yet (f is not called)
-//        svg.on("click", f.asInstanceOf[Selection[dom.EventTarget]#ListenerFunction0])
-//    }
+    def onClick(f: => Any): Unit = svg.on("click", () => f)
+    // TODO does not work with 1 or 2 arguments (as in JS) because "same type after erasure"
+//    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction1): Unit = svg.on("click", f)
+//    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction2): Unit = svg.on("click", f)
 }
