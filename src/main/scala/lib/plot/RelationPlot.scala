@@ -169,36 +169,36 @@ trait RelationPlot {
 
     //===================== Listeners =========================
     /** Calls the function $f when the plot is clicked on */
-    def onClick(f: => Any): RelationPlot = {svg.on("click", () => f); this}
+    def onClick(f: => Unit): RelationPlot = {svg.on("click", () => f); this}
     // TODO does not work with 1 or 2 arguments (as in JS) because "same type after erasure"
-//    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction1): Unit = svg.on("click", f)
+    def onClick(f: => js.Any => Unit): Unit = svg.on("click", f)
 //    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction2): Unit = svg.on("click", f)
     /** Calls the function $f when the plot is double-clicked */
-    def onDoubleClick(f: => Any): RelationPlot = {svg.on("dblclick", () => f); this}
+    def onDoubleClick(f: => Unit): RelationPlot = {svg.on("dblclick", () => f); this}
     /** Calls the function $f when the plot is clicked on (mouse down) */
-    def onMouseDown(f: => Any): RelationPlot = onClickDown(f)
-    def onClickDown(f: => Any): RelationPlot = {svg.on("mousedown", () => f); this}
+    def onMouseDown(f: => Unit): RelationPlot = onClickDown(f)
+    def onClickDown(f: => Unit): RelationPlot = {svg.on("mousedown", () => f); this}
     /** Calls the function $f when the plot stops being clicked on (mouse up) */
-    def onMouseUp(f: => Any): RelationPlot = onClickUp(f)
-    def onClickUp(f: => Any): RelationPlot = {svg.on("mouseup", () => f); this}
+    def onMouseUp(f: => Unit): RelationPlot = onClickUp(f)
+    def onClickUp(f: => Unit): RelationPlot = {svg.on("mouseup", () => f); this}
     /** Calls the function $f when the mouse goes over the plot */
-    def onMouseOver(f: => Any): RelationPlot = {svg.on("mouseover", () => f); this}
+    def onMouseOver(f: => Unit): RelationPlot = {svg.on("mouseover", () => f); this}
     /** Calls the function $f when the plot is hovered by the mouse (mouse enter) */
-    def onMouseEnter(f: => Any): RelationPlot = onHover(f)
-    def onHover(f: => Any): RelationPlot = {svg.on("mouseenter", () => f); this}
+    def onMouseEnter(f: => Unit): RelationPlot = onHover(f)
+    def onHover(f: => Unit): RelationPlot = {svg.on("mouseenter", () => f); this}
     /** Calls the function $f when the plot stops being hovered by the mouse (mouse leave) */
-    def onMouseLeave(f: => Any): RelationPlot = onHoverOff(f)
-    def onHoverOff(f: => Any): RelationPlot = {svg.on("mouseleave", () => f); this}
+    def onMouseLeave(f: => Unit): RelationPlot = onHoverOff(f)
+    def onHoverOff(f: => Unit): RelationPlot = {svg.on("mouseleave", () => f); this}
     /** Calls the function $f when the plot is focused */
-    def whenFocused(f: => Any): RelationPlot = {svg.on("focus", () => f); this} // Not useful as the svg in the html file is not focusable
+    def whenFocused(f: => Unit): RelationPlot = {svg.on("focus", () => f); this} // Not useful as the svg in the html file is not focusable
     /** Calls the function $f when a key is pressed */
-    def onKeyPressed(f: => Any): RelationPlot = {svg.on("keydown", () => f); this} // TODO doesn't seem to work
+    def onKeyPressed(f: => Unit): RelationPlot = {svg.on("keydown", () => f); this} // TODO doesn't seem to work
     /** Calls the function $f when scrolled */
-    def onScroll(f: => Any): RelationPlot = {svg.on("SCGScroll", () => f); this} // TODO doesn't seem to work
+    def onScroll(f: => Unit): RelationPlot = {svg.on("SCGScroll", () => f); this} // TODO doesn't seem to work
     /** Calls the function $f when the plot is resized (never happens) */
-    def onResize(f: => Any): RelationPlot = {svg.on("resize", () => f); this}
+    def onResize(f: => Unit): RelationPlot = {svg.on("resize", () => f); this}
     /** Calls the function $f when the page changes visibility */
-    def onPageVisibilityChange(f: => Any): RelationPlot = {svg.on("visibilitychange", () => f); this} // TODO doesn't seem to work
+    def onPageVisibilityChange(f: => Unit): RelationPlot = {svg.on("visibilitychange", () => f); this} // TODO doesn't seem to work
 
     // TODO listeners lists for events on groups?
 }
