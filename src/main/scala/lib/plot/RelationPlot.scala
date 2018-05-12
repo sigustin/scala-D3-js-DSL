@@ -66,9 +66,9 @@ trait RelationPlot {
             case Some(matrix) =>
                 matrix match {
                     case m: LabelizedRelationMatrix =>
-                        matrix.asInstanceOf[LabelizedRelationMatrix].setLabels (l)
+                        m.setLabels (l)
                         this
-                    case m: RelationMatrix =>
+                    case _: RelationMatrix =>
                         data match {
                             case Some(d) =>
                                 val labelizedMatrix = LabelizedRelationMatrix(l, d)
@@ -85,14 +85,13 @@ trait RelationPlot {
 
     def updateLabel(labelToLabel: (String, String)): ChordPlot = {
         displayedMatrix match {
-            case Some(matrix) => {
+            case Some(matrix) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
                         displayedMatrix = Some(labelizedMat.updateLabel(labelToLabel))
                         this
                     case _ => throw new UnsupportedOperationException("Can't update a label on a plot without labels")
                 }
-            }
             case None => throw new UnsupportedOperationException("Can't update labels on a plot without data")
         }
     }
@@ -135,7 +134,7 @@ trait RelationPlot {
     //=================== Utility methods ==========================
     /** Transform all Double so that they are castable to js.Int (by Javascript) */
     private def transformData(d: js.Array[js.Array[Double]]): js.Array[js.Array[Double]] = {
-        var maxFigureBehindCommaVal = d.maxNbFigureBehindComma
+        val maxFigureBehindCommaVal = d.maxNbFigureBehindComma
         scale=maxFigureBehindCommaVal
         (d * (10**maxFigureBehindCommaVal)).round
     }

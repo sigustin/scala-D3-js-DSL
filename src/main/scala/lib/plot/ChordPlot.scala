@@ -80,11 +80,10 @@ class ChordPlot extends RelationPlot {
 
         data match {
             case None => 0.0
-            case Some(d) => {
+            case Some(d) =>
                 var sum = 0.0
                 d.foreach(sum += _.sum)
                 sum
-            }
         }
     }
 
@@ -106,7 +105,7 @@ class ChordPlot extends RelationPlot {
     }
 
     private def setDataFromUrl(url: String): RelationPlot = {
-        var xobj = new XMLHttpRequest()
+        val xobj = new XMLHttpRequest()
         xobj.open("GET", url, false)
         xobj.send(null)
 
@@ -280,14 +279,13 @@ class ChordPlot extends RelationPlot {
                             val e = dJs.asInstanceOf[ChordGroupJson]
                             i != e.index
                         } catch {
-                            case default:Throwable => {
+                            case _: Throwable =>
                                 try {
                                     val e = dJs.asInstanceOf[ChordJson]
                                     e.source.index != i && e.target.index != i
                                 } catch {
-                                    case default:Throwable => true
+                                    case _: Throwable => true
                                 }
-                            }
                         }
                     })
                     .style("stroke-opacity", opacity.toString)
