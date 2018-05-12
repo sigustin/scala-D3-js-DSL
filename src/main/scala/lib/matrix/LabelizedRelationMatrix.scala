@@ -37,11 +37,13 @@ class LabelizedRelationMatrix extends RelationMatrix {
 
     def updateLabel(labelToLabel: (Any, String)): LabelizedRelationMatrix = {
         val newLabel = labelToLabel._2
-        var oldLabel: Any = "uninitialized"
+        var oldLabel: String = "uninitialized"
         labelToLabel._1 match {
             case index: Int => oldLabel = labels(index)
             case label: String => oldLabel = label
         }
+        if (!existsLabel(oldLabel))
+            println(s"[WARNING] Label '$oldLabel' is not present in the plot => ignoring the update")
 
         val updatedLabels = labels.map(label => if (label == oldLabel) newLabel else label)
         new LabelizedRelationMatrix(updatedLabels, data)
@@ -86,6 +88,9 @@ class LabelizedRelationMatrix extends RelationMatrix {
     }
 
     //====================== Utility functions ===========================
+    /** Returns true iff a section is labelled $label */
+    def existsLabel(label: String): Boolean = labelsIndices.keySet.contains(label)
+
     /** Merge section $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index of $indexToIndex._2 */
     def merge(indexToIndex: (Any, Any)): LabelizedRelationMatrix = { // DummyImplicit to avoid "same type after erasure error'
         indexToIndex match {
