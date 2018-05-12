@@ -245,7 +245,7 @@ class ChordPlot extends RelationPlot {
         import d3v4.d3
 
         // Refresh display
-        d3.select(target+" g").remove()
+        d3.select(localTarget+" g").remove()
 
         val outerRadius = Math.min(width, height) * 0.5 - 40
         val innerRadius = outerRadius - 30

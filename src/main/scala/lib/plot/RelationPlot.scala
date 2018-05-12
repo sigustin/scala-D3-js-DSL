@@ -12,8 +12,8 @@ trait RelationPlot {
     private var heightLocal:Option[Double] = None
     private var widthLocal:Option[Double] = None
 
-    var target = "svg" // is a html selector used as destination for the graphe
-    var svg: Selection[dom.EventTarget] = d3.select(target)
+    protected var localTarget = "svg" // is a html selector used as destination for the graphe
+    var svg: Selection[dom.EventTarget] = d3.select(localTarget)
 
     // Both matrices may contain labels or not
     protected var basisMatrix: Option[RelationMatrix] = None // When resetting the display, get back to this data
@@ -24,21 +24,23 @@ trait RelationPlot {
     def setDimension(w: Int, h:Int): RelationPlot = {
         heightLocal = Some(h)
         widthLocal = Some(w)
-        d3.select(target)
+        d3.select(localTarget)
             .attr("width", w)
             .attr("height", h)
         this
     }
+    def dimension_=(w: Int, h: Int): Unit = setDimension(w, h)
+    def dimension_=(dim: (Int, Int)): Unit = setDimension(dim._1, dim._2)
 
     /** Sets the target html tag */
     def setTarget(t: String): RelationPlot = {
-        target = t
-        svg = d3.select(target)
+        localTarget = t
+        svg = d3.select(localTarget)
         this
     }
-    def target_(t: String): Unit = {
-        target = t
-        svg = d3.select(target)
+    def target_=(t: String): Unit = {
+        localTarget = t
+        svg = d3.select(localTarget)
     }
 
     /** Sets the basis matrix of the plot and let it display itself */
@@ -100,16 +102,17 @@ trait RelationPlot {
     def height: Double = {
         heightLocal match {
             case Some(h) => h
-            case None => d3.select(target).attr("height").toDouble
+            case None => d3.select(localTarget).attr("height").toDouble
         }
     }
-
     def width: Double = {
         widthLocal match {
             case Some(w) => w
-            case None => d3.select(target).attr("width").toDouble
+            case None => d3.select(localTarget).attr("width").toDouble
         }
     }
+
+    def getTarget: String = localTarget
 
     def data: Option[List[List[Double]]] = {
         displayedMatrix match {
