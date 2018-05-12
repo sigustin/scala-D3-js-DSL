@@ -1,6 +1,5 @@
 package example
 
-import d3v4.d3
 import lib.plot.ChordPlot
 
 import scala.scalajs.js
@@ -154,10 +153,6 @@ object ScalaJSExample {
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
         plot
             .draw()
-
-        d3.select("#playground2 svg g").remove()
-//        d3.select("playground2")
-//                .append("svg").attr("width", "600").attr("height", "800")
 
         plot.merge("LabelB" -> "LabelC")
         plot.draw()
