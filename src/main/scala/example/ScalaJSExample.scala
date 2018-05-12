@@ -6,7 +6,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import lib._
 import lib.ImplicitConv._
 import lib.matrix.{*, FlowsMatrix, LabelizedFlowsMatrix, LabelizedRelationMatrix}
-import lib.plot.ChordPlot
+import lib.plot.{ChordPlot, MigrationPlot}
 import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
@@ -54,12 +54,12 @@ object ScalaJSExample {
 //            js.Array(1013, 990,  940, 6907)
 //        )
 
-        val dataJs = js.Array[js.Array[Double]](
-            js.Array(12, 6, 9, 3),
-            js.Array(2, 10, 2, 6),
-            js.Array(8, 16, 8, 8),
-            js.Array(1, 1,  1, 7)
-        )
+//        val dataJs = js.Array[js.Array[Double]](
+//            js.Array(12, 6, 9, 3),
+//            js.Array(2, 10, 2, 6),
+//            js.Array(8, 16, 8, 8),
+//            js.Array(1, 1,  1, 7)
+//        )
 
 //        val g = new ChordPlot()
 //        g.setDataFromUrl("data.json")
@@ -68,13 +68,13 @@ object ScalaJSExample {
 //        g.setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
 //        g.draw()
 
-        val g = new ChordPlot()
-            .setData(dataJs)
-            .setTarget("#playground2 svg")
-            .setDimension(600, 600)
-            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
-            .setLabel(List("A", "B", "C", "D"))
-            .draw()
+//        val g = new ChordPlot()
+//            .setData(dataJs)
+//            .setTarget("#playground2 svg")
+//            .setDimension(600, 600)
+//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+//            .setLabel(List("A", "B", "C", "D"))
+//            .draw()
 
 //        val graph = ChordPlot(
 //            "LabelA" -> (1,2,3),
@@ -88,34 +88,13 @@ object ScalaJSExample {
 //            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
 //            .draw()
 
-        //========== Flow map =====================
-//        import d3v4.d3
-//        val width = 900
-//        val height = 800
-//        val scale = 200 // for this file, this is approximately 0.5*size of America
-//
-//        val projection: Projection = d3.geoMercator().translate((width/2.0+2*scale, height/2.0+2*scale)).scale(scale)
-//
-//        var path: Path = d3.geoPath(projection)
-////        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
-//
-//        val callback: js.Any => Unit = (d:js.Any) => {
-//            val geoData = d.asInstanceOf[MyRootJson].features
-//            println("got:"+d+" => "+geoData)
-//
-//            val ret = d3.select("body")
-//                .append("svg")
-//                .attr("width", width)
-//                .attr("height", height)
-//                .append("g")
-//                .attr("id", "map")
-//                .selectAll("path")
-//                .data(geoData)
-//                .enter().append("path")
-//                .attr("d", path.asInstanceOf[Primitive])
-//                .attr("fill", "green")
-//        }
-//        d3.json("d3/europe.geo.json", callback)
+        // ========== Flow map =====================
+        val g= new MigrationPlot()
+//        g.setDimension(240, 300)
+        g.setDimension(800, 900)
+        g.setTarget("#playground2 svg")
+        g.draw()
+
 
 
 //        //========== Test matrices =================
