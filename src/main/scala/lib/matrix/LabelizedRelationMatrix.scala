@@ -1,7 +1,7 @@
 package lib.matrix
 
 /**
-  * Square matrix indexable by labels used to store relations between sections in chord graphs and migration maps
+  * Immutable square matrix indexable by labels used to store relations between sections in chord graphs and migration maps
   */
 class LabelizedRelationMatrix extends RelationMatrix {
     //=================== Constructors and related ==========================
@@ -16,7 +16,10 @@ class LabelizedRelationMatrix extends RelationMatrix {
 
     /** Checks that all labels are different and initializes $this.labels and $this.labelIndices */
     def checkAndInitLabels(labels: List[String]): Unit = {
-        var fixedLabels = labels.padTo(size, "")
+        if (labels.distinct.length != labels.length)
+            println("[WARNING] Provided duplicated labels => removing the duplicates")
+
+        var fixedLabels = labels.distinct.padTo(size, "")
         if (labels.length < size)
             println("[WARNING] Provided labels are missing some values => replaced by empty strings")
         else if (labels.length > size) {
@@ -30,6 +33,17 @@ class LabelizedRelationMatrix extends RelationMatrix {
         labels.zipWithIndex.foreach{case (label, i) => labelsIndicesBuilder += (label -> i)}
         labelsIndices = labelsIndicesBuilder.toMap
     }
+    def setLabels(labels: List[String]): Unit = checkAndInitLabels(labels)
+
+    def updateLabel(labelToLabel: (String, String)): LabelizedRelationMatrix = {
+        val oldLabel = labelToLabel._1
+        val newLabel = labelToLabel._2
+        val updatedLabels = labels.map(label => if (label == oldLabel) newLabel else label)
+        new LabelizedRelationMatrix(updatedLabels, data)
+    }
+
+    //================== Getters ======================
+    def getLabels: List[String] = labels
 
     //=================== Indexing ================================
     /** Returns the index of $label or throws an exception if the label didn't exist */
@@ -67,22 +81,32 @@ class LabelizedRelationMatrix extends RelationMatrix {
     }
 
     //====================== Utility functions ===========================
-    /** Merge section $labelToLabel._1 and $labelToLabel._2 and puts the resulting elements at index of $labelToLabel._2 */
-    def merge(labelToLabel: (String, String))(implicit d: DummyImplicit): Unit = { // DummyImplicit to avoid "same type after erasure error'
-        super.merge(getIndex(labelToLabel._1) -> getIndex(labelToLabel._2))
-    }
-    def merge(labelToIndex: (String, Int))(implicit d1: DummyImplicit, d2: DummyImplicit): Unit = {
-        super.merge(getIndex(labelToIndex._1) -> labelToIndex._2)
-    }
-    def merge(indexToLabel: (Int, String))(implicit d1: DummyImplicit, d2: DummyImplicit, d3: DummyImplicit): Unit = {
-        super.merge(indexToLabel._1 -> getIndex(indexToLabel._2))
+    /** Merge section $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index of $indexToIndex._2 */
+    def merge(indexToIndex: (Any, Any)): LabelizedRelationMatrix = { // DummyImplicit to avoid "same type after erasure error'
+        indexToIndex match {
+            case (index1: Int, index2: Int) =>
+                val updatedLabels = labels.slice(0, index1) ++ labels.slice(index1+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(index1 -> index2))
+            case (index: Int, label: String) =>
+                val updatedLabels = labels.slice(0, index) ++ labels.slice(index+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(index -> getIndex(label)))
+            case (label: String, index: Int) =>
+                val indexLabel = getIndex(label)
+                val updatedLabels = labels.slice(0, indexLabel) ++ labels.slice(indexLabel+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(indexLabel -> index))
+            case (label1: String, label2: String) =>
+                val indexLabel1 = getIndex(label1)
+                val updatedLabels = labels.slice(0, indexLabel1) ++ labels.slice(indexLabel1+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(getIndex(label1) -> getIndex(label2)))
+            case _ => throw new IllegalArgumentException("Can only index matrices using Int and labels")
+        }
     }
 
     override def toString: String = {
         val answer = new StringBuilder()
         answer.append("Matrix(\n")
         data.zipWithIndex.foreach{
-            case (row, i) => {
+            case (row, i) =>
                 answer.append("\t")
                 answer.append(labels(i))
                 answer.append(":\t")
@@ -91,7 +115,6 @@ class LabelizedRelationMatrix extends RelationMatrix {
                     answer.append("\t")
                 })
                 answer.append("\n")
-            }
         }
         answer.append(")")
         answer.toString()

@@ -1,5 +1,6 @@
 package example
 
+
 import d3v4.{Path, Primitive, Projection, TransformType, d3geo, d3selection}
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -9,9 +10,11 @@ import lib.matrix.{*, FlowsMatrix, LabelizedFlowsMatrix, LabelizedRelationMatrix
 import lib.plot.{ChordPlot, MigrationPlot}
 import org.scalajs.dom.raw.XMLHttpRequest
 
+import d3v4.d3
+
+
 import scala.scalajs.js
-import js.Dynamic.{global => gJS}
-import scala.scalajs.js.JSON
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @js.native
 trait MyRootJson extends js.Object {
@@ -35,7 +38,7 @@ object ScalaJSExample {
     @JSExport
     def main(args: Array[String]): Unit = {
 //        //========= Chord Graph =====================
-//        val graph = ChordPlot(
+//        val plot = ChordGraph(
 //            "LabelA" -> (11975, 5871, 8916, 2868),
 //            "LabelB" -> (1951, 10048, 2060, 6171),
 //            "LabelC" -> (8010, 16145, 8090, 8045),
@@ -76,28 +79,27 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
-//        val graph = ChordPlot(
+//        val plot = ChordGraph(
 //            "LabelA" -> (1,2,3),
 //            "LabelB" -> (4,5,4),
 //            "LabelC" -> (3,2,1)
 //        )
 //
-//        graph
+//        plot
 //            .setTarget("#playground2 svg")
 //            .setDimension(600, 600)
 //            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
 //            .draw()
 
-        // ========== Flow map =====================
-        val g= new MigrationPlot()
-//        g.setDimension(240, 300)
-        g.setDimension(800, 900)
-        g.setTarget("#playground2 svg")
-        g.draw()
+//        // ========== Flow map =====================
+//        val g= new MigrationPlot()
+////        g.setDimension(240, 300)
+//        g.setDimension(800, 900)
+//        g.setTarget("#playground2 svg")
+//        g.draw()
 
 
-
-//        //========== Test matrices =================
+        //========== Test matrices =================
 //        val testMatrix = FlowsMatrix((1,2,3), (4,5,6), (7,8,9))
 //        println(testMatrix(0)(*)) // Actually no error
 //        println(testMatrix(0 -> *))
@@ -125,6 +127,32 @@ object ScalaJSExample {
 //        println(mat)
 //        mat.merge("LabelB" -> 2)
 //        println(mat)
+
+        val plot = ChordPlot(
+            "LabelA" -> (1,2,3),
+            "LabelB" -> (4,5,4),
+            "LabelC" -> (3,2,1)
+        )
+//        val plot = ChordPlot("data.json") // TODO Invalid syntax exception?
+
+        plot
+            .setTarget("#playground2 svg")
+            .setDimension(600, 600)
+            .updateLabel("LabelA" -> "LabelOne")
+
+        plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
+        plot
+            .draw()
+
+        var clickCount = 0
+        d3.select("#playground2").on("click", () => {
+            if (clickCount % 2 == 0)
+                plot.merge("LabelB" -> "LabelC")
+            else
+                plot.revertDisplay()
+            plot.draw()
+            clickCount += 1
+        })
     }
 
     /*

@@ -50,7 +50,7 @@ class MigrationPlot extends RelationPlot {
             val r = scala.util.Random // to generate random id
             val id = "svgID-"+r.nextInt
 
-            val ret = d3.select(target)
+            val ret = d3.select(localTarget)
                 .attr("width", width)
                 .attr("height", height)
                 .attr("id", id)
