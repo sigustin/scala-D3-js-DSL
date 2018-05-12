@@ -141,53 +141,36 @@ trait RelationPlot {
 
     /**
       * Merges all elements of section $indexToIndex._1 into section $indexToIndex._2
-      * and makes the plot ready to display it
+      * or $indexToIndex._1._1 and $indexToIndex._1._2 and name it as $indexToIndex._2
+      * and makes the plot ready to display those changes
       */
-    def merge(indexToIndex: (Int, Int)): RelationPlot = {
-        displayedMatrix match {
-            case Some(matrix) => displayedMatrix = Some(matrix.merge(indexToIndex._1 -> indexToIndex._2))
-            case None => throw new UnsupportedOperationException("Can't merge two sections when there is no data in the plot")
+    def merge(indexToIndex: (Any, Any)): RelationPlot = {
+        val matrix = displayedMatrix.getOrElse(
+            throw new UnsupportedOperationException("Can't merge two sections when there is no data in the plot"))
+        indexToIndex match {
+            case (_: Int, _: Int) => displayedMatrix = Some(matrix.merge(indexToIndex.asInstanceOf[(Int, Int)]))
+            case (_: String, _: String) | (_: Int, _: String) | (_: String, _: Int) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMat.merge(indexToIndex))
+                    case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
+                }
+            case (indices: (Any, Any), label: String) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMat.merge(indices).updateLabel(indices._2 -> label))
+                    case _ => throw new UnsupportedOperationException("Can't add labels to matrix without labels (set the labels for all the matrix before merging)")
+                }
+            case _ => throw new UnsupportedOperationException("Can index matrices only using Int or String")
         }
         this
     }
-    def merge(index1: Int, index2: Int): RelationPlot = merge(index1 -> index2)
-    def merge(labelToLabel: (String, String))(implicit d: DummyImplicit): RelationPlot = {
-        displayedMatrix match {
-            case Some(matrix) =>
-                matrix match {
-                    case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMat.merge(labelToLabel))
-                        this
-                    case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
-                }
-            case None => throw new UnsupportedOperationException("Can't merge sections when no plot has been initialized")
-        }
-    }
-    def merge(label1: String, label2: String): RelationPlot = merge(label1 -> label2)
-    def merge(labelToIndex: (String, Int))(implicit d1: DummyImplicit, d2: DummyImplicit): RelationPlot = {
-        displayedMatrix match {
-            case Some(matrix) =>
-                matrix match {
-                    case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMat.merge(labelToIndex._1 -> labelToIndex._2)) // Giving $labelToIndex directly restuls in a compiler error
-                        this
-                    case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
-                }
-            case None => throw new UnsupportedOperationException("Can't merge sections when no plot has been initialized")
-        }
-    }
-    def merge(label: String, index: Int): RelationPlot = merge(label -> index)
-    def merge(indexToLabel: (Int, String))(implicit d1: DummyImplicit, d2: DummyImplicit, d3: DummyImplicit): RelationPlot = {
-        displayedMatrix match {
-            case Some(matrix) =>
-                matrix match {
-                    case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMat.merge(indexToLabel))
-                        this
-                    case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
-                }
-            case None => throw new UnsupportedOperationException("Can't merge sections when no plot has been initialized")
-        }
-    }
-    def merge(index: Int, label: String): RelationPlot = merge(index -> label)
+    def merge(index1: Any, index2: Any): RelationPlot = merge(index1 -> index2)
+
+    //===================== Listeners =========================
+    /** Calls the function $function when the plot is clicked on */
+    def onClick(f: => Any): Unit = svg.on("click", () => f)
+    // TODO does not work with 1 or 2 arguments (as in JS) because "same type after erasure"
+//    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction1): Unit = svg.on("click", f)
+//    def onClick(f: => Selection[dom.EventTarget]#ListenerFunction2): Unit = svg.on("click", f)
 }
