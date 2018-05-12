@@ -58,29 +58,9 @@ class MigrationPlot extends RelationPlot {
     div.innerHTML = "Hello"
     div.setAttribute("id", idDivInfo)
     div.style.position = "absolute"
+    div.style.background = "white"
 
 
-    /*def handleMouseOver_inside: js.Any => Unit = (d:js.Any) => {
-        var x:Double = 0
-        var y:Double = 0
-
-        if (d3.event != null){
-            println("here")
-            d3.event.stopPropagation()
-            x = d3.event.asInstanceOf[MouseEvent].clientX
-            y = d3.event.asInstanceOf[MouseEvent].clientY
-        }else {
-            x = d.asInstanceOf[MouseEvent].clientX
-            y = d.asInstanceOf[MouseEvent].clientY
-        }
-        println("mouseover inside")
-        val div = gJS.document.getElementById(idDivInfo)
-        div.innerHTML = "bonjour"
-
-        gJS.console.log(x, y)
-        div.style.left = x+"px"
-        div.style.top = y+"px"
-    }*/
 
     def draw()={
         val scale = 200 // for this file, this is approximately 0.5*size of America
@@ -94,20 +74,16 @@ class MigrationPlot extends RelationPlot {
         }
 
         val handleMouseOver_inside: js.Any => Unit = (d:js.Any) => {
-            var x:Double = 0
-            var y:Double = 0
-
             if (d3.event != null){
-                println("here")
                 d3.event.stopPropagation()
-                x = d3.event.asInstanceOf[MouseEvent].clientX
-                y = d3.event.asInstanceOf[MouseEvent].clientY
+                val x = d3.event.asInstanceOf[MouseEvent].clientX
+                val y = d3.event.asInstanceOf[MouseEvent].clientY
 
-                println("mouseover inside")
                 val div = gJS.document.getElementById(idDivInfo)
+                div.style.display = "block"
 
                 val country = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
-                div.innerHTML = country
+                div.innerHTML = buildDivContent(country)
                 gJS.console.log()
                 div.style.left = (x+20)+"px"
                 div.style.top = (y+10)+"px"
@@ -115,12 +91,20 @@ class MigrationPlot extends RelationPlot {
 
         }
 
+        val handleMouseOver_outside: js.Any => Unit = (d:js.Any) => {
+            var div = gJS.document.getElementById(idDivInfo)
+            if (div != null)
+                div.style.display = "None"
+        }
+
         val handleClick_outside: js.Any => Unit = (d:js.Any) => {
             println("outside")
             gJS.console.log(d)
         }
 
-
+        svg.on("click", handleClick_outside)
+            .on("mousemove", handleMouseOver_outside)
+        //                .on("mouseover", handleMouseOver_inside)
 
         var path: Path = d3.geoPath(projection)
         //        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
@@ -146,6 +130,7 @@ class MigrationPlot extends RelationPlot {
                 .on("click",handleClick_inside)
                 .on("mousemove", handleMouseOver_inside)
 
+
             // move the left corner at the right place and apply the right scale
             val svg_box = gJS.document.querySelector(s"#${idSvg}").getBoundingClientRect()
             val map = gJS.document.querySelector(s"#${idSvg} #map").getBoundingClientRect()
@@ -159,18 +144,24 @@ class MigrationPlot extends RelationPlot {
 
             ret.attr("transform", s"translate(${dx},${dy}) scale(${scaleApplied})")
 
-            svg.on("click", handleClick_outside)
-//                .on("mouseover", handleMouseOver_inside)
 
 
-            // add div for info
+
+            // add div for info on the country under the mouse
             gJS.document.getElementById(idSvg).parentElement.appendChild(div)
-//            gJS.document.getElementById(idSvg).addEventListener("mousemove", handleMouseOver_inside)
-//            gJS.document.getElementById(idSvg).setAttribute("onmousemove", "handleMouseOver_inside(event)")
+
 
         }
         d3.json("d3/europe.geo.json", callback)
 
+    }
+
+    def buildDivContent(name:String):String = {
+        return s"""
+            <div style="margin:10px; font-size: 20px;">
+              <div> ${name} </div
+            </div>
+            """
     }
 
 }
