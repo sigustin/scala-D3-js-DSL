@@ -1,17 +1,10 @@
 package example
 
-import d3v4.{Path, Primitive, Projection, TransformType, d3geo, d3selection}
-
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import lib._
-import lib.ImplicitConv._
-import lib.matrix.{*, FlowsMatrix, LabelizedFlowsMatrix, LabelizedRelationMatrix}
+import d3v4.d3
 import lib.plot.ChordPlot
-import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
-import js.Dynamic.{global => gJS}
-import scala.scalajs.js.JSON
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @js.native
 trait MyRootJson extends js.Object {
@@ -161,6 +154,10 @@ object ScalaJSExample {
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
         plot
             .draw()
+
+        d3.select("#playground2 svg g").remove()
+//        d3.select("playground2")
+//                .append("svg").attr("width", "600").attr("height", "800")
 
         plot.merge("LabelB" -> "LabelC")
         plot.draw()

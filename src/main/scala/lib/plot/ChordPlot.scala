@@ -342,12 +342,15 @@ class ChordPlot extends RelationPlot {
         }
 
 
-        g.append("g").attr("class", "ribbons")
+        val path = g.append("g").attr("class", "ribbons")
             .selectAll("path").data((c: ChordArray) => c)
+        path
             .enter().append("path")
             .attr("d", (d: Chord) => ribbon(d))
             .style("fill", (d: Chord) => color(d.target.index))
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
+
+        path.exit().remove()
     }
 }
 object ChordPlot {

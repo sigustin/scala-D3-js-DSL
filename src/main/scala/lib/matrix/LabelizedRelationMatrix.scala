@@ -16,7 +16,10 @@ class LabelizedRelationMatrix extends RelationMatrix {
 
     /** Checks that all labels are different and initializes $this.labels and $this.labelIndices */
     def checkAndInitLabels(labels: List[String]): Unit = {
-        var fixedLabels = labels.padTo(size, "")
+        if (labels.distinct.length != labels.length)
+            println("[WARNING] Provided duplicated labels => removing the duplicates")
+
+        var fixedLabels = labels.distinct.padTo(size, "")
         if (labels.length < size)
             println("[WARNING] Provided labels are missing some values => replaced by empty strings")
         else if (labels.length > size) {
@@ -82,13 +85,19 @@ class LabelizedRelationMatrix extends RelationMatrix {
     def merge(indexToIndex: (Any, Any)): LabelizedRelationMatrix = { // DummyImplicit to avoid "same type after erasure error'
         indexToIndex match {
             case (index1: Int, index2: Int) =>
-                new LabelizedRelationMatrix(labels, super.mergeData(index1 -> index2))
+                val updatedLabels = labels.slice(0, index1) ++ labels.slice(index1+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(index1 -> index2))
             case (index: Int, label: String) =>
-                new LabelizedRelationMatrix(labels, super.mergeData(index -> getIndex(label)))
+                val updatedLabels = labels.slice(0, index) ++ labels.slice(index+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(index -> getIndex(label)))
             case (label: String, index: Int) =>
-                new LabelizedRelationMatrix(labels, super.mergeData(getIndex(label) -> index))
+                val indexLabel = getIndex(label)
+                val updatedLabels = labels.slice(0, indexLabel) ++ labels.slice(indexLabel+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(indexLabel -> index))
             case (label1: String, label2: String) =>
-                new LabelizedRelationMatrix(labels, super.mergeData(getIndex(label1) -> getIndex(label2)))
+                val indexLabel1 = getIndex(label1)
+                val updatedLabels = labels.slice(0, indexLabel1) ++ labels.slice(indexLabel1+1, labels.length)
+                new LabelizedRelationMatrix(updatedLabels, super.mergeData(getIndex(label1) -> getIndex(label2)))
             case _ => throw new IllegalArgumentException("Can only index matrices using Int and labels")
         }
     }
