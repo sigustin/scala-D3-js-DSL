@@ -167,8 +167,10 @@ class ChordPlot extends RelationPlot {
         def computeTickStep(): Unit = {
             val sumDataValue: Double = sumData.getOrElse(0)
             val minTicksStep = closestRoundNb(sumDataValue / computeMaxNbTicks())
-            if (minTicksStep == 0.0)
+            if (minTicksStep == 0.0) {
                 tickStep = Some(1)
+                return
+            }
             tickStep = Some(minTicksStep)
         }
 
@@ -222,7 +224,7 @@ class ChordPlot extends RelationPlot {
             val totalNbTicks = sumData.get / getTickStep
             val nbBigTicks: Int = (totalNbTicks / preferredBigTickStep).round.toInt
             if (nbBigTicks >= minNbBigTicks && nbBigTicks < maxNbBigTicks)
-                return (totalNbTicks / nbBigTicks).round.toInt
+                return preferredBigTickStep
             (totalNbTicks / minNbBigTicks).round.toInt
         }
         else 0
