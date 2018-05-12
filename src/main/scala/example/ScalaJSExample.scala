@@ -1,17 +1,8 @@
 package example
 
 
-import d3v4.{Path, Primitive, Projection, TransformType, d3geo, d3selection}
-
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import lib._
-import lib.ImplicitConv._
-import lib.matrix.{*, FlowsMatrix, LabelizedFlowsMatrix, LabelizedRelationMatrix}
-import lib.plot.{ChordPlot, MigrationPlot}
-import org.scalajs.dom.raw.XMLHttpRequest
-
 import d3v4.d3
-
+import lib.plot.ChordPlot
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -145,14 +136,23 @@ object ScalaJSExample {
             .draw()
 
         var clickCount = 0
-        d3.select("#playground2").on("click", () => {
+        d3.select("#playground2 svg").on("click", () => {
             if (clickCount % 2 == 0)
-                plot.merge("LabelB" -> "LabelC")
+                plot.merge(("LabelB", "LabelC") -> "labelB and C")
             else
                 plot.revertDisplay()
             plot.draw()
             clickCount += 1
         })
+        //MOCKUP
+//        plot.onClick{
+//            if (clickCount % 2 == 0)
+//                plot.merge("LabelB" -> "LabelC")
+//            else
+//                plot.revertDisplay()
+//            plot.draw()
+//            clickCount += 1
+//        }
     }
 
     /*
