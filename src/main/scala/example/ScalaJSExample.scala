@@ -1,7 +1,7 @@
 package example
 
 
-import lib.plot.ChordPlot
+import lib.plot.{ChordPlot, MigrationPlot}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
