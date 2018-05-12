@@ -298,7 +298,7 @@ class ChordPlot extends RelationPlot {
         // Place ticks around the plot
         def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
             val k: Double = (d.endAngle - d.startAngle) / d.value
-            d3.range(0, d.value/(10**scale), step).map(
+            d3.range(0, (d.value+1)/(10**scale), step).map(
                 (v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle))
             )
         }
