@@ -64,8 +64,6 @@ class MigrationPlot extends RelationPlot {
 
 
     def draw()={
-        val scale = 200 // for this file, this is approximately 0.5*size of America
-
         val projection: Projection = d3.geoMercator()
 
         val handleClick_inside: js.Any => Unit = (d:js.Any) => {
@@ -106,7 +104,6 @@ class MigrationPlot extends RelationPlot {
 
         svg.on("click", handleClick_outside)
             .on("mousemove", handleMouseOver_outside)
-        //                .on("mouseover", handleMouseOver_inside)
 
         var path: Path = d3.geoPath(projection)
         //        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
@@ -159,20 +156,9 @@ class MigrationPlot extends RelationPlot {
     }
 
     def buildDivContent(name:String, population:Int):String = {
-//        import java.text.DecimalFormat
-//        val myFormatter = new DecimalFormat("# ###")
-//        val pop:String = myFormatter.format(population)
-//        import java.util.Locale
-//
-//        val locale = new java.util.Locale("pl", "PL")
-//        val formatter = java.text.NumberFormat.getIntegerInstance(locale)
-//
-//        val pop:String = formatter.format("%,d", population)
-
         val f1 = d3.formatPrefix(".3s", population)
         val pop = f1(population)
-//        val f2 = d3.formatted("$,")
-//        val pop2 = f2(population)
+
         return s"""
             <div style="margin:10px;">
               <div style="font-size: 20px;"> ${name} </div>
