@@ -134,7 +134,7 @@ object ScalaJSExample {
         plot.draw()
 
         var clickCount = 0
-        plot.onClick{
+        plot onClick {
             if (clickCount % 2 == 0)
                 plot.merge(("LabelB", "LabelC") -> "Label B and C")
             else
