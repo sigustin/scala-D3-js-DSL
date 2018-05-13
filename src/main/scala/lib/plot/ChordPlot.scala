@@ -246,6 +246,9 @@ class ChordPlot extends RelationPlot {
         // Refresh display
         d3.select(localTarget+" g").remove()
 
+        gJS.document.querySelector(localTarget).style.fontSize = "15px"
+        gJS.document.querySelector(localTarget).style.stroke = "black"
+
         val outerRadius = Math.min(width, height) * 0.5 - 40
         val innerRadius = outerRadius - 30
 

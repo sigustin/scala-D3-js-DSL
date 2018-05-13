@@ -56,11 +56,13 @@ class MigrationPlot extends RelationPlot {
     val idSvg = "svgID-"+r.nextInt
 
     val div = gJS.document.createElement("div")
-    div.innerHTML = "Hello"
+    div.style.display = "None"
     div.setAttribute("id", idDivInfo)
     div.style.position = "absolute"
     div.style.background = "white"
 
+    // prevent to the info blocked when the mouse arrive on it, cause blink
+    div.addEventListener("mouseover", (d:js.Any) => div.style.display = "None")
 
 
     def draw()={
@@ -77,6 +79,8 @@ class MigrationPlot extends RelationPlot {
                 d3.event.stopPropagation()
                 val x = d3.event.asInstanceOf[MouseEvent].clientX
                 val y = d3.event.asInstanceOf[MouseEvent].clientY
+//                val x = d3.event.asInstanceOf[MouseEvent].screenX
+//                val y = d3.event.asInstanceOf[MouseEvent].clientY
 
                 val div = gJS.document.getElementById(idDivInfo)
                 div.style.display = "block"
@@ -84,8 +88,8 @@ class MigrationPlot extends RelationPlot {
                 val country = dataCountry.admin
                 val pop = dataCountry.pop_est
                 div.innerHTML = buildDivContent(country, pop)
-                gJS.console.log()
-                div.style.left = (x+20)+"px"
+//                gJS.console.log(x, y)
+                div.style.left = (x+10)+"px"
                 div.style.top = (y+10)+"px"
             }
 
@@ -160,7 +164,7 @@ class MigrationPlot extends RelationPlot {
         val pop = f1(population)
 
         return s"""
-            <div style="margin:10px;">
+            <div style="margin:10px; color: black";>
               <div style="font-size: 20px;"> ${name} </div>
               <div style="font-size: 15px;"> Population: ${pop} </div>
             </div>

@@ -84,7 +84,7 @@ object ScalaJSExample {
 //        // ========== Flow map =====================
 //        val g= new MigrationPlot()
 ////        g.setDimension(240, 300)
-//        g.setDimension(800, 900)
+//        g.setDimension(600, 700)
 //        g.setTarget("#playground2 svg")
 //        g.draw()
 
