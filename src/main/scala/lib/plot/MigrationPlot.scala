@@ -1,11 +1,12 @@
 package lib.plot
-import d3v4.{Path, Primitive, Projection, d3}
+//import d3v4.{Path, Primitive, Projection, d3}
 import example.MyRootJson
 import org.scalajs.dom.raw.MouseEvent
 
-import scala.scalajs.js.annotation.{JSExport, JSExportNamed, JSExportTopLevel}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => gJS}
+import d3v4._
+//import lib.ImplicitConv._
 
 //trait TopoJson extends js.Object {
 //    val `type`: String = js.native
@@ -61,8 +62,6 @@ class MigrationPlot extends RelationPlot {
     div.style.position = "absolute"
     div.style.background = "white"
 
-    // prevent to the info blocked when the mouse arrive on it, cause blink
-    div.addEventListener("mouseover", (d:js.Any) => div.style.display = "None")
 
 
     def draw()={
@@ -77,10 +76,10 @@ class MigrationPlot extends RelationPlot {
         val handleMouseOver_inside: js.Any => Unit = (d:js.Any) => {
             if (d3.event != null){
                 d3.event.stopPropagation()
+
+                // popup
                 val x = d3.event.asInstanceOf[MouseEvent].clientX
                 val y = d3.event.asInstanceOf[MouseEvent].clientY
-//                val x = d3.event.asInstanceOf[MouseEvent].screenX
-//                val y = d3.event.asInstanceOf[MouseEvent].clientY
 
                 val div = gJS.document.getElementById(idDivInfo)
                 div.style.display = "block"
@@ -88,12 +87,33 @@ class MigrationPlot extends RelationPlot {
                 val country = dataCountry.admin
                 val pop = dataCountry.pop_est
                 div.innerHTML = buildDivContent(country, pop)
-//                gJS.console.log(x, y)
+
                 div.style.left = (x+10)+"px"
                 div.style.top = (y+10)+"px"
             }
 
         }
+
+
+        def color(on:Boolean): js.Any => Unit = {
+            d => {
+                val country = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
+                svg.selectAll("path")
+                    .filter((d:js.Any) => {
+                        try {
+                            val e = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
+                            country == e.admin
+                        } catch {
+                            case _: Throwable => false
+                        }
+                    })
+                    .style("fill", (if (on) "yellow" else "green"))
+//                    .style("stroke-opacity", opacity.toString)
+//                    .style("fill-opacity", opacity.toString)
+            }
+        }
+
+
 
         val handleMouseOver_outside: js.Any => Unit = (d:js.Any) => {
             var div = gJS.document.getElementById(idDivInfo)
@@ -132,6 +152,8 @@ class MigrationPlot extends RelationPlot {
                 .attr("fill", "green")
                 .on("click",handleClick_inside)
                 .on("mousemove", handleMouseOver_inside)
+                .on("mouseover", color(true))
+                .on("mouseout", color(false))
 
 
             // move the left corner at the right place and apply the right scale
@@ -148,6 +170,22 @@ class MigrationPlot extends RelationPlot {
             ret.attr("transform", s"translate(${dx},${dy}) scale(${scaleApplied})")
 
 
+            /*val select:js.Any => Unit = (d:js.Any) => {
+                gJS.console.log(d)
+                val country = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
+
+                svg.selectAll("path")
+//                    .filter((d:js.Any) => {
+////                        gJS.console.log(d)
+//                        false
+//                    })
+                    .style("fill", "yellow")
+
+            }*/
+
+
+//            ret.on("mouseover", select)
+
 
 
             // add div for info on the country under the mouse
@@ -163,8 +201,9 @@ class MigrationPlot extends RelationPlot {
         val f1 = d3.formatPrefix(".3s", population)
         val pop = f1(population)
 
+        // the mouseover listener prevent that the popup is blocked when the mouse arrive on it, cause blink
         return s"""
-            <div style="margin:10px; color: black";>
+            <div style="margin:10px; color: black"; onmouseover="this.style.display = 'None'">
               <div style="font-size: 20px;"> ${name} </div>
               <div style="font-size: 15px;"> Population: ${pop} </div>
             </div>
