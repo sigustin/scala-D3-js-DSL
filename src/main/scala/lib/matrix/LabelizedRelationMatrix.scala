@@ -131,6 +131,18 @@ class LabelizedRelationMatrix extends RelationMatrix {
         answer.append(")")
         answer.toString()
     }
+
+    override def equals(other: Any): Boolean = {
+        other match {
+            case otherMatrix: LabelizedRelationMatrix =>
+                if (labels == otherMatrix.labels)
+                    super.equals(other)
+                else
+                    false
+            case _ => false
+        }
+    }
+    override def hashCode(): Int = labels.hashCode() + super.hashCode()
 }
 
 object LabelizedRelationMatrix {

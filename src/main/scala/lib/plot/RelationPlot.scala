@@ -286,7 +286,7 @@ trait RelationPlot {
     def focusSectionsOnHover: Unit = focusEvent = FocusEvent.hover
     def dontFocusSections: Unit = focusEvent = FocusEvent.none
 
-    //=================== =======================
+    //=================== Drawing utilities =======================
     /** Merges sections when two of them are selected */
     val focusAndMergeSections: js.Any => Unit =
         (d: js.Any) => {
