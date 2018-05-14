@@ -261,10 +261,9 @@ class ChordPlot extends RelationPlot {
             .on("mouseout", fadeSections(0.8))
             //.on("click", merger)
 
-        svg.on("click", revertAndRedraw)
         svg.call(d3.zoom().on("zoom",  () => g.attr("transform", d3.event.transform.toString)))
         onClick {
-            revertDisplay()
+            revert()
             draw()
         }
 
@@ -272,10 +271,6 @@ class ChordPlot extends RelationPlot {
         focusEvent match {
             case FocusEvent.click => section.on("click", focusAndMergeSections)
             case FocusEvent.hover => section.on("mouseenter", focusAndMergeSections)
-            case FocusEvent.drag => {
-                section.on("dragstart", focusAndMergeSections)
-                section.on("dragend", focusAndMergeSections)
-            }
             case _ =>
         }
 
