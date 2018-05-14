@@ -42,6 +42,7 @@ trait DataFromJsonUrl extends js.Object {
 class ChordPlot extends RelationPlot {
     //=================== Constructors and related =============================
     private var colorPaletteLocal: Option[List[String]] = None
+    private var indexSelected:Option[Int] = None
 
     def this(data: Seq[(String, Product with Serializable)]) = {
         this()
@@ -247,7 +248,7 @@ class ChordPlot extends RelationPlot {
         d3.select(localTarget+" g").remove()
 
         gJS.document.querySelector(localTarget).style.fontSize = "15px"
-        gJS.document.querySelector(localTarget).style.stroke = "black"
+//        gJS.document.querySelector(localTarget).style.stroke = "black" needed to override the style of reveal.js
 
         val outerRadius = Math.min(width, height) * 0.5 - 40
         val innerRadius = outerRadius - 30
@@ -294,9 +295,36 @@ class ChordPlot extends RelationPlot {
                     .style("fill-opacity", opacity.toString)
             }
         }
+
+        val merger = (d:js.Any) => {
+            if (d3.event != null)
+                d3.event.stopPropagation()
+            gJS.console.log(d)
+            val data = d.asInstanceOf[ChordGroupJson]
+            indexSelected match {
+                case None => indexSelected = Some(data.index); println("clicked")
+                case Some(i) => {
+                    if (i != data.index) {
+                        println(s"merged ${i} and ${data.index}")
+                        merge((i, data.index) -> "merged")
+                        indexSelected = None
+                        draw()
+                    }
+                }
+            }
+            if (false) return
+        }
         group
             .on("mouseover", fade(0.2))
             .on("mouseout", fade(0.8))
+            .on("click", merger)
+
+        val handleClick_outside: js.Any => Unit = (d:js.Any) => {
+            revertDisplay()
+            draw()
+        }
+
+        svg.on("click", handleClick_outside)
 
         // Place ticks around the plot
         def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
