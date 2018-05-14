@@ -133,7 +133,7 @@ object ScalaJSExample {
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
         plot.draw()
 
-        plot onDoubleClick {plot.revertDisplay()}
+        //plot onDoubleClick {plot.revertDisplay()}
 
 //        plot onClick {d: js.Any => println(s"got $d")}
 //        plot onClick {println("test")}
