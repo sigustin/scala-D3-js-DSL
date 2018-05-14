@@ -74,7 +74,6 @@ trait RelationPlot {
     }
     /** Sets the displayed matrix of the plot */
     def displayedMatrix_=(matrix: RelationMatrix): Unit = {
-        println("SETTING DISPLAYED MATRIX")
         saveDisplayedMatrix()
         _displayedMatrix = Some(matrix)
     }
@@ -117,7 +116,9 @@ trait RelationPlot {
             case Some(matrix) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = labelizedMat.updateLabel(labelToLabel)
+                        val updatedMatrix = labelizedMat.updateLabel(labelToLabel)
+                        if (updatedMatrix != labelizedMat)
+                            displayedMatrix = updatedMatrix
                         this
                     case _ => throw new UnsupportedOperationException("Can't update a label on a plot without labels")
                 }
@@ -177,15 +178,12 @@ trait RelationPlot {
     //================= History =======================
     /** Saves the current $_displayedMatrix into the history (if it is not the last one in) */
     def saveDisplayedMatrix(): Unit = {
-        println(s"save $historyMatrices")
         if (_displayedMatrix.isDefined
             && (historyMatrices.isEmpty || historyMatrices.top != _displayedMatrix.get))
             historyMatrices.push(_displayedMatrix.get)
-        println(s"saved $historyMatrices")
     }
     /** Resets the displayed matrix to the basis one (if there is one) */
     def revertToInitial(): Unit = {
-        println(s"revert init: $historyMatrices")
         if (historyMatrices.nonEmpty) {
             while (historyMatrices.length > 1)
                 historyMatrices.pop()
@@ -196,12 +194,10 @@ trait RelationPlot {
     }
     /** Goes back one state in the history */
     def revert(): Unit = {
-        println(s"revert: $historyMatrices")
         if (historyMatrices.nonEmpty)
             _displayedMatrix = Some(historyMatrices.pop())
         else
             println("[WARNING] Can't revert to previous state without history")
-        println(s"end revert $historyMatrices")
     }
 
     //=================== Utility methods ==========================
@@ -218,7 +214,6 @@ trait RelationPlot {
       * and makes the plot ready to display those changes
       */
     def merge(indexToIndex: (Any, Any)): RelationPlot = {
-        println("merge")
         val matrix = _displayedMatrix.getOrElse(
             throw new UnsupportedOperationException("Can't merge two sections when there is no data in the plot"))
         indexToIndex match {
@@ -268,7 +263,7 @@ trait RelationPlot {
     def onClickUp(f: => Unit): RelationPlot = {svg.on("mouseup", () => f); this}
     /** Calls the function $f when the mouse goes over the plot */
     def onMouseOver(f: => Unit): RelationPlot = {svg.on("mouseover", () => f); this}
-    /** Calls the function $f when the plot is hovered by the mouse (mouse enter) */
+    /** Calls the function $f wh²en the plot is hovered by the mouse (mouse enter) */
     def onMouseEnter(f: => Unit): RelationPlot = onHover(f)
     def onHover(f: => Unit): RelationPlot = {svg.on("mouseenter", () => f); this}
     /** Calls the function $f when the plot stops being hovered by the mouse (mouse leave) */
@@ -298,7 +293,6 @@ trait RelationPlot {
             if (d3.event != null)
                 d3.event.stopPropagation()
             val i = d.asInstanceOf[ChordGroupJson].index // TODO ChordGroupJson only works for Chord at the moment
-            println(s"focus and merge section called: $i and focused is $focusedSection")
             if (focusedSection.isDefined) {
                 if (focusedSection.get != i) {
                     merge(i -> focusedSection.get)

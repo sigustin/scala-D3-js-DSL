@@ -142,6 +142,14 @@ class RelationMatrix {
     def prettyPrint(): Unit = {
         println(this)
     }
+
+    override def equals(other: Any): Boolean = {
+        other match {
+            case otherMatrix: RelationMatrix => data == otherMatrix.data
+            case _ => false
+        }
+    }
+    override def hashCode(): Int = data.hashCode()
 }
 
 /**
