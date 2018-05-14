@@ -248,9 +248,6 @@ class ChordPlot extends RelationPlot {
                 .data((c: ChordArray) => c.groups)
                 .enter().append("g")
 
-        val test = g.selectAll("g")
-        test.attr("test", "t")
-
         val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPaletteJS)
         val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
         section.append("path").style("fill", (d: ChordGroup) => color(d.index))
@@ -337,6 +334,8 @@ class ChordPlot extends RelationPlot {
             .attr("d", (d: Chord) => ribbon(d))
             .style("fill", (d: Chord) => color(d.target.index))
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
+
+//        g.selectAll(".ribbons").on("mouseover", () => {println("rib")})
 
         path.exit().remove()
     }
