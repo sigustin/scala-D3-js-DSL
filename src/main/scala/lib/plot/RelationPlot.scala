@@ -13,9 +13,10 @@ import scala.scalajs.js
   * When 2 sections are focused, they should be merged
   * Resp. when $hover is the focus event
   * When $drag is the focus event, a section should be focused when it is dragged from or to
+  * When $none is the focus event, nothing should happen
   */
 object FocusEvent extends Enumeration {
-    val click, hover, drag = Value
+    val none, click, hover, drag = Value
 }
 
 trait RelationPlot {
@@ -159,10 +160,16 @@ trait RelationPlot {
       * and makes the plot ready to display those changes
       */
     def merge(indexToIndex: (Any, Any)): RelationPlot = {
+        println("merge")
         val matrix = displayedMatrix.getOrElse(
             throw new UnsupportedOperationException("Can't merge two sections when there is no data in the plot"))
         indexToIndex match {
-            case (_: Int, _: Int) => displayedMatrix = Some(matrix.merge(indexToIndex.asInstanceOf[(Int, Int)]))
+            case (_: Int, _: Int) =>
+                matrix match {
+                    case labelizedMatrix: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMatrix.mergeAndKeepLabels(indexToIndex.asInstanceOf[(Int, Int)]))
+                    case _ => displayedMatrix = Some(matrix.merge(indexToIndex.asInstanceOf[(Int, Int)]))
+                }
             case (_: String, _: String) | (_: Int, _: String) | (_: String, _: Int) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
@@ -239,9 +246,11 @@ trait RelationPlot {
     def focusSectionsOnDrag: Unit = focusEvent = FocusEvent.drag
 
     //=================== =======================
-    /** Returns a function that merges sections when two of them are selected */
-    def focusAndMergeSections(): js.Any => Unit = {
-        d => {
+    /** Merges sections when two of them are selected */
+    val focusAndMergeSections: js.Any => Unit =
+        (d: js.Any) => {
+            if (d3.event != null)
+                d3.event.stopPropagation()
             val i = d.asInstanceOf[ChordGroupJson].index // TODO ChordGroupJson only works for Chord at the moment
             println(s"focus and merge section called: $i and focused is $focusedSection")
             if (focusedSection.isDefined) {
@@ -253,7 +262,13 @@ trait RelationPlot {
             else
                 focusedSection = Some(i)
         }
-    }
+
+    /** Reverts the display and redraws the plot */
+    val revertAndRedraw: js.Any => Unit =
+        (d:js.Any) => {
+            revertDisplay()
+            draw()
+        }
 
     //=============== Abstract methods =====================
     def draw(): Unit
