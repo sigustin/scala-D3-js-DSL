@@ -49,6 +49,13 @@ trait CountryData extends js.Object {
     val pop_est:Int = js.native
 }
 
+@js.native
+trait FlowMigration extends js.Object{
+    val from:String = js.native
+    val to:String = js.native
+    val qt:Double = js.native
+}
+
 
 
 
@@ -207,7 +214,13 @@ class MigrationPlot extends RelationPlot {
 //            svg.call(d3.zoom().on("zoom",  () => {val e = d3.event.transform; gJS.console.log(e.toString); gJS.console.log(s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scaleApplied(${e.k*scaleApplied})"); svg.attr("transform", s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scale(${e.k*scaleApplied})")}))
 //            svg.call(d3.zoom().on("zoom",  () => {svg.attr("transform", d3.event.transform.toString)}))
 
+
+//            def buildDicoMigration= (from:String, to:String, qt:Int)=>js.Dictionary[Double] = {
+//                return js.Dictionary("from" -> from, "to" -> to, "qt" -> qt)
+//            }
             // trace the migration flow
+
+            val buf:js.Array[FlowMigration] = js.Array()
             val labelsOption = getLabels
             if (labelsOption.isDefined){
                 val labels = labelsOption.get
@@ -220,14 +233,26 @@ class MigrationPlot extends RelationPlot {
                             // the sum of the flow is from 1 to 2, (i,j) -> (j,i)
                             var fromLoc = from
                             var towardLoc = toward
+                            println(s"now from ${fromLoc} (${basisMatrix.get(fromLoc)(towardLoc)}) to ${towardLoc} (${basisMatrix.get(towardLoc)(fromLoc)}) =>")
                             if (data.get(i)(j) < data.get(j)(i)){
                                 val tmp = from
                                 fromLoc = toward
                                 towardLoc = tmp
+                                println(s"switched: now from ${fromLoc} (${basisMatrix.get(fromLoc)(towardLoc)}) to ${towardLoc} (${basisMatrix.get(towardLoc)(fromLoc)})")
                             }
 
-                            val country = d3.select("#"+fromLoc).datum()
-                            val country2 = d3.select("#"+towardLoc).datum()
+//                            val d = new js.Object("from" -> fromLoc).asInstanceOf[FlowMigration]
+//                            val d = new FlowMigration {
+//                                "from" -> fromLoc,
+//                                "to" -> towardLoc,
+//                                "qt" -> 0
+//                            }
+                            val d = js.Dynamic.literal("from" -> fromLoc, "to" -> towardLoc, "qt" -> Math.abs(data.get(j)(i) - data.get(i)(j))).asInstanceOf[FlowMigration]
+//                            d.from = fromLoc
+                            buf.append(d)
+
+                            val country = d3.select("#"+towardLoc).datum()
+                            val country2 = d3.select("#"+fromLoc).datum()
                             val coord = path.centroid(country)
                             val coord2 = path.centroid(country2)
 
@@ -238,22 +263,30 @@ class MigrationPlot extends RelationPlot {
 
                             val (x1b, y1b, x2b, y2b) = buildLine(x1, y1, x2, y2)
 
-                            println(x1,","+ y1," "+ x2,","+ y2)
-                            println(x1b,","+ y1b," "+ x2b,","+ y2b)
 
+                            def mouseOnFlow(d:js.Any):Unit = {
+                                gJS.console.log(d);
+                            }
 
-                            val strokeWidth:Double = Math.max(Math.abs(data.get(i)(j) - data.get(j)(i)) / sumData.get*20, 1)
+                            val strokeWidth:Double = Math.max(Math.abs(data.get(i)(j) - data.get(j)(i)) / sumData.get*30, 1)
                             val p = "M"+x1b+","+y1b+"L"+x2b+","+y2b+"Z"
                             val ret2 = d3.select(localTarget)
                                 .append("g")
+//                                .data(buf).enter()
                                 .append("path")
+                                .attr("id", s"${fromLoc}-${towardLoc}")
+                                .attr("class", "flowMigration")
                                 .attr("d", p)
                                 .attr("stroke", "black")
                                 .attr("stroke-width", strokeWidth)
                                 .attr("marker-end", "url(#arrowhead)")
+                                .on("mouseover", mouseOnFlow(_))
                         }
                     }
                 }
+
+                d3.select(localTarget).selectAll(".flowMigration")
+                    .data(buf).enter()
             }
 
 //            val country = d3.select("#Canada").datum()
