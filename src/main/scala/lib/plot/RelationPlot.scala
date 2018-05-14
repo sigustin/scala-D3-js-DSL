@@ -5,6 +5,7 @@ import lib.ImplicitConv._
 import lib.matrix.{LabelizedRelationMatrix, RelationMatrix}
 import org.scalajs.dom
 
+import scala.collection.mutable.Stack
 import scala.scalajs.js
 
 /**
@@ -12,11 +13,10 @@ import scala.scalajs.js
   * When $click is the focus event of a plot, sections should be focused on click (and pushed in $focusedSections)
   * When 2 sections are focused, they should be merged
   * Resp. when $hover is the focus event
-  * When $drag is the focus event, a section should be focused when it is dragged from or to
   * When $none is the focus event, nothing should happen
   */
 object FocusEvent extends Enumeration {
-    val none, click, hover, drag = Value
+    val none, click, hover = Value
 }
 
 trait RelationPlot {
@@ -29,14 +29,15 @@ trait RelationPlot {
 
     // Both matrices may contain labels or not
     protected var basisMatrix: Option[RelationMatrix] = None // When resetting the display, get back to this data
-    protected var displayedMatrix: Option[RelationMatrix] = None
+    protected val historyMatrices: Stack[RelationMatrix] = Stack[RelationMatrix]()
+    protected var _displayedMatrix: Option[RelationMatrix] = None
 
     protected var sumData: Option[Double] = None
 
     var focusEvent = FocusEvent.click
     var focusedSection: Option[Int] = None // Stores the index of the currently focused section (not yet merged)
 
-    //================= Setters ===========================
+    //================= Setters and getters ===========================
     /** Sets the visible dimension of the plot in the svg image */
     def setDimension(w: Int, h:Int): RelationPlot = {
         heightLocal = Some(h)
@@ -48,6 +49,7 @@ trait RelationPlot {
     }
     def dimension_=(w: Int, h: Int): Unit = setDimension(w, h)
     def dimension_=(dim: (Int, Int)): Unit = setDimension(dim._1, dim._2)
+    def dimension: (Double, Double) = (widthLocal.get, heightLocal.get)
 
     /** Sets the target html tag */
     def setTarget(t: String): RelationPlot = {
@@ -59,38 +61,38 @@ trait RelationPlot {
         localTarget = t
         svg = d3.select(localTarget)
     }
+    def target: String = localTarget
 
     /** Sets the basis matrix of the plot and let it display itself */
     protected def setMatrix(matrix: RelationMatrix): RelationPlot = {
         basisMatrix = Some(matrix)
-        displayedMatrix = Some(matrix)
+        if (_displayedMatrix.isDefined)
+            historyMatrices.push(_displayedMatrix.get)
+        _displayedMatrix = Some(matrix)
         computeSumData()
         this
     }
     /** Sets the displayed matrix of the plot */
     def displayedMatrix_=(matrix: RelationMatrix): Unit = {
-        displayedMatrix = Some(matrix)
+        println("SETTING DISPLAYED MATRIX")
+        if (_displayedMatrix.isDefined)
+            historyMatrices.push(_displayedMatrix.get)
+        _displayedMatrix = Some(matrix)
     }
-    /** Resets the displayed matrix to the basis one (if there is one) */
-    def revertDisplay(): Unit = {
-        basisMatrix match {
-            case Some(matrix) => displayedMatrix = Some(matrix)
-            case None => displayedMatrix = None
-        }
-    }
+    def displayedMatrix: RelationMatrix = _displayedMatrix.getOrElse(RelationMatrix(List(List())))
 
     def setLabels(l: List[String]): ChordPlot = {
-        displayedMatrix match {
+        _displayedMatrix match {
             case Some(matrix) =>
                 matrix match {
-                    case m: LabelizedRelationMatrix =>
-                        m.setLabels (l)
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        labelizedMat.setLabels (l)
                         this
                     case _: RelationMatrix =>
                         data match {
                             case Some(d) =>
                                 val labelizedMatrix = LabelizedRelationMatrix(l, d)
-                                displayedMatrix = Some(labelizedMatrix)
+                                displayedMatrix = labelizedMatrix
                                 this
                             case None => throw new UnsupportedOperationException ("Can't set labels for an empty matrix")
                         }
@@ -100,13 +102,23 @@ trait RelationPlot {
         }
     }
     def labels_=(l: List[String]): Unit = setLabels(l)
+    def labels: List[String] = {
+        _displayedMatrix match {
+            case Some(matrix) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix => labelizedMat.getLabels
+                    case _ => List()
+                }
+            case None => List()
+        }
+    }
 
     def updateLabel(labelToLabel: (String, String)): ChordPlot = {
-        displayedMatrix match {
+        _displayedMatrix match {
             case Some(matrix) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMat.updateLabel(labelToLabel))
+                        displayedMatrix = labelizedMat.updateLabel(labelToLabel)
                         this
                     case _ => throw new UnsupportedOperationException("Can't update a label on a plot without labels")
                 }
@@ -146,14 +158,14 @@ trait RelationPlot {
     def getTarget: String = localTarget
 
     def data: Option[List[List[Double]]] = {
-        displayedMatrix match {
+        _displayedMatrix match {
             case Some(matrix) => Some(matrix.getData)
             case None => None
         }
     }
 
     def getLabels: Option[List[String]] = {
-        displayedMatrix match {
+        _displayedMatrix match {
             case Some(matrix) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix => Some(labelizedMat.getLabels)
@@ -161,6 +173,27 @@ trait RelationPlot {
                 }
             case _ => None
         }
+    }
+
+    //================= History =======================
+    /** Resets the displayed matrix to the basis one (if there is one) */
+    def revertToInitial(): Unit = {
+        println(s"revert init: $historyMatrices")
+        if (historyMatrices.nonEmpty) {
+            while (historyMatrices.length > 1)
+                historyMatrices.pop()
+            _displayedMatrix = Some(historyMatrices.pop())
+        }
+        else
+            println("[WARNING] Can't revert to initial state without history")
+    }
+    /** Goes back one state in the history */
+    def revert(): Unit = {
+        println(s"revert: $historyMatrices")
+        if (historyMatrices.nonEmpty)
+            _displayedMatrix = Some(historyMatrices.pop())
+        else
+            println("[WARNING] Can't revert to previous state without history")
     }
 
     //=================== Utility methods ==========================
@@ -178,25 +211,25 @@ trait RelationPlot {
       */
     def merge(indexToIndex: (Any, Any)): RelationPlot = {
         println("merge")
-        val matrix = displayedMatrix.getOrElse(
+        val matrix = _displayedMatrix.getOrElse(
             throw new UnsupportedOperationException("Can't merge two sections when there is no data in the plot"))
         indexToIndex match {
             case (_: Int, _: Int) =>
                 matrix match {
                     case labelizedMatrix: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMatrix.mergeAndKeepLabels(indexToIndex.asInstanceOf[(Int, Int)]))
-                    case _ => displayedMatrix = Some(matrix.merge(indexToIndex.asInstanceOf[(Int, Int)]))
+                        displayedMatrix = labelizedMatrix.mergeAndKeepLabels(indexToIndex.asInstanceOf[(Int, Int)])
+                    case _ => displayedMatrix = matrix.merge(indexToIndex.asInstanceOf[(Int, Int)])
                 }
             case (_: String, _: String) | (_: Int, _: String) | (_: String, _: Int) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMat.merge(indexToIndex))
+                        displayedMatrix = labelizedMat.merge(indexToIndex)
                     case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
                 }
             case (indices: (Any, Any), label: String) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = Some(labelizedMat.merge(indices).updateLabel(indices._2 -> label))
+                        displayedMatrix = labelizedMat.merge(indices).updateLabel(indices._2 -> label)
                     case _ => throw new UnsupportedOperationException("Can't add labels to matrix without labels (set the labels for all the matrix before merging)")
                 }
             case _ => throw new UnsupportedOperationException("Can index matrices only using Int or String")
@@ -238,13 +271,11 @@ trait RelationPlot {
     /** Calls the function $f when the page changes visibility */
     def onPageVisibilityChange(f: => Unit): RelationPlot = {svg.on("visibilitychange", () => f); this} // TODO doesn't seem to work
 
-    // TODO listeners lists for events on groups?
-
     //------------------ Focusing behavior -------------------------
     /** Set the focusing behavior */
     def focusSectionsOnClick: Unit = focusEvent = FocusEvent.click
     def focusSectionsOnHover: Unit = focusEvent = FocusEvent.hover
-    def focusSectionsOnDrag: Unit = focusEvent = FocusEvent.drag
+    def dontFocusSections: Unit = focusEvent = FocusEvent.none
 
     //=================== =======================
     /** Merges sections when two of them are selected */
@@ -258,18 +289,13 @@ trait RelationPlot {
                 if (focusedSection.get != i) {
                     merge(i -> focusedSection.get)
                     draw()
+                    focusedSection = None
                 }
-                focusedSection = None
+                else if (focusEvent == FocusEvent.click)
+                    focusedSection = None
             }
             else
                 focusedSection = Some(i)
-        }
-
-    /** Reverts the display and redraws the plot */
-    val revertAndRedraw: js.Any => Unit =
-        (d:js.Any) => {
-            revertDisplay()
-            draw()
         }
 
     //=============== Abstract methods =====================

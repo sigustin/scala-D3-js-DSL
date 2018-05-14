@@ -76,7 +76,7 @@ class ChordPlot extends RelationPlot {
 
     //==================== Getters ===========================
     /** Use a color palette in function of the size of the data if none is defined */
-    def colorPalette: js.Array[String] = {
+    def colorPaletteJS: js.Array[String] = {
         (data, colorPaletteLocal) match {
             case (_, Some(p)) => p
             case (Some(d), None) => if (d.length < 10) d3.schemeCategory10 else d3.schemeCategory20
@@ -127,6 +127,7 @@ class ChordPlot extends RelationPlot {
 
     def setColorPalette(cp: List[String]): ChordPlot = {colorPaletteLocal = Some(cp); this}
     def colorPalette_=(cp: List[String]): Unit = setColorPalette(cp)
+    def colorPalette: List[String] = colorPaletteLocal.getOrElse(List())
 
     //=================== Utility function ==============================
     private val minStepPx = 40 // minimal number of pixels between 2 ticks (not a hard bound)
@@ -250,7 +251,7 @@ class ChordPlot extends RelationPlot {
         val test = g.selectAll("g")
         test.attr("test", "t")
 
-        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPalette)
+        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPaletteJS)
         val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
         section.append("path").style("fill", (d: ChordGroup) => color(d.index))
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
@@ -261,10 +262,9 @@ class ChordPlot extends RelationPlot {
             .on("mouseout", fadeSections(0.8))
             //.on("click", merger)
 
-        svg.on("click", revertAndRedraw)
         svg.call(d3.zoom().on("zoom",  () => g.attr("transform", d3.event.transform.toString)))
         onClick {
-            revertDisplay()
+            revert()
             draw()
         }
 
@@ -272,10 +272,6 @@ class ChordPlot extends RelationPlot {
         focusEvent match {
             case FocusEvent.click => section.on("click", focusAndMergeSections)
             case FocusEvent.hover => section.on("mouseenter", focusAndMergeSections)
-            case FocusEvent.drag => {
-                section.on("dragstart", focusAndMergeSections)
-                section.on("dragend", focusAndMergeSections)
-            }
             case _ =>
         }
 
