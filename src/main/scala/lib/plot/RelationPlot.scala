@@ -63,11 +63,12 @@ trait RelationPlot {
     }
     def target: String = localTarget
 
-    /** Sets the basis matrix of the plot and let it display itself */
-    protected def setMatrix(matrix: RelationMatrix): RelationPlot = {
+    /** Sets the displayed matrix of the plot and wipes the history */
+    protected def setMatrixAndWipeHistory(matrix: RelationMatrix): RelationPlot = {
         basisMatrix = Some(matrix)
-        saveDisplayedMatrix()
         _displayedMatrix = Some(matrix)
+        historyMatrices.clear()
+
         computeSumData()
         this
     }
@@ -176,9 +177,11 @@ trait RelationPlot {
     //================= History =======================
     /** Saves the current $_displayedMatrix into the history (if it is not the last one in) */
     def saveDisplayedMatrix(): Unit = {
+        println(s"save $historyMatrices")
         if (_displayedMatrix.isDefined
             && (historyMatrices.isEmpty || historyMatrices.top != _displayedMatrix.get))
             historyMatrices.push(_displayedMatrix.get)
+        println(s"saved $historyMatrices")
     }
     /** Resets the displayed matrix to the basis one (if there is one) */
     def revertToInitial(): Unit = {
@@ -198,6 +201,7 @@ trait RelationPlot {
             _displayedMatrix = Some(historyMatrices.pop())
         else
             println("[WARNING] Can't revert to previous state without history")
+        println(s"end revert $historyMatrices")
     }
 
     //=================== Utility methods ==========================
@@ -220,20 +224,26 @@ trait RelationPlot {
         indexToIndex match {
             case (_: Int, _: Int) =>
                 matrix match {
-                    case labelizedMatrix: LabelizedRelationMatrix =>
-                        displayedMatrix = labelizedMatrix.mergeAndKeepLabels(indexToIndex.asInstanceOf[(Int, Int)])
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        val updatedMatrix = labelizedMat.mergeAndKeepLabels(indexToIndex.asInstanceOf[(Int, Int)])
+                        if (updatedMatrix != labelizedMat)
+                            displayedMatrix = updatedMatrix
                     case _ => displayedMatrix = matrix.merge(indexToIndex.asInstanceOf[(Int, Int)])
                 }
             case (_: String, _: String) | (_: Int, _: String) | (_: String, _: Int) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = labelizedMat.merge(indexToIndex)
+                        val updatedMatrix = labelizedMat.merge(indexToIndex)
+                        if (updatedMatrix != labelizedMat)
+                            displayedMatrix = updatedMatrix
                     case _ => throw new UnsupportedOperationException("Can't use labels to index matrix without labels")
                 }
             case (indices: (Any, Any), label: String) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>
-                        displayedMatrix = labelizedMat.merge(indices).updateLabel(indices._2 -> label)
+                        val updatedMatrix = labelizedMat.merge(indices).updateLabel(indices._2 -> label)
+                        if (updatedMatrix != labelizedMat)
+                            displayedMatrix = updatedMatrix
                     case _ => throw new UnsupportedOperationException("Can't add labels to matrix without labels (set the labels for all the matrix before merging)")
                 }
             case _ => throw new UnsupportedOperationException("Can index matrices only using Int or String")

@@ -79,7 +79,7 @@ class MigrationPlot extends RelationPlot {
             arrayOfList += tuple.productIterator.toList.asInstanceOf[List[Int]]
         })
 
-        setMatrix(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
+        setMatrixAndWipeHistory(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
     }
 
 
