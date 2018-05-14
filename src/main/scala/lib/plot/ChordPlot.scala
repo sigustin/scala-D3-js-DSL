@@ -76,7 +76,7 @@ class ChordPlot extends RelationPlot {
 
     //==================== Getters ===========================
     /** Use a color palette in function of the size of the data if none is defined */
-    def colorPaletteJS: js.Array[String] = {
+    private def colorPaletteJS: js.Array[String] = {
         (data, colorPaletteLocal) match {
             case (_, Some(p)) => p
             case (Some(d), None) => if (d.length < 10) d3.schemeCategory10 else d3.schemeCategory20
