@@ -76,7 +76,7 @@ class ChordPlot extends RelationPlot {
 
     //==================== Getters ===========================
     /** Use a color palette in function of the size of the data if none is defined */
-    def colorPalette: js.Array[String] = {
+    def colorPaletteJS: js.Array[String] = {
         (data, colorPaletteLocal) match {
             case (_, Some(p)) => p
             case (Some(d), None) => if (d.length < 10) d3.schemeCategory10 else d3.schemeCategory20
@@ -251,7 +251,7 @@ class ChordPlot extends RelationPlot {
         val test = g.selectAll("g")
         test.attr("test", "t")
 
-        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPalette)
+        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPaletteJS)
         val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
         section.append("path").style("fill", (d: ChordGroup) => color(d.index))
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
