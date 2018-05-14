@@ -1,15 +1,14 @@
 package lib.plot
 //import d3v4.{Path, Primitive, Projection, d3}
+import d3v4._
 import example.MyRootJson
+import lib.ImplicitConv._
+import lib.matrix.LabelizedRelationMatrix
 import org.scalajs.dom.raw.MouseEvent
 
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => gJS}
-import d3v4._
-import lib.ImplicitConv._
-import lib.matrix.{*, LabelizedRelationMatrix, RelationMatrix}
-
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 //import lib.ImplicitConv._
 
 //trait TopoJson extends js.Object {
@@ -54,9 +53,8 @@ trait CountryData extends js.Object {
 
 
 class MigrationPlot extends RelationPlot {
-
+    //================= Constructors and related =====================
     var countrySelected: Option[String] = None
-    private var sumData: Option[Double] = None
 
     val r = scala.util.Random // to generate random id
     val idDivInfo = "divID-"+r.nextInt
@@ -68,8 +66,6 @@ class MigrationPlot extends RelationPlot {
     div.style.position = "absolute"
     div.style.background = "white"
 
-
-    // this code is duplicated
     def this(data: Seq[(String, Product with Serializable)]) = {
         this()
         val labels: ListBuffer[String] = ListBuffer.empty[String]
@@ -306,15 +302,6 @@ class MigrationPlot extends RelationPlot {
             </div>
             """
     }
-
-    // TODO this code is also duplicated
-    //================== Setters ===============================
-    override def setMatrix(matrix: RelationMatrix): RelationPlot = {
-        super.setMatrix(matrix)
-        sumData = Some(computeSumData())
-        this
-    }
-
 }
 
 object MigrationPlot {

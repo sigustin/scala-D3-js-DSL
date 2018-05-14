@@ -31,6 +31,8 @@ trait RelationPlot {
     protected var basisMatrix: Option[RelationMatrix] = None // When resetting the display, get back to this data
     protected var displayedMatrix: Option[RelationMatrix] = None
 
+    protected var sumData: Option[Double] = None
+
     var focusEvent = FocusEvent.click
     var focusedSection: Option[Int] = None // Stores the index of the currently focused section (not yet merged)
 
@@ -62,6 +64,7 @@ trait RelationPlot {
     protected def setMatrix(matrix: RelationMatrix): RelationPlot = {
         basisMatrix = Some(matrix)
         displayedMatrix = Some(matrix)
+        computeSumData()
         this
     }
     /** Sets the displayed matrix of the plot */
@@ -111,6 +114,20 @@ trait RelationPlot {
         }
     }
     def updateLabel(oldLabel: String, newLabel: String): ChordPlot = updateLabel(oldLabel -> newLabel)
+
+    /**
+      * Returns the sum of the data around the whole chord plot
+      * @post the result is >= 0.0
+      */
+    protected def computeSumData(): Unit = {
+        data match {
+            case None => sumData = None
+            case Some(d) =>
+                var sum = 0.0
+                d.foreach(sum += _.sum.abs)
+                sumData = Some(sum)
+        }
+    }
 
     //=================== Getters ===========================
     def height: Double = {
@@ -188,22 +205,6 @@ trait RelationPlot {
     }
     def merge(index1: Any, index2: Any): RelationPlot = merge(index1 -> index2)
 
-    /**
-      * Returns the sum of the data around the whole chord plot
-      * @post the result is >= 0.0
-      */
-    protected def computeSumData(): Double = {
-
-        data match {
-            case None => 0.0
-            case Some(d) =>
-                var sum = 0.0
-                d.foreach(sum += _.sum.abs)
-                print(sum)
-                sum
-        }
-    }
-
     //===================== Listeners =========================
     /** Calls the function $f when the plot is clicked on */
     def onClick(f: => Unit): RelationPlot = {svg.on("click", () => f); this}
@@ -254,10 +255,11 @@ trait RelationPlot {
             val i = d.asInstanceOf[ChordGroupJson].index // TODO ChordGroupJson only works for Chord at the moment
             println(s"focus and merge section called: $i and focused is $focusedSection")
             if (focusedSection.isDefined) {
-                if (focusedSection.get != i)
+                if (focusedSection.get != i) {
                     merge(i -> focusedSection.get)
+                    draw()
+                }
                 focusedSection = None
-                draw()
             }
             else
                 focusedSection = Some(i)

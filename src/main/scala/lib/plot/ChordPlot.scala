@@ -72,19 +72,7 @@ class ChordPlot extends RelationPlot {
         setDataFromUrl(url)
     }
 
-    private var sumData: Option[Double] = None
     private var tickStep: Option[Double] = None
-    /**
-      * Returns the sum of the data around the whole chord plot
-      * @post the result is >= 0.0
-      */
-    private def computeSumDataOverCircle(): Double = {
-        // TODO is this necessary ?
-        // Reset the tick step
-        tickStep = None
-
-        computeSumData()
-    }
 
     //==================== Getters ===========================
     /** Use a color palette in function of the size of the data if none is defined */
@@ -99,7 +87,7 @@ class ChordPlot extends RelationPlot {
     //================== Setters ===============================
     override def setMatrix(matrix: RelationMatrix): RelationPlot = {
         super.setMatrix(matrix)
-        sumData = Some(computeSumDataOverCircle())
+        tickStep = None // Reset the tick step
         this
     }
 
@@ -268,39 +256,17 @@ class ChordPlot extends RelationPlot {
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
             .attr("d", (x: ChordGroup) => arc(x))
 
-        /** Makes all sections fade but the one hovered */
-        def fade(opacity:Double): js.Any => Unit = {
-            d => {
-                val i = d.asInstanceOf[ChordGroupJson].index
-                svg.selectAll("path")
-                    .filter((d:js.Any) => {
-                        val dJs = d.asInstanceOf[js.Any]
-                        try {
-                            val e = dJs.asInstanceOf[ChordGroupJson]
-                            i != e.index
-                        } catch {
-                            case _: Throwable =>
-                                try {
-                                    val e = dJs.asInstanceOf[ChordJson]
-                                    e.source.index != i && e.target.index != i
-                                } catch {
-                                    case _: Throwable => true
-                                }
-                        }
-                    })
-                    .style("stroke-opacity", opacity.toString)
-                    .style("fill-opacity", opacity.toString)
-            }
-        }
-
         section
-            .on("mouseover", fade(0.2))
-            .on("mouseout", fade(0.8))
+            .on("mouseover", fadeSections(0.2))
+            .on("mouseout", fadeSections(0.8))
             //.on("click", merger)
-
 
         svg.on("click", revertAndRedraw)
         svg.call(d3.zoom().on("zoom",  () => g.attr("transform", d3.event.transform.toString)))
+        onClick {
+            revertDisplay()
+            draw()
+        }
 
         // Set focusing behavior
         focusEvent match {
@@ -378,7 +344,34 @@ class ChordPlot extends RelationPlot {
 
         path.exit().remove()
     }
+
+    //--------------- Draw utilities -------------------------
+    /** Makes all sections fade but the one hovered */
+    def fadeSections(opacity:Double): js.Any => Unit = {
+        d => {
+            val i = d.asInstanceOf[ChordGroupJson].index
+            svg.selectAll("path")
+                .filter((d:js.Any) => {
+                    val dJs = d.asInstanceOf[js.Any]
+                    try {
+                        val e = dJs.asInstanceOf[ChordGroupJson]
+                        i != e.index
+                    } catch {
+                        case _: Throwable =>
+                            try {
+                                val e = dJs.asInstanceOf[ChordJson]
+                                e.source.index != i && e.target.index != i
+                            } catch {
+                                case _: Throwable => true
+                            }
+                    }
+                })
+                .style("stroke-opacity", opacity.toString)
+                .style("fill-opacity", opacity.toString)
+        }
+    }
 }
+
 object ChordPlot {
     def apply(d:List[List[Double]]): ChordPlot =  new ChordPlot(d)
     def apply(d: (String, Product with Serializable)*): ChordPlot = new ChordPlot(d)
