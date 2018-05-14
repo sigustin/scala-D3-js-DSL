@@ -298,45 +298,22 @@ class ChordPlot extends RelationPlot {
             }
         }
 
-        val merger = (d:js.Any) => {
-            if (d3.event != null)
-                d3.event.stopPropagation()
-            gJS.console.log(d)
-            val data = d.asInstanceOf[ChordGroupJson]
-            indexSelected match {
-                case None => indexSelected = Some(data.index); println("clicked")
-                case Some(i) => {
-                    if (i != data.index) {
-                        println(s"merged ${i} and ${data.index}")
-                        merge((i, data.index) -> "merged")
-                        indexSelected = None
-                        draw()
-                    }
-                }
-            }
-            if (false) return
-        }
-
         section
             .on("mouseover", fade(0.2))
             .on("mouseout", fade(0.8))
             //.on("click", merger)
 
-        val handleClick_outside: js.Any => Unit = (d:js.Any) => {
-            revertDisplay()
-            draw()
-        }
-
-        svg.on("click", handleClick_outside)
+        svg.on("click", revertAndRedraw)
 
         // Set focusing behavior
         focusEvent match {
-            case FocusEvent.click => section.on("click", focusAndMergeSections())
-            case FocusEvent.hover => section.on("mouseenter", focusAndMergeSections())
+            case FocusEvent.click => section.on("click", focusAndMergeSections)
+            case FocusEvent.hover => section.on("mouseenter", focusAndMergeSections)
             case FocusEvent.drag => {
-                section.on("dragstart", focusAndMergeSections())
-                section.on("dragend", focusAndMergeSections())
+                section.on("dragstart", focusAndMergeSections)
+                section.on("dragend", focusAndMergeSections)
             }
+            case _ =>
         }
 
         // Place ticks around the plot
