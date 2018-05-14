@@ -66,8 +66,7 @@ trait RelationPlot {
     /** Sets the basis matrix of the plot and let it display itself */
     protected def setMatrix(matrix: RelationMatrix): RelationPlot = {
         basisMatrix = Some(matrix)
-        if (_displayedMatrix.isDefined)
-            historyMatrices.push(_displayedMatrix.get)
+        saveDisplayedMatrix()
         _displayedMatrix = Some(matrix)
         computeSumData()
         this
@@ -75,8 +74,7 @@ trait RelationPlot {
     /** Sets the displayed matrix of the plot */
     def displayedMatrix_=(matrix: RelationMatrix): Unit = {
         println("SETTING DISPLAYED MATRIX")
-        if (_displayedMatrix.isDefined)
-            historyMatrices.push(_displayedMatrix.get)
+        saveDisplayedMatrix()
         _displayedMatrix = Some(matrix)
     }
     def displayedMatrix: RelationMatrix = _displayedMatrix.getOrElse(RelationMatrix(List(List())))
@@ -176,6 +174,12 @@ trait RelationPlot {
     }
 
     //================= History =======================
+    /** Saves the current $_displayedMatrix into the history (if it is not the last one in) */
+    def saveDisplayedMatrix(): Unit = {
+        if (_displayedMatrix.isDefined
+            && (historyMatrices.isEmpty || historyMatrices.top != _displayedMatrix.get))
+            historyMatrices.push(_displayedMatrix.get)
+    }
     /** Resets the displayed matrix to the basis one (if there is one) */
     def revertToInitial(): Unit = {
         println(s"revert init: $historyMatrices")
