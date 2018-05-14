@@ -1,7 +1,7 @@
 package example
 
 
-import lib.plot.ChordPlot
+import lib.plot.{ChordPlot, MigrationPlot}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -69,7 +69,7 @@ object ScalaJSExample {
 //            .setLabel(List("A", "B", "C", "D"))
 //            .draw()
 
-//        val plot = ChordGraph(
+//        val plot = ChordPlot(
 //            "LabelA" -> (1,2,3),
 //            "LabelB" -> (4,5,4),
 //            "LabelC" -> (3,2,1)
@@ -78,11 +78,17 @@ object ScalaJSExample {
 //        plot
 //            .setTarget("#playground2 svg")
 //            .setDimension(600, 600)
-//            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223"))
+////            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223")) TODO setter does not seems to work
 //            .draw()
 
 //        // ========== Flow map =====================
 //        val g= new MigrationPlot()
+//        val g= MigrationPlot(
+//            "CAN" -> (0, 4, 5, 4),
+//            "GRL" -> (1, 0, 2, 3),
+//            "MEX" -> (3, 2, 0, 1),
+//            "USA" -> (10, 20, 30, 0)
+//        )
 ////        g.setDimension(240, 300)
 //        g.setDimension(600, 700)
 //        g.setTarget("#playground2 svg")
@@ -133,7 +139,7 @@ object ScalaJSExample {
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
         plot.draw()
 
-        //plot onDoubleClick {plot.revertDisplay()}
+//        plot onDoubleClick {plot.revertDisplay()}
 
 //        plot onClick {d: js.Any => println(s"got $d")}
 //        plot onClick {println("test")}

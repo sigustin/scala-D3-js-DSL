@@ -79,16 +79,11 @@ class ChordPlot extends RelationPlot {
       * @post the result is >= 0.0
       */
     private def computeSumDataOverCircle(): Double = {
+        // TODO is this necessary ?
         // Reset the tick step
         tickStep = None
 
-        data match {
-            case None => 0.0
-            case Some(d) =>
-                var sum = 0.0
-                d.foreach(sum += _.sum.abs)
-                sum
-        }
+        computeSumData()
     }
 
     //==================== Getters ===========================
@@ -328,6 +323,7 @@ class ChordPlot extends RelationPlot {
         }
 
         svg.on("click", handleClick_outside)
+        svg.call(d3.zoom().on("zoom",  () => g.attr("transform", d3.event.transform.toString)))
 
         // Set focusing behavior
         focusEvent match {

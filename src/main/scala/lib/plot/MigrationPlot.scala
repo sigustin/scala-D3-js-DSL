@@ -6,6 +6,10 @@ import org.scalajs.dom.raw.MouseEvent
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => gJS}
 import d3v4._
+import lib.ImplicitConv._
+import lib.matrix.{*, LabelizedRelationMatrix, RelationMatrix}
+
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 //import lib.ImplicitConv._
 
 //trait TopoJson extends js.Object {
@@ -35,13 +39,14 @@ import d3v4._
 
 @js.native
 trait MigrationData extends js.Object {
-    val geometry:CountryData= js.native
+    val geometry:CountryData = js.native
     val properties:js.Any= js.native
 }
 
 @js.native
 trait CountryData extends js.Object {
     val admin:String= js.native
+    val adm0_a3:String = js.native
     val pop_est:Int = js.native
 }
 
@@ -51,6 +56,7 @@ trait CountryData extends js.Object {
 class MigrationPlot extends RelationPlot {
 
     var countrySelected: Option[String] = None
+    private var sumData: Option[Double] = None
 
     val r = scala.util.Random // to generate random id
     val idDivInfo = "divID-"+r.nextInt
@@ -63,6 +69,24 @@ class MigrationPlot extends RelationPlot {
     div.style.background = "white"
 
 
+    // this code is duplicated
+    def this(data: Seq[(String, Product with Serializable)]) = {
+        this()
+        val labels: ListBuffer[String] = ListBuffer.empty[String]
+        var matrix: ArrayBuffer[Product with Serializable] = ArrayBuffer.empty[Product with Serializable]
+        data.foreach(elem => {
+            labels += elem._1
+            matrix += elem._2
+        })
+        var arrayOfList: ArrayBuffer[List[Int]] = ArrayBuffer.empty[List[Int]]
+        matrix.foreach(tuple => {
+            arrayOfList += tuple.productIterator.toList.asInstanceOf[List[Int]]
+        })
+
+        setMatrix(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
+    }
+
+
 
     def draw()={
         val projection: Projection = d3.geoMercator()
@@ -71,6 +95,10 @@ class MigrationPlot extends RelationPlot {
             d3.event.stopPropagation()
             println("inside")
             gJS.console.log(d)
+            val name = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
+            gJS.console.log()
+            println(basisMatrix)
+//            println(basisMatrix(name -> *))
         }
 
         val handleMouseOver_inside: js.Any => Unit = (d:js.Any) => {
@@ -150,6 +178,7 @@ class MigrationPlot extends RelationPlot {
                 .enter().append("path")
                 .attr("d", path.asInstanceOf[Primitive])
                 .attr("fill", "green")
+                .attr("id", (d:js.Any) => d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].adm0_a3)
                 .on("click",handleClick_inside)
                 .on("mousemove", handleMouseOver_inside)
                 .on("mouseover", color(true))
@@ -168,6 +197,74 @@ class MigrationPlot extends RelationPlot {
             val dy = (svg_box.y - map.y)*scaleApplied.asInstanceOf[js.Dynamic]
 
             ret.attr("transform", s"translate(${dx},${dy}) scale(${scaleApplied})")
+
+
+            // trace the migration flow
+
+            gJS.console.log(getLabels.get.toArray.asInstanceOf[js.Array[String]]) // TODO
+            val labelsOption = getLabels
+            if (labelsOption.isDefined){
+                println("hello")
+                val labels = labelsOption.get
+                for (i <- 0 until labels.length){
+                    var from = labels(i)
+                    println(from)
+                    for (j <- 0 until labels.length){
+                        var toward = labels(j)
+                        if (i != j){
+
+                            // the sum of the flow is from 1 to 2, (i,j) -> (j,i)
+                            if (data.get(i)(j) < data.get(j)(i)){
+                                val tmp = from
+                                from = toward
+                                toward = tmp
+                            }
+
+                            val country = d3.select("#"+from).datum()
+                            val country2 = d3.select("#"+toward).datum()
+                            val coord = path.centroid(country)
+                            val coord2 = path.centroid(country2)
+
+                            val x1 = coord._1*scaleApplied + dx.asInstanceOf[Double]
+                            val y1 = coord._2*scaleApplied + dy.asInstanceOf[Double]
+                            val x2 = coord2._1*scaleApplied + dx.asInstanceOf[Double]
+                            val y2 = coord2._2*scaleApplied + dy.asInstanceOf[Double]
+
+                            val strokeWidth:Double = Math.max(Math.abs(data.get(i)(j) - data.get(j)(i)) / sumData.get*10, 1)
+                            println(strokeWidth)
+                            val p = "M"+x1+","+y1+"L"+x2+","+y2+"Z"
+                            val ret2 = d3.select(localTarget)
+                                .append("g")
+                                .append("path")
+                                .attr("d", p)
+                                .attr("stroke", "black")
+                                .attr("stroke-width", strokeWidth)
+                        }
+                    }
+                }
+            }
+
+//            val country = d3.select("#Canada").datum()
+//            val country2 = d3.select("#Mexico").datum()
+//            val coord = path.centroid(country)
+//            val coord2 = path.centroid(country2)
+//
+//            val x1 = coord._1*scaleApplied + dx.asInstanceOf[Double]
+//            val y1 = coord._2*scaleApplied + dy.asInstanceOf[Double]
+//            val x2 = coord2._1*scaleApplied + dx.asInstanceOf[Double]
+//            val y2 = coord2._2*scaleApplied + dy.asInstanceOf[Double]
+//
+//            val p = "M"+x1+","+y1+"L"+x2+","+y2+"Z"
+//            val ret2 = d3.select(localTarget)
+//                .attr("width", width)
+//                .attr("height", height)
+//                .append("g")
+//                .append("path")
+//                .attr("d", p)
+//                .attr("stroke", "black")
+//                .attr("stoke-width", "1")
+
+
 
 
             /*val select:js.Any => Unit = (d:js.Any) => {
@@ -210,5 +307,16 @@ class MigrationPlot extends RelationPlot {
             """
     }
 
+    // TODO this code is also duplicated
+    //================== Setters ===============================
+    override def setMatrix(matrix: RelationMatrix): RelationPlot = {
+        super.setMatrix(matrix)
+        sumData = Some(computeSumData())
+        this
+    }
+
 }
 
+object MigrationPlot {
+    def apply(d: (String, Product with Serializable)*): MigrationPlot = new MigrationPlot(d)
+}

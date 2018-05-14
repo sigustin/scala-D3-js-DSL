@@ -181,6 +181,22 @@ trait RelationPlot {
     }
     def merge(index1: Any, index2: Any): RelationPlot = merge(index1 -> index2)
 
+    /**
+      * Returns the sum of the data around the whole chord plot
+      * @post the result is >= 0.0
+      */
+    protected def computeSumData(): Double = {
+
+        data match {
+            case None => 0.0
+            case Some(d) =>
+                var sum = 0.0
+                d.foreach(sum += _.sum.abs)
+                print(sum)
+                sum
+        }
+    }
+
     //===================== Listeners =========================
     /** Calls the function $f when the plot is clicked on */
     def onClick(f: => Unit): RelationPlot = {svg.on("click", () => f); this}
