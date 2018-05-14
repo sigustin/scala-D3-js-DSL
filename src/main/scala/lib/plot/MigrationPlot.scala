@@ -194,21 +194,25 @@ class MigrationPlot extends RelationPlot {
 
             ret.attr("transform", s"translate(${dx},${dy}) scale(${scaleApplied})")
 
+            // add arrow
+            d3.select(localTarget).append("defs").html(
+                """
+                  |<marker id="arrowhead" markerWidth="10" markerHeight="7"
+                  |    refX="7" refY="3.5" orient="auto" markerUnits ="userSpaceOnUse">
+                  |    <polygon points="0 0, 10 3.5, 0 7" />
+                  |</marker>
+                """.stripMargin)
 
             // trace the migration flow
-
-            gJS.console.log(getLabels.get.toArray.asInstanceOf[js.Array[String]]) // TODO
             val labelsOption = getLabels
             if (labelsOption.isDefined){
-                println("hello")
                 val labels = labelsOption.get
                 for (i <- 0 until labels.length){
                     var from = labels(i)
-                    println(from)
                     for (j <- 0 until labels.length){
                         var toward = labels(j)
-                        if (i != j){
-
+                        if (i < j){
+//                            gJS.console.log(from, " -> ", toward)
                             // the sum of the flow is from 1 to 2, (i,j) -> (j,i)
                             if (data.get(i)(j) < data.get(j)(i)){
                                 val tmp = from
@@ -227,7 +231,6 @@ class MigrationPlot extends RelationPlot {
                             val y2 = coord2._2*scaleApplied + dy.asInstanceOf[Double]
 
                             val strokeWidth:Double = Math.max(Math.abs(data.get(i)(j) - data.get(j)(i)) / sumData.get*10, 1)
-                            println(strokeWidth)
                             val p = "M"+x1+","+y1+"L"+x2+","+y2+"Z"
                             val ret2 = d3.select(localTarget)
                                 .append("g")
@@ -235,6 +238,7 @@ class MigrationPlot extends RelationPlot {
                                 .attr("d", p)
                                 .attr("stroke", "black")
                                 .attr("stroke-width", strokeWidth)
+                                .attr("marker-end", "url(#arrowhead)")
                         }
                     }
                 }
@@ -286,7 +290,7 @@ class MigrationPlot extends RelationPlot {
 
 
         }
-        d3.json("d3/europe.geo.json", callback)
+        d3.json("Maps/europe.geo.json", callback)
 
     }
 

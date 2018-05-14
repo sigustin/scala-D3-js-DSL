@@ -83,11 +83,17 @@ object ScalaJSExample {
 
 //        // ========== Flow map =====================
 //        val g= new MigrationPlot()
+////        val g= MigrationPlot(
+////            "FIN" -> (0, 4, 5, 4),
+////            "FRA" -> (1, 0, 2, 3),
+////            "ITA" -> (3, 2, 0, 1),
+////            "ESP" -> (10, 20, 30, 0)
+////        )
+//
 //        val g= MigrationPlot(
-//            "CAN" -> (0, 4, 5, 4),
-//            "GRL" -> (1, 0, 2, 3),
-//            "MEX" -> (3, 2, 0, 1),
-//            "USA" -> (10, 20, 30, 0)
+//            "FIN" -> (0, 4, 5),
+//            "FRA" -> (1, 0, 2),
+//            "ITA" -> (3, 2, 0)
 //        )
 ////        g.setDimension(240, 300)
 //        g.setDimension(600, 700)
