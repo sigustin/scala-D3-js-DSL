@@ -234,7 +234,7 @@ class ChordPlot extends RelationPlot {
         js.Array(js.Dictionary("index" -> d.index.toDouble, "angle" -> (d.startAngle + angleMean)))
     }
 
-    def draw(): Unit = {
+    override def draw(): Unit = {
         var matrix: js.Array[js.Array[Double]] = js.Array()
         data match {
             case Some(d) => matrix = d
@@ -249,21 +249,23 @@ class ChordPlot extends RelationPlot {
         val outerRadius = Math.min(width, height) * 0.5 - 40
         val innerRadius = outerRadius - 30
 
+        // Make sections ('groups' in JS)
         val chord = d3.chord().padAngle(0.05).sortSubgroups(d3.descending)
-        val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
-        val ribbon = d3.ribbon().radius(innerRadius)
-        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPalette)
-
         val g = svg.append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
             .datum(chord(matrix))
 
-        val group = g.append("g").attr("class", "groups")
+        val section = g.append("g").attr("class", "groups")
                 .selectAll("g")
                 .data((c: ChordArray) => c.groups)
                 .enter().append("g")
 
-        group.append("path").style("fill", (d: ChordGroup) => color(d.index))
+        val test = g.selectAll("g")
+        test.attr("test", "t")
+
+        val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(colorPalette)
+        val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
+        section.append("path").style("fill", (d: ChordGroup) => color(d.index))
             .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
             .attr("d", (x: ChordGroup) => arc(x))
 
@@ -291,9 +293,19 @@ class ChordPlot extends RelationPlot {
                     .style("fill-opacity", opacity.toString)
             }
         }
-        group
+        section
             .on("mouseover", fade(0.2))
             .on("mouseout", fade(0.8))
+
+        // Set focusing behavior
+        focusEvent match {
+            case FocusEvent.click => section.on("click", focusAndMergeSections())
+            case FocusEvent.hover => section.on("mouseenter", focusAndMergeSections())
+            case FocusEvent.drag => {
+                section.on("dragstart", focusAndMergeSections())
+                section.on("dragend", focusAndMergeSections())
+            }
+        }
 
         // Place ticks around the plot
         def groupTicks(d:ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
@@ -303,7 +315,7 @@ class ChordPlot extends RelationPlot {
             )
         }
 
-        var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, getTickStep))
+        var groupTick = section.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, getTickStep))
             .enter().append("g").attr("class", "group-tick")
             .attr("transform", (d: js.Dictionary[Double]) =>
                 "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
@@ -322,10 +334,11 @@ class ChordPlot extends RelationPlot {
             .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
             .text((d: js.Dictionary[Double]) => formatValue(d("value")))
 
+        // Place labels
         val labels = getLabels
         if (labels.isDefined){
             val label = d3.scaleOrdinal[Int, String]().domain(d3.range(labels.get.size)).range(labels.get)
-            val groupLabel = group.selectAll(".group-label").data((d: ChordGroup) => groupLabelData(d))
+            val groupLabel = section.selectAll(".group-label").data((d: ChordGroup) => groupLabelData(d))
                 .enter().append("g").attr("class", "group-label")
                 .attr("transform", (d: js.Dictionary[Double]) =>
                     "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+24) + ",0)")
@@ -348,7 +361,7 @@ class ChordPlot extends RelationPlot {
 //            .text((d: js.Dictionary[Double]) => label(d("value").toInt) )
         }
 
-
+        val ribbon = d3.ribbon().radius(innerRadius)
         val path = g.append("g").attr("class", "ribbons")
             .selectAll("path").data((c: ChordArray) => c)
         path

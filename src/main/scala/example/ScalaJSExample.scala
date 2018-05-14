@@ -1,7 +1,7 @@
 package example
 
 
-import lib.plot.{ChordPlot, MigrationPlot}
+import lib.plot.ChordPlot
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -133,21 +133,23 @@ object ScalaJSExample {
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
         plot.draw()
 
+        plot onDoubleClick {plot.revertDisplay()}
+
 //        plot onClick {d: js.Any => println(s"got $d")}
 //        plot onClick {println("test")}
 
-        var clickCount = 0
-        plot onClickDown {
-            if (clickCount % 2 == 0)
-//                plot.merge(("LabelB", "LabelC") -> "Label B and C")
-                plot.merge(("A-", "B-") -> "A- and B-")
-            else
-                plot.revertDisplay()
-            plot.draw()
-            clickCount += 1
-        } onClickUp {
-            println("clicked :D")
-        }
+//        var clickCount = 0
+//        plot onClickDown {
+//            if (clickCount % 2 == 0)
+////                plot.merge(("LabelB", "LabelC") -> "Label B and C")
+//                plot.merge(("A-", "B-") -> "A- and B-")
+//            else
+//                plot.revertDisplay()
+//            plot.draw()
+//            clickCount += 1
+//        } onClickUp {
+//            println("clicked :D")
+//        }
     }
 
     /*

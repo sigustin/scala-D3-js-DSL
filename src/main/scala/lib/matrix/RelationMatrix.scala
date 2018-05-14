@@ -90,6 +90,7 @@ class RelationMatrix {
     /** Returns the data in which section $indexToIndex._1 is merged into $indexToIndex._2 */
     protected def mergeData(indexToIndex: (Int, Int)): List[List[Double]] = {
         // TODO this method might be better off using a ListBuffer
+        // TODO fix labels disappearing when this is called
         val index1 = indexToIndex._1
         val index2 = indexToIndex._2
         if (index1 < 0 || index1 >= size || index2 < 0 || index2 >= size)

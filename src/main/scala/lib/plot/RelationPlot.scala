@@ -7,6 +7,17 @@ import org.scalajs.dom
 
 import scala.scalajs.js
 
+/**
+  * Enumerates the different behaviors for focusing sections (and then merge them when several are focused)
+  * When $click is the focus event of a plot, sections should be focused on click (and pushed in $focusedSections)
+  * When 2 sections are focused, they should be merged
+  * Resp. when $hover is the focus event
+  * When $drag is the focus event, a section should be focused when it is dragged from or to
+  */
+object FocusEvent extends Enumeration {
+    val click, hover, drag = Value
+}
+
 trait RelationPlot {
     var scale = 0 // power of ten multiplier of the representation of the data
     private var heightLocal:Option[Double] = None
@@ -18,6 +29,9 @@ trait RelationPlot {
     // Both matrices may contain labels or not
     protected var basisMatrix: Option[RelationMatrix] = None // When resetting the display, get back to this data
     protected var displayedMatrix: Option[RelationMatrix] = None
+
+    var focusEvent = FocusEvent.click
+    var focusedSection: Option[Int] = None // Stores the index of the currently focused section (not yet merged)
 
     //================= Setters ===========================
     /** Sets the visible dimension of the plot in the svg image */
@@ -201,4 +215,30 @@ trait RelationPlot {
     def onPageVisibilityChange(f: => Unit): RelationPlot = {svg.on("visibilitychange", () => f); this} // TODO doesn't seem to work
 
     // TODO listeners lists for events on groups?
+
+    //------------------ Focusing behavior -------------------------
+    /** Set the focusing behavior */
+    def focusSectionsOnClick: Unit = focusEvent = FocusEvent.click
+    def focusSectionsOnHover: Unit = focusEvent = FocusEvent.hover
+    def focusSectionsOnDrag: Unit = focusEvent = FocusEvent.drag
+
+    //=================== =======================
+    /** Returns a function that merges sections when two of them are selected */
+    def focusAndMergeSections(): js.Any => Unit = {
+        d => {
+            val i = d.asInstanceOf[ChordGroupJson].index // TODO ChordGroupJson only works for Chord at the moment
+            println(s"focus and merge section called: $i and focused is $focusedSection")
+            if (focusedSection.isDefined) {
+                if (focusedSection.get != i)
+                    merge(i -> focusedSection.get)
+                focusedSection = None
+                draw()
+            }
+            else
+                focusedSection = Some(i)
+        }
+    }
+
+    //=============== Abstract methods =====================
+    def draw(): Unit
 }
