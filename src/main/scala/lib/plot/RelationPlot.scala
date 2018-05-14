@@ -162,7 +162,12 @@ trait RelationPlot {
         val matrix = displayedMatrix.getOrElse(
             throw new UnsupportedOperationException("Can't merge two sections when there is no data in the plot"))
         indexToIndex match {
-            case (_: Int, _: Int) => displayedMatrix = Some(matrix.merge(indexToIndex.asInstanceOf[(Int, Int)]))
+            case (_: Int, _: Int) =>
+                matrix match {
+                    case labelizedMatrix: LabelizedRelationMatrix =>
+                        displayedMatrix = Some(labelizedMatrix.mergeAndKeepLabels(indexToIndex.asInstanceOf[(Int, Int)]))
+                    case _ => displayedMatrix = Some(matrix.merge(indexToIndex.asInstanceOf[(Int, Int)]))
+                }
             case (_: String, _: String) | (_: Int, _: String) | (_: String, _: Int) =>
                 matrix match {
                     case labelizedMat: LabelizedRelationMatrix =>

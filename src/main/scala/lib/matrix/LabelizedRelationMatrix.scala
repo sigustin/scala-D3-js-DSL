@@ -92,7 +92,7 @@ class LabelizedRelationMatrix extends RelationMatrix {
     def existsLabel(label: String): Boolean = labelsIndices.keySet.contains(label)
 
     /** Merge section $indexToIndex._1 and $indexToIndex._2 and puts the resulting elements at index of $indexToIndex._2 */
-    def merge(indexToIndex: (Any, Any)): LabelizedRelationMatrix = { // DummyImplicit to avoid "same type after erasure error'
+    def mergeAndKeepLabels(indexToIndex: (Any, Any)): LabelizedRelationMatrix = { // DummyImplicit to avoid "same type after erasure error'
         indexToIndex match {
             case (index1: Int, index2: Int) =>
                 val updatedLabels = labels.slice(0, index1) ++ labels.slice(index1+1, labels.length)
@@ -111,6 +111,8 @@ class LabelizedRelationMatrix extends RelationMatrix {
             case _ => throw new IllegalArgumentException("Can only index matrices using Int and labels")
         }
     }
+    /** Id. defined to avoid calling super.merge with those specific arguments */
+    def merge(indexToIndex: (Any, Any)): LabelizedRelationMatrix = mergeAndKeepLabels(indexToIndex)
 
     override def toString: String = {
         val answer = new StringBuilder()
