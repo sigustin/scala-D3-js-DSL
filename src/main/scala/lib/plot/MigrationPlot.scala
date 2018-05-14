@@ -203,25 +203,31 @@ class MigrationPlot extends RelationPlot {
                   |</marker>
                 """.stripMargin)
 
+            // does not work // TODO remove
+//            svg.call(d3.zoom().on("zoom",  () => {val e = d3.event.transform; gJS.console.log(e.toString); gJS.console.log(s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scaleApplied(${e.k*scaleApplied})"); svg.attr("transform", s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scale(${e.k*scaleApplied})")}))
+//            svg.call(d3.zoom().on("zoom",  () => {svg.attr("transform", d3.event.transform.toString)}))
+
             // trace the migration flow
             val labelsOption = getLabels
             if (labelsOption.isDefined){
                 val labels = labelsOption.get
                 for (i <- 0 until labels.length){
-                    var from = labels(i)
+                    val from = labels(i)
                     for (j <- 0 until labels.length){
-                        var toward = labels(j)
-                        if (i < j){
+                        val toward = labels(j)
+                        if (i < j && data.get(i)(j) - data.get(j)(i) != 0){
 //                            gJS.console.log(from, " -> ", toward)
                             // the sum of the flow is from 1 to 2, (i,j) -> (j,i)
+                            var fromLoc = from
+                            var towardLoc = toward
                             if (data.get(i)(j) < data.get(j)(i)){
                                 val tmp = from
-                                from = toward
-                                toward = tmp
+                                fromLoc = toward
+                                towardLoc = tmp
                             }
 
-                            val country = d3.select("#"+from).datum()
-                            val country2 = d3.select("#"+toward).datum()
+                            val country = d3.select("#"+fromLoc).datum()
+                            val country2 = d3.select("#"+towardLoc).datum()
                             val coord = path.centroid(country)
                             val coord2 = path.centroid(country2)
 
@@ -230,8 +236,14 @@ class MigrationPlot extends RelationPlot {
                             val x2 = coord2._1*scaleApplied + dx.asInstanceOf[Double]
                             val y2 = coord2._2*scaleApplied + dy.asInstanceOf[Double]
 
-                            val strokeWidth:Double = Math.max(Math.abs(data.get(i)(j) - data.get(j)(i)) / sumData.get*10, 1)
-                            val p = "M"+x1+","+y1+"L"+x2+","+y2+"Z"
+                            val (x1b, y1b, x2b, y2b) = buildLine(x1, y1, x2, y2)
+
+                            println(x1,","+ y1," "+ x2,","+ y2)
+                            println(x1b,","+ y1b," "+ x2b,","+ y2b)
+
+
+                            val strokeWidth:Double = Math.max(Math.abs(data.get(i)(j) - data.get(j)(i)) / sumData.get*20, 1)
+                            val p = "M"+x1b+","+y1b+"L"+x2b+","+y2b+"Z"
                             val ret2 = d3.select(localTarget)
                                 .append("g")
                                 .append("path")
@@ -305,6 +317,36 @@ class MigrationPlot extends RelationPlot {
               <div style="font-size: 15px;"> Population: ${pop} </div>
             </div>
             """
+    }
+
+    def buildLine(x1:Double, y1:Double, x2:Double, y2:Double):(Double, Double, Double, Double) = {
+        val dx = Math.abs(x1 - x2)
+        val dy = Math.abs(y1 - y2)
+        val hyp = Math.sqrt(dx*dx + dy*dy)
+        val alpha = (Math.acos(dy/hyp))
+        val d = 0.02*Math.min(height, width)
+
+        var x1b, y1b, x2b, y2b = 0.0
+        val dxb = d*Math.sin(alpha)
+        val dyb = d*Math.cos(alpha)
+        if (x2 > x1){
+            x1b = x1 + dxb
+            x2b = x2 - dxb
+
+        }else{
+            x1b = x1 - dxb
+            x2b = x2 + dxb
+        }
+        if (y2 > y1){
+            y1b = y1 + dyb
+            y2b = y2 - dyb
+        }else {
+            y1b = y1 - dyb
+            y2b = y2 + dyb
+        }
+
+        (x1b, y1b, x2b, y2b)
+
     }
 }
 
