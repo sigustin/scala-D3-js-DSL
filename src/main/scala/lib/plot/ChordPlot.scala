@@ -57,15 +57,15 @@ class ChordPlot extends RelationPlot {
             arrayOfList += tuple.productIterator.toList.asInstanceOf[List[Int]]
         })
 
-        setMatrix(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
+        setMatrixAndWipeHistory(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
     }
     def this(data: List[List[Double]]) = {
         this()
-        setMatrix(RelationMatrix(data))
+        setMatrixAndWipeHistory(RelationMatrix(data))
     }
     def this(matrix: RelationMatrix) = {
         this()
-        setMatrix(matrix)
+        setMatrixAndWipeHistory(matrix)
     }
     def this(url: String) = {
         this()
@@ -76,7 +76,7 @@ class ChordPlot extends RelationPlot {
 
     //==================== Getters ===========================
     /** Use a color palette in function of the size of the data if none is defined */
-    def colorPaletteJS: js.Array[String] = {
+    private def colorPaletteJS: js.Array[String] = {
         (data, colorPaletteLocal) match {
             case (_, Some(p)) => p
             case (Some(d), None) => if (d.length < 10) d3.schemeCategory10 else d3.schemeCategory20
@@ -85,8 +85,8 @@ class ChordPlot extends RelationPlot {
     }
 
     //================== Setters ===============================
-    override def setMatrix(matrix: RelationMatrix): RelationPlot = {
-        super.setMatrix(matrix)
+    override def setMatrixAndWipeHistory(matrix: RelationMatrix): RelationPlot = {
+        super.setMatrixAndWipeHistory(matrix)
         tickStep = None // Reset the tick step
         this
     }
@@ -109,7 +109,7 @@ class ChordPlot extends RelationPlot {
                     labelsBuilder += row.label
                 }
 
-                setMatrix(LabelizedRelationMatrix(labelsBuilder.toList, dataBuilder.toList))
+                setMatrixAndWipeHistory(LabelizedRelationMatrix(labelsBuilder.toList, dataBuilder.toList))
 
             } catch {
                 case default:Throwable => {
