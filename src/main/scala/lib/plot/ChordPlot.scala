@@ -127,6 +127,7 @@ class ChordPlot extends RelationPlot {
 
     def setColorPalette(cp: List[String]): ChordPlot = {colorPaletteLocal = Some(cp); this}
     def colorPalette_=(cp: List[String]): Unit = setColorPalette(cp)
+    def colorPalette: List[String] = colorPaletteLocal.getOrElse(List())
 
     //=================== Utility function ==============================
     private val minStepPx = 40 // minimal number of pixels between 2 ticks (not a hard bound)

@@ -81,38 +81,12 @@ trait RelationPlot {
     }
     def displayedMatrix: RelationMatrix = _displayedMatrix.getOrElse(RelationMatrix(List(List())))
 
-    /** Resets the displayed matrix to the basis one (if there is one) */
-    def revertToInitial(): Unit = {
-        println(s"revert init: $historyMatrices")
-        if (historyMatrices.nonEmpty) {
-            while (historyMatrices.length > 1)
-                historyMatrices.pop()
-            _displayedMatrix = Some(historyMatrices.pop())
-        }
-        else
-            println("[WARNING] Can't revert to initial state without history")
-        println("end revert init")
-//        basisMatrix match {
-//            case Some(matrix) => displayedMatrix = Some(matrix)
-//            case None => displayedMatrix = None
-//        }
-    }
-    /** Goes back one state in the history */
-    def revert(): Unit = {
-        println(s"revert: $historyMatrices")
-        if (historyMatrices.nonEmpty)
-            _displayedMatrix = Some(historyMatrices.pop())
-        else
-            println("[WARNING] Can't revert to previous state without history")
-        println("end revert")
-    }
-
     def setLabels(l: List[String]): ChordPlot = {
         _displayedMatrix match {
             case Some(matrix) =>
                 matrix match {
-                    case m: LabelizedRelationMatrix =>
-                        m.setLabels (l)
+                    case labelizedMat: LabelizedRelationMatrix =>
+                        labelizedMat.setLabels (l)
                         this
                     case _: RelationMatrix =>
                         data match {
@@ -127,8 +101,17 @@ trait RelationPlot {
             case None => throw new UnsupportedOperationException ("Can't set labels for no matrix")
         }
     }
-
     def labels_=(l: List[String]): Unit = setLabels(l)
+    def labels: List[String] = {
+        _displayedMatrix match {
+            case Some(matrix) =>
+                matrix match {
+                    case labelizedMat: LabelizedRelationMatrix => labelizedMat.getLabels
+                    case _ => List()
+                }
+            case None => List()
+        }
+    }
 
     def updateLabel(labelToLabel: (String, String)): ChordPlot = {
         _displayedMatrix match {
@@ -190,6 +173,27 @@ trait RelationPlot {
                 }
             case _ => None
         }
+    }
+
+    //================= History =======================
+    /** Resets the displayed matrix to the basis one (if there is one) */
+    def revertToInitial(): Unit = {
+        println(s"revert init: $historyMatrices")
+        if (historyMatrices.nonEmpty) {
+            while (historyMatrices.length > 1)
+                historyMatrices.pop()
+            _displayedMatrix = Some(historyMatrices.pop())
+        }
+        else
+            println("[WARNING] Can't revert to initial state without history")
+    }
+    /** Goes back one state in the history */
+    def revert(): Unit = {
+        println(s"revert: $historyMatrices")
+        if (historyMatrices.nonEmpty)
+            _displayedMatrix = Some(historyMatrices.pop())
+        else
+            println("[WARNING] Can't revert to previous state without history")
     }
 
     //=================== Utility methods ==========================
