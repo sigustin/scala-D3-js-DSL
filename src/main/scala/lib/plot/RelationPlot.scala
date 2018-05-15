@@ -4,9 +4,13 @@ import d3v4._
 import lib.ImplicitConv._
 import lib.matrix.{LabelizedRelationMatrix, RelationMatrix}
 import org.scalajs.dom
+import org.scalajs.dom.XMLHttpRequest
 
-import scala.collection.mutable.Stack
+import scala.collection.mutable.{ListBuffer, Stack}
 import scala.scalajs.js
+import scala.scalajs.js.JSON
+
+import scala.scalajs.js.Dynamic.{global => gJS}
 
 /**
   * Enumerates the different behaviors for focusing sections (and then merge them when several are focused)
@@ -139,6 +143,40 @@ trait RelationPlot {
                 d.foreach(sum += _.sum.abs)
                 sumData = Some(sum)
         }
+    }
+
+    protected def setDataFromUrl(url: String): RelationPlot = {
+        val xobj = new XMLHttpRequest()
+        xobj.open("GET", url, false)
+        xobj.send(null)
+
+        if (xobj.readyState == 4 && xobj.status == 200) {
+            val r = xobj.responseText
+            val d = JSON.parse(r)
+
+            try {
+                val dataBuilder = new ListBuffer[List[Double]]
+                val labelsBuilder = new ListBuffer[String]
+                for (e <- d.asInstanceOf[js.Array[DataFromJsonUrl]]){
+                    val row = e.asInstanceOf[DataFromJsonUrl]
+                    dataBuilder += row.data.toList
+                    labelsBuilder += row.label
+                }
+
+                setMatrixAndWipeHistory(LabelizedRelationMatrix(labelsBuilder.toList, dataBuilder.toList))
+
+            } catch {
+                case default:Throwable => {
+                    gJS.console.log("error in the json format")
+                }
+            }
+
+
+        } else {
+            gJS.console.log("error while getting the json")
+        }
+
+        this
     }
 
     //=================== Getters ===========================

@@ -62,6 +62,9 @@ trait FlowMigration extends js.Object{
 class MigrationPlot extends RelationPlot {
     //================= Constructors and related =====================
     var countrySelected: Option[String] = None
+    var mapUrl:Option[String] = None
+    var colorCountry = "green"
+    var colorArrow = "black"
 
     val r = scala.util.Random // to generate random id
     val idDivInfo = "divID-"+r.nextInt
@@ -73,7 +76,7 @@ class MigrationPlot extends RelationPlot {
     div.style.position = "absolute"
     div.style.background = "white"
 
-    def this(data: Seq[(String, Product with Serializable)]) = {
+    def this(mUrl:String, data: Seq[(String, Product with Serializable)]) = {
         this()
         val labels: ListBuffer[String] = ListBuffer.empty[String]
         var matrix: ArrayBuffer[Product with Serializable] = ArrayBuffer.empty[Product with Serializable]
@@ -85,8 +88,14 @@ class MigrationPlot extends RelationPlot {
         matrix.foreach(tuple => {
             arrayOfList += tuple.productIterator.toList.asInstanceOf[List[Int]]
         })
-
+        mapUrl = Some(mUrl)
         setMatrixAndWipeHistory(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
+    }
+
+    def this(mUrl:String, dUrl:String){
+        this()
+        mapUrl = Some(mUrl)
+        setDataFromUrl(dUrl)
     }
 
 
@@ -138,7 +147,7 @@ class MigrationPlot extends RelationPlot {
                             case _: Throwable => false
                         }
                     })
-                    .style("fill", (if (on) "yellow" else "green"))
+                    .style("fill", (if (on) "yellow" else colorCountry))
             }
         }
 
@@ -195,7 +204,7 @@ class MigrationPlot extends RelationPlot {
                 .data(geoData)
                 .enter().append("path")
                 .attr("d", path.asInstanceOf[Primitive])
-                .attr("fill", "green")
+                .attr("fill", colorCountry)
                 .attr("id", (d:js.Any) => d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].adm0_a3)
                 .on("click",handleClick_inside)
                 .on("mousemove", handleMouseOver_inside)
@@ -218,16 +227,16 @@ class MigrationPlot extends RelationPlot {
 
             // add arrow
             d3.select(localTarget).append("defs").html(
-                """
+                s"""
                   |<marker id="arrowhead" markerWidth="10" markerHeight="7"
-                  |    refX="7" refY="3.5" orient="auto" markerUnits ="userSpaceOnUse">
+                  |    refX="7" refY="3.5" orient="auto" markerUnits ="userSpaceOnUse", fill="${colorArrow}">
                   |    <polygon points="0 0, 10 3.5, 0 7" />
                   |</marker>
                 """.stripMargin)
 
             // does not work // TODO remove
 //            svg.call(d3.zoom().on("zoom",  () => {val e = d3.event.transform; gJS.console.log(e.toString); gJS.console.log(s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scaleApplied(${e.k*scaleApplied})"); svg.attr("transform", s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scale(${e.k*scaleApplied})")}))
-//            svg.call(d3.zoom().on("zoom",  () => {svg.attr("transform", d3.event.transform.toString)}))
+            svg.call(d3.zoom().on("zoom",  () => {svg.attr("transform", d3.event.transform.toString)}))
 
 
 //            def buildDicoMigration= (from:String, to:String, qt:Int)=>js.Dictionary[Double] = {
@@ -281,7 +290,7 @@ class MigrationPlot extends RelationPlot {
                                d => {
                                    val f = d.asInstanceOf[FlowMigration]
                                    d3.select(localTarget).select(s"#${f.from}-${f.to}")
-                                       .attr("stroke", if (on) "red" else "black")
+                                       .attr("stroke", if (on) "red" else colorArrow)
 
                                }
                             }
@@ -296,7 +305,7 @@ class MigrationPlot extends RelationPlot {
                                 .attr("id", s"${fromLoc}-${towardLoc}")
                                 .attr("class", "flowMigration")
                                 .attr("d", p)
-                                .attr("stroke", "black")
+                                .attr("stroke", colorArrow)
                                 .attr("stroke-linecap", "butt")
                                 .attr("stroke-width", strokeWidth)
                                 .attr("marker-end", "url(#arrowhead)")
@@ -358,7 +367,7 @@ class MigrationPlot extends RelationPlot {
 
 
         }
-        d3.json("Maps/europe.geo.json", callback)
+        d3.json(mapUrl.get, callback)
 
     }
 
@@ -426,5 +435,6 @@ class MigrationPlot extends RelationPlot {
 }
 
 object MigrationPlot {
-    def apply(d: (String, Product with Serializable)*): MigrationPlot = new MigrationPlot(d)
+    def apply(mapUrl: String, d: (String, Product with Serializable)*): MigrationPlot = new MigrationPlot(mapUrl, d)
+    def apply(mapUrl:String, dataUrl:String): MigrationPlot = new MigrationPlot(mapUrl, dataUrl)
 }

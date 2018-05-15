@@ -99,39 +99,7 @@ class ChordPlot extends RelationPlot {
         this
     }
 
-    private def setDataFromUrl(url: String): RelationPlot = {
-        val xobj = new XMLHttpRequest()
-        xobj.open("GET", url, false)
-        xobj.send(null)
 
-        if (xobj.readyState == 4 && xobj.status == 200) {
-            val r = xobj.responseText
-            val d = JSON.parse(r)
-
-            try {
-                val dataBuilder = new ListBuffer[List[Double]]
-                val labelsBuilder = new ListBuffer[String]
-                for (e <- d.asInstanceOf[js.Array[DataFromJsonUrl]]){
-                    val row = e.asInstanceOf[DataFromJsonUrl]
-                    dataBuilder += row.data.toList
-                    labelsBuilder += row.label
-                }
-
-                setMatrixAndWipeHistory(LabelizedRelationMatrix(labelsBuilder.toList, dataBuilder.toList))
-
-            } catch {
-                case default:Throwable => {
-                    gJS.console.log("error in the json format")
-                }
-            }
-
-
-        } else {
-            gJS.console.log("error while getting the json")
-        }
-
-        this
-    }
 
     def setColorPalette(cp: List[String]): ChordPlot = {colorPaletteLocal = Some(cp); this}
     def colorPalette_=(cp: List[String]): Unit = setColorPalette(cp)
