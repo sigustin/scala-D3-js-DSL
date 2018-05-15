@@ -3,38 +3,13 @@ package lib.plot
 import d3v4._
 import example.MyRootJson
 import lib.ImplicitConv._
-import lib.matrix.LabelizedRelationMatrix
+import lib.matrix.{LabelizedFlowsMatrix, LabelizedRelationMatrix}
 import org.scalajs.dom.raw.MouseEvent
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => gJS}
-//import lib.ImplicitConv._
 
-//trait TopoJson extends js.Object {
-//    val `type`: String = js.native
-//    val transform: js.Any = js.native
-//    val arcs: js.Array[js.Array[js.Array[Int]]] = js.native
-//    val objects: ???
-//}
-//trait TopoObject extends js.Object {
-//    val `type`: String = js.native
-//    val geometries: js.Array[???]
-//}
-//trait TopoPolygon extends js.Object {
-//    val `type`: String = js.native
-//    val arcs: js.Array[js.Array[Int]]
-//    val properties:
-//}
-//trait TopoMultipolygon extends js.Object {
-//    val `type`: String = js.native
-//    ???
-//}
-//trait TopoProperties extends js.Object {
-//    val STATEFP: String = js.native
-//    val STUSPS: String = js.native
-//    val
-//}
 
 @js.native
 trait MigrationData extends js.Object {
@@ -89,7 +64,7 @@ class MigrationPlot extends RelationPlot {
             arrayOfList += tuple.productIterator.toList.asInstanceOf[List[Int]]
         })
         mapUrl = Some(mUrl)
-        setMatrixAndWipeHistory(LabelizedRelationMatrix(labels.toList, arrayOfList.toList))
+        setMatrixAndWipeHistory(LabelizedFlowsMatrix(labels.toList, arrayOfList.toList))
     }
 
     def this(mUrl:String, dUrl:String){
@@ -98,102 +73,18 @@ class MigrationPlot extends RelationPlot {
         setDataFromUrl(dUrl)
     }
 
-
+    //====================== Display methods ===========================
 
     def draw()={
         val projection: Projection = d3.geoMercator()
-
-        val handleClick_inside: js.Any => Unit = (d:js.Any) => {
-            d3.event.stopPropagation()
-            println("inside")
-            gJS.console.log(d)
-            val name = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
-            gJS.console.log()
-            println(basisMatrix)
-//            println(basisMatrix(name -> *))
-        }
-
-        val handleMouseOver_inside: js.Any => Unit = (d:js.Any) => {
-                if (d3.event != null){
-                    d3.event.stopPropagation()
-
-                // popup
-                val x = d3.event.asInstanceOf[MouseEvent].clientX
-                val y = d3.event.asInstanceOf[MouseEvent].clientY
-
-                val div = gJS.document.getElementById(idDivInfo)
-                if (showPopup)
-                    div.style.display = "block"
-                val dataCountry = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
-                val country = dataCountry.admin
-                val pop = dataCountry.pop_est
-                div.innerHTML = buildDivContentCountry(country, pop)
-
-                div.style.left = (x+10)+"px"
-                div.style.top = (y+10)+"px"
-            }
-
-        }
-
-
-        def color(on:Boolean): js.Any => Unit = {
-            d => {
-                val country = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
-                svg.selectAll("path")
-                    .filter((d:js.Any) => {
-                        try {
-                            val e = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
-                            country == e.admin
-                        } catch {
-                            case _: Throwable => false
-                        }
-                    })
-                    .style("fill", (if (on) "yellow" else colorRegion))
-            }
-        }
-
-        val handleMouseMoveOnFlow: js.Any => Unit = (d:js.Any) => { // TODO
-            if (d3.event != null){
-                d3.event.stopPropagation()
-
-                // popup
-                val x = d3.event.asInstanceOf[MouseEvent].clientX
-                val y = d3.event.asInstanceOf[MouseEvent].clientY
-
-                val div = gJS.document.getElementById(idDivInfo)
-                if (showPopup)
-                    div.style.display = "block"
-                val dFlow = d.asInstanceOf[FlowMigration]
-                div.innerHTML = buildDivContentFlow(dFlow.from, dFlow.to, dFlow.qt)
-
-                div.style.left = (x+10)+"px"
-                div.style.top = (y+10)+"px"
-            }
-
-        }
-
-        val handleMouseOver_outside: js.Any => Unit = (d:js.Any) => {
-            var div = gJS.document.getElementById(idDivInfo)
-            if (div != null)
-                div.style.display = "None"
-        }
-
-        val handleClick_outside: js.Any => Unit = (d:js.Any) => {
-            println("outside")
-            gJS.console.log(d)
-        }
-
-        svg.on("click", handleClick_outside)
-            .on("mousemove", handleMouseOver_outside)
+        
+        svg.on("click", showData)
+            .on("mousemove", hidePopup)
 
         var path: Path = d3.geoPath(projection)
-        //        var path: Path = d3.geoPath().projection(projection.asInstanceOf[TransformType]) // equivalent
 
         val callback: js.Any => Unit = (d:js.Any) => {
             val geoData = d.asInstanceOf[MyRootJson].features
-            println("got:"+d+" => "+geoData)
-
-
 
 
             val ret = d3.select(localTarget)
@@ -208,8 +99,7 @@ class MigrationPlot extends RelationPlot {
                 .attr("d", path.asInstanceOf[Primitive])
                 .attr("fill", colorRegion)
                 .attr("id", (d:js.Any) => d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].adm0_a3)
-                .on("click",handleClick_inside)
-                .on("mousemove", handleMouseOver_inside)
+                .on("mousemove", buildPopupRegion)
                 .on("mouseover", color(true))
                 .on("mouseout", color(false))
 
@@ -236,15 +126,7 @@ class MigrationPlot extends RelationPlot {
                   |</marker>
                 """.stripMargin)
 
-            // does not work // TODO remove
-//            svg.call(d3.zoom().on("zoom",  () => {val e = d3.event.transform; gJS.console.log(e.toString); gJS.console.log(s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scaleApplied(${e.k*scaleApplied})"); svg.attr("transform", s"translate(${e.x*scaleApplied}, ${e.y*scaleApplied}) scale(${e.k*scaleApplied})")}))
-            svg.call(d3.zoom().on("zoom",  () => {svg.attr("transform", d3.event.transform.toString)}))
 
-
-//            def buildDicoMigration= (from:String, to:String, qt:Int)=>js.Dictionary[Double] = {
-//                return js.Dictionary("from" -> from, "to" -> to, "qt" -> qt)
-//            }
-            // trace the migration flow
 
             val buf:js.Array[FlowMigration] = js.Array()
             val labelsOption = getLabels
@@ -255,8 +137,6 @@ class MigrationPlot extends RelationPlot {
                     for (j <- 0 until labels.length){
                         val toward = labels(j)
                         if (i < j && data.get(i)(j) - data.get(j)(i) != 0){
-//                            gJS.console.log(from, " -> ", toward)
-                            // the sum of the flow is from 1 to 2, (i,j) -> (j,i)
                             var fromLoc = from
                             var towardLoc = toward
                             if (data.get(i)(j) < data.get(j)(i)){
@@ -265,14 +145,7 @@ class MigrationPlot extends RelationPlot {
                                 towardLoc = tmp
                             }
 
-//                            val d = new js.Object("from" -> fromLoc).asInstanceOf[FlowMigration]
-//                            val d = new FlowMigration {
-//                                "from" -> fromLoc,
-//                                "to" -> towardLoc,
-//                                "qt" -> 0
-//                            }
                             val d = js.Dynamic.literal("from" -> fromLoc, "to" -> towardLoc, "qt" -> Math.abs(data.get(j)(i) - data.get(i)(j))).asInstanceOf[FlowMigration]
-//                            d.from = fromLoc
                             buf.append(d)
 
                             val country = d3.select("#"+towardLoc).datum()
@@ -302,7 +175,6 @@ class MigrationPlot extends RelationPlot {
                             val p = "M"+x1b+","+y1b+"L"+x2b+","+y2b+"Z"
                             val ret2 = d3.select(localTarget)
                                 .append("g")
-//                                .data(buf).enter()
                                 .append("path")
                                 .attr("id", s"${fromLoc}-${towardLoc}")
                                 .attr("class", "flowMigration")
@@ -313,8 +185,7 @@ class MigrationPlot extends RelationPlot {
                                 .attr("marker-end", "url(#arrowhead)")
                                 .on("mouseover", makeFlowListener(true))
                                 .on("mouseout", makeFlowListener(false))
-                                .on("mousemove", handleMouseMoveOnFlow)
-//                                .on("mouseover", mouseOnFlow(_))
+                                .on("mousemove", buildPopupFlow)
                         }
                     }
                 }
@@ -322,46 +193,6 @@ class MigrationPlot extends RelationPlot {
                 d3.select(localTarget).selectAll(".flowMigration")
                     .data(buf).enter()
             }
-
-//            val country = d3.select("#Canada").datum()
-//            val country2 = d3.select("#Mexico").datum()
-//            val coord = path.centroid(country)
-//            val coord2 = path.centroid(country2)
-//
-//            val x1 = coord._1*scaleApplied + dx.asInstanceOf[Double]
-//            val y1 = coord._2*scaleApplied + dy.asInstanceOf[Double]
-//            val x2 = coord2._1*scaleApplied + dx.asInstanceOf[Double]
-//            val y2 = coord2._2*scaleApplied + dy.asInstanceOf[Double]
-//
-//            val p = "M"+x1+","+y1+"L"+x2+","+y2+"Z"
-//            val ret2 = d3.select(localTarget)
-//                .attr("width", width)
-//                .attr("height", height)
-//                .append("g")
-//                .append("path")
-//                .attr("d", p)
-//                .attr("stroke", "black")
-//                .attr("stoke-width", "1")
-
-
-
-
-            /*val select:js.Any => Unit = (d:js.Any) => {
-                gJS.console.log(d)
-                val country = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
-
-                svg.selectAll("path")
-//                    .filter((d:js.Any) => {
-////                        gJS.console.log(d)
-//                        false
-//                    })
-                    .style("fill", "yellow")
-
-            }*/
-
-
-//            ret.on("mouseover", select)
-
 
 
             // add div for info on the country under the mouse
@@ -371,6 +202,79 @@ class MigrationPlot extends RelationPlot {
         }
         d3.json(mapUrl.get, callback)
 
+    }
+
+    //--------------- Draw utilities -------------------------
+
+    val showData: js.Any => Unit = (d:js.Any) => {
+        d3.event.stopPropagation()
+        println("data of the flows:")
+        println(basisMatrix)
+    }
+
+    val buildPopupRegion: js.Any => Unit = (d:js.Any) => {
+        if (d3.event != null){
+            d3.event.stopPropagation()
+
+            // popup
+            val x = d3.event.asInstanceOf[MouseEvent].clientX
+            val y = d3.event.asInstanceOf[MouseEvent].clientY
+
+            val div = gJS.document.getElementById(idDivInfo)
+            if (showPopup)
+                div.style.display = "block"
+            val dataCountry = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
+            val country = dataCountry.admin
+            val pop = dataCountry.pop_est
+            div.innerHTML = buildDivContentCountry(country, pop)
+
+            div.style.left = (x+10)+"px"
+            div.style.top = (y+10)+"px"
+        }
+
+    }
+
+
+    def color(on:Boolean): js.Any => Unit = {
+        d => {
+            val country = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].admin
+            svg.selectAll("path")
+                .filter((d:js.Any) => {
+                    try {
+                        val e = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
+                        country == e.admin
+                    } catch {
+                        case _: Throwable => false
+                    }
+                })
+                .style("fill", (if (on) "yellow" else colorRegion))
+        }
+    }
+
+    val buildPopupFlow: js.Any => Unit = (d:js.Any) => { // TODO
+        if (d3.event != null){
+            d3.event.stopPropagation()
+
+            // popup
+            val x = d3.event.asInstanceOf[MouseEvent].clientX
+            val y = d3.event.asInstanceOf[MouseEvent].clientY
+
+            val div = gJS.document.getElementById(idDivInfo)
+            if (showPopup)
+                div.style.display = "block"
+            val dFlow = d.asInstanceOf[FlowMigration]
+            div.innerHTML = buildDivContentFlow(dFlow.from, dFlow.to, dFlow.qt)
+
+            div.style.left = (x+10)+"px"
+            div.style.top = (y+10)+"px"
+        }
+
+    }
+
+    val hidePopup: js.Any => Unit = (d:js.Any) => {
+        var div = gJS.document.getElementById(idDivInfo)
+        if (div != null)
+            div.style.display = "None"
     }
 
     def buildDivContentCountry(name:String, population:Int):String = {
@@ -387,7 +291,7 @@ class MigrationPlot extends RelationPlot {
     }
 
     def buildDivContentFlow(from:String, to:String, qt:Double):String = {
-        val f1 = d3.formatPrefix(".3s", qt)
+        val f1 = d3.formatPrefix(".0s", qt)
         val qtFormat = f1(qt)
 
         val f = d3.select(localTarget).select("#"+from).data().asInstanceOf[js.Array[MigrationData]](0).properties.asInstanceOf[CountryData].admin

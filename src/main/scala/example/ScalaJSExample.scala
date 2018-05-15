@@ -92,30 +92,30 @@ object ScalaJSExample {
 //            "GBR" -> (2, 6, 8, 9, 0)
 //        )
 
+        val g= MigrationPlot(
+            "Maps/europe.geo.json",
+            "data.json"
+        )
 //        val g= MigrationPlot(
-//            "Maps/europe.geo.json",
-//            "data.json"
+//            "FRA" -> (0, 4, 5, 4, 6),
+//            "FIN" -> (0, 0, 0, 0, 0),
+//            "ITA" -> (0, 0, 0, 0, 0),
+//            "ESP" -> (0, 0, 0, 0, 0),
+//            "GBR" -> (0, 0, 0, 0, 0)
 //        )
-////        val g= MigrationPlot(
-////            "FRA" -> (0, 4, 5, 4, 6),
-////            "FIN" -> (0, 0, 0, 0, 0),
-////            "ITA" -> (0, 0, 0, 0, 0),
-////            "ESP" -> (0, 0, 0, 0, 0),
-////            "GBR" -> (0, 0, 0, 0, 0)
-////        )
-//
-////        val g= MigrationPlot(
-////            "FIN" -> (0, 4, 5),
-////            "FRA" -> (1, 0, 2),
-////            "ITA" -> (3, 2, 0)
-////        )
-////        g.setDimension(240, 300)
-//        g.colorRegion = "#123456"
-//        g.colorArrow = "orange"
-//        g.showPopup = false
-//        g.setDimension(600, 700)
-//        g.setTarget("#playground2 svg")
-//        g.draw()
+
+//        val g= MigrationPlot(
+//            "FIN" -> (0, 4, 5),
+//            "FRA" -> (1, 0, 2),
+//            "ITA" -> (3, 2, 0)
+//        )
+//        g.setDimension(240, 300)
+        g.colorRegion = "#123456"
+        g.colorArrow = "orange"
+        g.showPopup = true
+        g.setDimension(600, 700)
+        g.setTarget("#playground2 svg")
+        g.draw()
 
 
         //========== Test matrices =================
@@ -152,16 +152,16 @@ object ScalaJSExample {
 //            "LabelB" -> (4,5,4),
 //            "LabelC" -> (3,2,1)
 //        )
-        val plot = ChordPlot("data.json") // TODO Invalid syntax exception?
-
-        plot
-            .setTarget("#playground2 svg")
-            .setDimension(600, 600)
-            .updateLabel("FRA" -> "France")
-
-
-        plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223", "#902383")
-        plot.draw()
+//        val plot = ChordPlot("data.json") // TODO Invalid syntax exception?
+//
+//        plot
+//            .setTarget("#playground2 svg")
+//            .setDimension(600, 600)
+//            .updateLabel("FRA" -> "France")
+//
+//
+//        plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223", "#902383")
+//        plot.draw()
 
 //        plot onDoubleClick {plot.revertDisplay()}
 
