@@ -122,7 +122,8 @@ class MigrationPlot extends RelationPlot {
                 val y = d3.event.asInstanceOf[MouseEvent].clientY
 
                 val div = gJS.document.getElementById(idDivInfo)
-                div.style.display = "block"
+                if (showPopup)
+                    div.style.display = "block"
                 val dataCountry = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
                 val country = dataCountry.admin
                 val pop = dataCountry.pop_est
@@ -160,7 +161,8 @@ class MigrationPlot extends RelationPlot {
                 val y = d3.event.asInstanceOf[MouseEvent].clientY
 
                 val div = gJS.document.getElementById(idDivInfo)
-                div.style.display = "block"
+                if (showPopup)
+                    div.style.display = "block"
                 val dFlow = d.asInstanceOf[FlowMigration]
                 div.innerHTML = buildDivContentFlow(dFlow.from, dFlow.to, dFlow.qt)
 

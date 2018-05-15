@@ -40,6 +40,7 @@ trait RelationPlot {
 
     var focusEvent = FocusEvent.click
     var focusedSection: Option[Int] = None // Stores the index of the currently focused section (not yet merged)
+    var showPopup = true
 
     //================= Setters and getters ===========================
     /** Sets the visible dimension of the plot in the svg image */

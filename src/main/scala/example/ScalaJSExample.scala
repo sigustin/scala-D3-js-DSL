@@ -81,14 +81,20 @@ object ScalaJSExample {
 ////            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223")) TODO setter does not seems to work
 //            .draw()
 
-////        // ========== Flow map =====================
-////        val g= new MigrationPlot()
+//        // ========== Flow map =====================
+//        val g= new MigrationPlot()
 //        val g= MigrationPlot(
+//            "Maps/europe.geo.json",
 //            "FIN" -> (0, 4, 5, 4, 6),
 //            "FRA" -> (1, 0, 2, 3, 8),
 //            "ITA" -> (3, 2, 0, 1, 6),
 //            "ESP" -> (10, 20, 30, 0, 1),
 //            "GBR" -> (2, 6, 8, 9, 0)
+//        )
+
+//        val g= MigrationPlot(
+//            "Maps/europe.geo.json",
+//            "data.json"
 //        )
 ////        val g= MigrationPlot(
 ////            "FRA" -> (0, 4, 5, 4, 6),
@@ -104,6 +110,9 @@ object ScalaJSExample {
 ////            "ITA" -> (3, 2, 0)
 ////        )
 ////        g.setDimension(240, 300)
+//        g.colorCountry = "#123456"
+//        g.colorArrow = "orange"
+//        g.showPopup = false
 //        g.setDimension(600, 700)
 //        g.setTarget("#playground2 svg")
 //        g.draw()
@@ -150,7 +159,8 @@ object ScalaJSExample {
             .setDimension(600, 600)
             .updateLabel("LabelA" -> "LabelOne")
 
-        plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223")
+
+        plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223", "#902383")
         plot.draw()
 
 //        plot onDoubleClick {plot.revertDisplay()}

@@ -233,7 +233,6 @@ class ChordPlot extends RelationPlot {
         section
             .on("mouseover", fadeSections(0.2))
             .on("mouseout", fadeSections(0.8))
-            //.on("click", merger)
 
         svg.call(d3.zoom().on("zoom",  () => g.attr("transform", d3.event.transform.toString)))
         onClick {
@@ -263,7 +262,7 @@ class ChordPlot extends RelationPlot {
 
         groupTick.append("line").attr("x2", 6)
 
-        val formatValue = d3.formatPrefix(",.0", getTickStep) // Should print K for thousands, M for millions...
+        val formatValue = d3.formatPrefix(",.0", getTickStep) // to print K for thousands, M for millions...
         val computedBigTickStep = closestRoundNb(nbTicksBetweenBigTicks() * getTickStep)
         val bigTickStep = if (computedBigTickStep == 0.0) getTickStep else computedBigTickStep
         groupTick.filter((d: js.Dictionary[Double]) => d("value") % bigTickStep == 0).append("text")
@@ -283,23 +282,15 @@ class ChordPlot extends RelationPlot {
                 .enter().append("g").attr("class", "group-label")
                 .attr("transform", (d: js.Dictionary[Double]) =>
                     "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+24) + ",0)")
-//                .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
 
             groupLabel.append("text")
                 .attr("x", 8)
                 .attr("dy", ".35em")
-//                .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + ((d("angle") * 180 / Math.PI - 90) + ")" + "translate(" + (innerRadius + 26) + ")" +  (if (d("angle") > Math.PI ) "rotate(180)" else "")))
-//                .attr("transform", (d: js.Dictionary[Double]) => (if (d("angle") > Math.PI ) "rotate(180) translate(-16)" else null))
                 .attr("transform", (d: js.Dictionary[Double]) => "translate(8) rotate(90)")
-//                .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
                 .attr("text-anchor", "middle")
                 .text((d: js.Dictionary[Double]) => label(d("index").toInt) )
 
-//        groupTick.append("text")
-//            .attr("dy", ".35em")
-//            .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + (d("angle") * 180 / Math.PI - 90) + ")" + "translate(" + (innerRadius + 26) + ")" +  (if (d("angle") > Math.PI ) "rotate(180)" else ""))
-//            .style("text-anchor", (d: js.Dictionary[Double]) => { if (d("angle") > Math.PI ) "end" else null })
-//            .text((d: js.Dictionary[Double]) => label(d("value").toInt) )
+
         }
 
         // Make ribbons
@@ -313,10 +304,8 @@ class ChordPlot extends RelationPlot {
             .style("fill", (d: Chord) => color(d.target.index))
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
 
-//        g.selectAll(".ribbons").on("mouseover", () => {println("rib")})
         g.selectAll(".ribbonArc").on("mouseover", handleMouseOver_inside)
         g.selectAll(".ribbons").on("mouseout", leaveRebbon)
-//        svg.on("mousemove", handleMouseOver_outside) // TODO
         svg.on("mousemove", movePopup)
 
 
@@ -366,8 +355,6 @@ class ChordPlot extends RelationPlot {
                 val x = d3.event.asInstanceOf[MouseEvent].clientX
                 val y = d3.event.asInstanceOf[MouseEvent].clientY
 
-                println(s"move $x $y")
-                gJS.console.log(d)
                 val labels = getLabels.get
 
                 val dChord = d.asInstanceOf[ChordJson]
@@ -377,49 +364,30 @@ class ChordPlot extends RelationPlot {
                 val to = labels(iTo)
                 val qt = if (iFrom == iTo) data.get(iFrom)(iTo) else data.get(iFrom)(iTo) - data.get(iTo)(iFrom)
 
-                gJS.console.log(s"${from} -> ${to}")
 
                 val div = gJS.document.getElementById(idDivInfo)
-//                println(s"div is $div")
-                div.style.display = "block"
-//                val selectedDiv = d3.select("#"+idDivInfo)
-//                println(s"selectedDiv is ${selectedDiv.attr("style")}")
-//                selectedDiv.style("display", "block")
-//                println(s"selectedDiv is ${selectedDiv.attr("style")}")
-//                val dataCountry = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
-//                val country = dataCountry.admin
-//                val pop = dataCountry.pop_est
+                if (showPopup)
+                    div.style.display = "block"
                 div.innerHTML = buildDivContent(to, from, qt)
-
-                div.style.left = (x+10)+"px"
-                div.style.top = (y+10)+"px"
-//                selectedDiv.style("left", (x+10)+"px")
-//                selectedDiv.style("top", (y+10)+"px")
             }
         }
 
     val leaveRebbon: js.Any => Unit =
         (d:js.Any) => {
             if (d3.event != null){
-
-
-                println(s"leave")
-
                 val div = gJS.document.getElementById(idDivInfo)
                 div.style.display = "none"
             }
         }
 
+    // move the popup
     val movePopup: js.Any => Unit =
         (d:js.Any) => {
             if (d3.event != null){
                 d3.event.stopPropagation()
 
-                // popup
                 val x = d3.event.asInstanceOf[MouseEvent].clientX
                 val y = d3.event.asInstanceOf[MouseEvent].clientY
-
-                println(s"moveBIS $x $y")
 
                 val div = gJS.document.getElementById(idDivInfo)
 
@@ -430,7 +398,6 @@ class ChordPlot extends RelationPlot {
 
     val handleMouseOver_outside: js.Any => Unit =
         (d:js.Any) => {
-            gJS.console.log("out")
             var div = gJS.document.getElementById(idDivInfo)
             if (div != null)
                 div.style.display = "None"
