@@ -4,6 +4,7 @@ import d3v4.{ChordGroup, _}
 import lib.ImplicitConv._
 import lib.matrix.{LabelizedRelationMatrix, RelationMatrix}
 import org.scalajs.dom.XMLHttpRequest
+import org.scalajs.dom.raw.MouseEvent
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.scalajs.js
@@ -73,6 +74,13 @@ class ChordPlot extends RelationPlot {
     }
 
     private var tickStep: Option[Double] = None
+
+    val idDivInfo = "divID-"+scala.util.Random.nextInt
+    val div = gJS.document.createElement("div")
+    div.style.display = "None"
+    div.setAttribute("id", idDivInfo)
+    div.style.position = "absolute"
+    div.style.background = "white"
 
     //==================== Getters ===========================
     /** Use a color palette in function of the size of the data if none is defined */
@@ -326,6 +334,7 @@ class ChordPlot extends RelationPlot {
 //            .text((d: js.Dictionary[Double]) => label(d("value").toInt) )
         }
 
+        // Make ribbons
         val ribbon = d3.ribbon().radius(innerRadius)
         val path = g.append("g").attr("class", "ribbons")
             .selectAll("path").data((c: ChordArray) => c)
@@ -336,6 +345,16 @@ class ChordPlot extends RelationPlot {
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
 
 //        g.selectAll(".ribbons").on("mouseover", () => {println("rib")})
+        g.selectAll(".ribbons").on("mouseover", handleMouseOver_inside)
+        svg.on("mousemove", handleMouseOver_outside)
+
+        // Place element that will be used as hovering text
+        d3.select("body")
+            .append("div")
+            .attr("id", idDivInfo)
+            .style("display", "None")
+            .style("background", "white")
+            .style("position", "absolute")
 
         path.exit().remove()
     }
@@ -364,6 +383,56 @@ class ChordPlot extends RelationPlot {
                 .style("stroke-opacity", opacity.toString)
                 .style("fill-opacity", opacity.toString)
         }
+    }
+
+    val handleMouseOver_inside: js.Any => Unit =
+        (d:js.Any) => {
+            if (d3.event != null){
+                d3.event.stopPropagation()
+
+                // popup
+                val x = d3.event.asInstanceOf[MouseEvent].clientX
+                val y = d3.event.asInstanceOf[MouseEvent].clientY
+
+                println(s"move $x $y")
+
+//                val div = gJS.document.getElementById(idDivInfo)
+//                println(s"div is $div")
+//                div.style.display = "block"
+                val selectedDiv = d3.select("#"+idDivInfo)
+//                println(s"selectedDiv is ${selectedDiv.attr("style")}")
+                selectedDiv.style("display", "block")
+//                println(s"selectedDiv is ${selectedDiv.attr("style")}")
+//                val dataCountry = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
+//                val country = dataCountry.admin
+//                val pop = dataCountry.pop_est
+                div.innerHTML = buildDivContent("test", 10)
+
+//                div.style.left = (x+10)+"px"
+//                div.style.top = (y+10)+"px"
+                selectedDiv.style("left", (x+10)+"px")
+                selectedDiv.style("top", (y+10)+"px")
+            }
+        }
+
+    val handleMouseOver_outside: js.Any => Unit =
+        (d:js.Any) => {
+            var div = gJS.document.getElementById(idDivInfo)
+            if (div != null)
+                div.style.display = "None"
+        }
+
+    def buildDivContent(name:String, population:Int):String = {
+        val f1 = d3.formatPrefix(".3s", population)
+        val pop = f1(population)
+
+        // the mouseover listener prevent that the popup is blocked when the mouse arrive on it, cause blink
+        return s"""
+            <div style="margin:10px; color: black"; onmouseover="this.style.display = 'None'">
+              <div style="font-size: 20px;"> ${name} </div>
+              <div style="font-size: 15px;"> Population: ${pop} </div>
+            </div>
+            """
     }
 }
 

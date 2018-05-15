@@ -98,8 +98,8 @@ class MigrationPlot extends RelationPlot {
         }
 
         val handleMouseOver_inside: js.Any => Unit = (d:js.Any) => {
-            if (d3.event != null){
-                d3.event.stopPropagation()
+                if (d3.event != null){
+                    d3.event.stopPropagation()
 
                 // popup
                 val x = d3.event.asInstanceOf[MouseEvent].clientX
