@@ -1,7 +1,7 @@
 package example
 
 
-import lib.plot.ChordPlot
+import lib.plot.{ChordPlot, MigrationPlot}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -81,20 +81,28 @@ object ScalaJSExample {
 ////            .setColorPalette(List("#000000", "#FFDD89", "#957244", "#F26223")) TODO setter does not seems to work
 //            .draw()
 
-//        // ========== Flow map =====================
-//        val g= new MigrationPlot()
+////        // ========== Flow map =====================
+////        val g= new MigrationPlot()
+//        val g= MigrationPlot(
+//            "FIN" -> (0, 4, 5, 4, 6),
+//            "FRA" -> (1, 0, 2, 3, 8),
+//            "ITA" -> (3, 2, 0, 1, 6),
+//            "ESP" -> (10, 20, 30, 0, 1),
+//            "GBR" -> (2, 6, 8, 9, 0)
+//        )
 ////        val g= MigrationPlot(
-////            "FIN" -> (0, 4, 5, 4),
-////            "FRA" -> (1, 0, 2, 3),
-////            "ITA" -> (3, 2, 0, 1),
-////            "ESP" -> (10, 20, 30, 0)
+////            "FRA" -> (0, 4, 5, 4, 6),
+////            "FIN" -> (0, 0, 0, 0, 0),
+////            "ITA" -> (0, 0, 0, 0, 0),
+////            "ESP" -> (0, 0, 0, 0, 0),
+////            "GBR" -> (0, 0, 0, 0, 0)
 ////        )
 //
-//        val g= MigrationPlot(
-//            "FIN" -> (0, 4, 5),
-//            "FRA" -> (1, 0, 2),
-//            "ITA" -> (3, 2, 0)
-//        )
+////        val g= MigrationPlot(
+////            "FIN" -> (0, 4, 5),
+////            "FRA" -> (1, 0, 2),
+////            "ITA" -> (3, 2, 0)
+////        )
 ////        g.setDimension(240, 300)
 //        g.setDimension(600, 700)
 //        g.setTarget("#playground2 svg")

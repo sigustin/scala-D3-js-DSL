@@ -340,13 +340,17 @@ class ChordPlot extends RelationPlot {
             .selectAll("path").data((c: ChordArray) => c)
         path
             .enter().append("path")
+            .attr("class", "ribbonArc")
             .attr("d", (d: Chord) => ribbon(d))
             .style("fill", (d: Chord) => color(d.target.index))
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
 
 //        g.selectAll(".ribbons").on("mouseover", () => {println("rib")})
-        g.selectAll(".ribbons").on("mouseover", handleMouseOver_inside)
-        svg.on("mousemove", handleMouseOver_outside)
+        g.selectAll(".ribbonArc").on("mouseover", handleMouseOver_inside)
+        g.selectAll(".ribbons").on("mouseout", leaveRebbon)
+//        svg.on("mousemove", handleMouseOver_outside) // TODO
+        svg.on("mousemove", movePopup)
+
 
         // Place element that will be used as hovering text
         d3.select("body")
@@ -395,42 +399,97 @@ class ChordPlot extends RelationPlot {
                 val y = d3.event.asInstanceOf[MouseEvent].clientY
 
                 println(s"move $x $y")
+                gJS.console.log(d)
+                val labels = getLabels.get
 
-//                val div = gJS.document.getElementById(idDivInfo)
+                val dChord = d.asInstanceOf[ChordJson]
+                val iFrom = dChord.source.index
+                val iTo = dChord.target.index
+                val from = labels(iFrom)
+                val to = labels(iTo)
+                val qt = if (iFrom == iTo) data.get(iFrom)(iTo) else data.get(iFrom)(iTo) - data.get(iTo)(iFrom)
+
+                gJS.console.log(s"${from} -> ${to}")
+
+                val div = gJS.document.getElementById(idDivInfo)
 //                println(s"div is $div")
-//                div.style.display = "block"
-                val selectedDiv = d3.select("#"+idDivInfo)
+                div.style.display = "block"
+//                val selectedDiv = d3.select("#"+idDivInfo)
 //                println(s"selectedDiv is ${selectedDiv.attr("style")}")
-                selectedDiv.style("display", "block")
+//                selectedDiv.style("display", "block")
 //                println(s"selectedDiv is ${selectedDiv.attr("style")}")
 //                val dataCountry = d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData]
 //                val country = dataCountry.admin
 //                val pop = dataCountry.pop_est
-                div.innerHTML = buildDivContent("test", 10)
+                div.innerHTML = buildDivContent(to, from, qt)
 
-//                div.style.left = (x+10)+"px"
-//                div.style.top = (y+10)+"px"
-                selectedDiv.style("left", (x+10)+"px")
-                selectedDiv.style("top", (y+10)+"px")
+                div.style.left = (x+10)+"px"
+                div.style.top = (y+10)+"px"
+//                selectedDiv.style("left", (x+10)+"px")
+//                selectedDiv.style("top", (y+10)+"px")
+            }
+        }
+
+    val leaveRebbon: js.Any => Unit =
+        (d:js.Any) => {
+            if (d3.event != null){
+
+
+                println(s"leave")
+
+                val div = gJS.document.getElementById(idDivInfo)
+                div.style.display = "none"
+            }
+        }
+
+    val movePopup: js.Any => Unit =
+        (d:js.Any) => {
+            if (d3.event != null){
+                d3.event.stopPropagation()
+
+                // popup
+                val x = d3.event.asInstanceOf[MouseEvent].clientX
+                val y = d3.event.asInstanceOf[MouseEvent].clientY
+
+                println(s"moveBIS $x $y")
+
+                val div = gJS.document.getElementById(idDivInfo)
+
+                div.style.left = (x+10)+"px"
+                div.style.top = (y+10)+"px"
             }
         }
 
     val handleMouseOver_outside: js.Any => Unit =
         (d:js.Any) => {
+            gJS.console.log("out")
             var div = gJS.document.getElementById(idDivInfo)
             if (div != null)
                 div.style.display = "None"
         }
 
-    def buildDivContent(name:String, population:Int):String = {
-        val f1 = d3.formatPrefix(".3s", population)
-        val pop = f1(population)
+    def buildDivContent(from:String, to:String, qt:Double):String = {
+        val f1 = d3.formatPrefix(".0s", qt)
+        val qtFormat = f1(qt)
 
         // the mouseover listener prevent that the popup is blocked when the mouse arrive on it, cause blink
-        return s"""
+        if (from.equals(to))
+            return s"""
+                <div style="margin:10px; color: black"; onmouseover="this.style.display = 'None'">
+                  <div><span style="font-size: 20px;"> ${qtFormat} </span>
+                  <span>STAYED</span>
+                  </div>
+                  <div style="font-size: 15px;"> in: ${from} </div>
+                </div>
+                """
+        else
+            return s"""
             <div style="margin:10px; color: black"; onmouseover="this.style.display = 'None'">
-              <div style="font-size: 20px;"> ${name} </div>
-              <div style="font-size: 15px;"> Population: ${pop} </div>
+              <div><span style="font-size: 20px;"> ${qtFormat} </span>
+              <span>NET MOVER</span>
+              </div>
+              <div style="font-size: 15px;"> from: ${from} </div>
+              <div style="font-size: 15px;"> to: ${to} </div>
             </div>
             """
     }
