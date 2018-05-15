@@ -216,7 +216,7 @@ class ChordPlot extends RelationPlot {
         // Make sections ('groups' in JS)
         val chord = d3.chord().padAngle(0.05).sortSubgroups(d3.descending)
         val g = svg.append("g")
-            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ") scale(0.9)")
             .datum(chord(matrix))
 
         val section = g.append("g").attr("class", "groups")
@@ -281,7 +281,7 @@ class ChordPlot extends RelationPlot {
             val groupLabel = section.selectAll(".group-label").data((d: ChordGroup) => groupLabelData(d))
                 .enter().append("g").attr("class", "group-label")
                 .attr("transform", (d: js.Dictionary[Double]) =>
-                    "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+24) + ",0)")
+                    "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius+40) + ",0)")
 
             groupLabel.append("text")
                 .attr("x", 8)
@@ -308,7 +308,6 @@ class ChordPlot extends RelationPlot {
             .on("mouseover", buildPopup)
             .on("mouseout", hidePopup)
         svg.on("mousemove", movePopup)
-
 
         // Place element that will be used as hovering text
         d3.select("body")

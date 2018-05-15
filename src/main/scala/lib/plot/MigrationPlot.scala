@@ -77,7 +77,7 @@ class MigrationPlot extends RelationPlot {
 
     def draw()={
         val projection: Projection = d3.geoMercator()
-        
+
         svg.on("click", showData)
             .on("mousemove", hidePopup)
 
