@@ -293,17 +293,39 @@ trait RelationPlot {
             if (d3.event != null)
                 d3.event.stopPropagation()
             val i = d.asInstanceOf[ChordGroupJson].index // TODO ChordGroupJson only works for Chord at the moment
+
+            val displayedSection = svg.selectAll("path")
+                .filter((element: js.Any) => {
+                try {
+                    val index = element.asInstanceOf[ChordGroupJson].index
+                    i == index
+                } catch {
+                    case _: Throwable =>
+                        try {
+                            val e = element.asInstanceOf[ChordJson]
+                            e.source.index == i || e.target.index == i
+                        } catch {
+                            case _: Throwable => false
+                        }
+                }
+            })
+
             if (focusedSection.isDefined) {
                 if (focusedSection.get != i) {
                     merge(i -> focusedSection.get)
                     draw()
                     focusedSection = None
+                    displayedSection.style("stroke-width", "1")
                 }
-                else if (focusEvent == FocusEvent.click)
+                else if (focusEvent == FocusEvent.click) {
                     focusedSection = None
+                    displayedSection.style("stroke-width", "1")
+                }
             }
-            else
+            else {
                 focusedSection = Some(i)
+                displayedSection.style("stroke-width", "3")
+            }
         }
 
     //=============== Abstract methods =====================
