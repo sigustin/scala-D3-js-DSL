@@ -63,7 +63,7 @@ class MigrationPlot extends RelationPlot {
     //================= Constructors and related =====================
     var countrySelected: Option[String] = None
     var mapUrl:Option[String] = None
-    var colorCountry = "green"
+    var colorRegion = "green"
     var colorArrow = "black"
 
     val r = scala.util.Random // to generate random id
@@ -148,7 +148,7 @@ class MigrationPlot extends RelationPlot {
                             case _: Throwable => false
                         }
                     })
-                    .style("fill", (if (on) "yellow" else colorCountry))
+                    .style("fill", (if (on) "yellow" else colorRegion))
             }
         }
 
@@ -206,7 +206,7 @@ class MigrationPlot extends RelationPlot {
                 .data(geoData)
                 .enter().append("path")
                 .attr("d", path.asInstanceOf[Primitive])
-                .attr("fill", colorCountry)
+                .attr("fill", colorRegion)
                 .attr("id", (d:js.Any) => d.asInstanceOf[MigrationData].properties.asInstanceOf[CountryData].adm0_a3)
                 .on("click",handleClick_inside)
                 .on("mousemove", handleMouseOver_inside)

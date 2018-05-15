@@ -110,7 +110,7 @@ object ScalaJSExample {
 ////            "ITA" -> (3, 2, 0)
 ////        )
 ////        g.setDimension(240, 300)
-//        g.colorCountry = "#123456"
+//        g.colorRegion = "#123456"
 //        g.colorArrow = "orange"
 //        g.showPopup = false
 //        g.setDimension(600, 700)
@@ -157,7 +157,7 @@ object ScalaJSExample {
         plot
             .setTarget("#playground2 svg")
             .setDimension(600, 600)
-            .updateLabel("LabelA" -> "LabelOne")
+            .updateLabel("FRA" -> "France")
 
 
         plot.colorPalette = List("#000000", "#FFDD89", "#957244", "#F26223", "#902383")

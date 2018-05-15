@@ -304,8 +304,9 @@ class ChordPlot extends RelationPlot {
             .style("fill", (d: Chord) => color(d.target.index))
             .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
 
-        g.selectAll(".ribbonArc").on("mouseover", handleMouseOver_inside)
-        g.selectAll(".ribbons").on("mouseout", leaveRebbon)
+        g.selectAll(".ribbonArc")
+            .on("mouseover", buildPopup)
+            .on("mouseout", hidePopup)
         svg.on("mousemove", movePopup)
 
 
@@ -321,6 +322,7 @@ class ChordPlot extends RelationPlot {
     }
 
     //--------------- Draw utilities -------------------------
+
     /** Makes all sections fade but the one hovered */
     def fadeSections(opacity:Double): js.Any => Unit = {
         d => {
@@ -346,14 +348,10 @@ class ChordPlot extends RelationPlot {
         }
     }
 
-    val handleMouseOver_inside: js.Any => Unit =
+    val buildPopup: js.Any => Unit =
         (d:js.Any) => {
             if (d3.event != null){
                 d3.event.stopPropagation()
-
-                // popup
-                val x = d3.event.asInstanceOf[MouseEvent].clientX
-                val y = d3.event.asInstanceOf[MouseEvent].clientY
 
                 val labels = getLabels.get
 
@@ -372,7 +370,7 @@ class ChordPlot extends RelationPlot {
             }
         }
 
-    val leaveRebbon: js.Any => Unit =
+    val hidePopup: js.Any => Unit =
         (d:js.Any) => {
             if (d3.event != null){
                 val div = gJS.document.getElementById(idDivInfo)
@@ -396,12 +394,6 @@ class ChordPlot extends RelationPlot {
             }
         }
 
-    val handleMouseOver_outside: js.Any => Unit =
-        (d:js.Any) => {
-            var div = gJS.document.getElementById(idDivInfo)
-            if (div != null)
-                div.style.display = "None"
-        }
 
     def buildDivContent(from:String, to:String, qt:Double):String = {
         val f1 = d3.formatPrefix(".0s", qt)
