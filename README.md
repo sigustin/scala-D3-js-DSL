@@ -20,7 +20,7 @@ This project had to be done in pairs. I thus made it with [Arnaud Gellens](https
 - I had a glimpse of how JavaScript libraries can be ported to Scala
 - Design an ergonomic DSL
 
-## Files worth checking
+## Files worth checking out
 - Our report explaining what we made: [Submission/LINGI2132_Project-DSL_Gellens-Gustin_Report.pdf](https://github.com/sigustin/scala-js-d3-example-app/blob/master/Submission/LINGI2132_Project-DSL_Gellens-Gustin_Report.pdf)
 - A slide presentation reviewing the interesting points of our DSL: [Submission/LINGI2132_Project-DSL_Gellens-Gustin_Slides.pdf](https://github.com/sigustin/scala-js-d3-example-app/blob/master/Submission/LINGI2132_Project-DSL_Gellens-Gustin_Slides.pdf)
 - The source code defining the DSL: [src/main/scala/lib](https://github.com/sigustin/scala-js-d3-example-app/tree/master/src/main/scala/lib)
